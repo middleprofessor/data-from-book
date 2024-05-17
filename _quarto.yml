@@ -1,0 +1,29 @@
+project:
+  type: book
+
+book:
+  title: "Data From -- The Book"
+  author: "Jeffrey A. Walker"
+  date: "5/17/2024"
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - summary.qmd
+    - part: "Nested"
+      chapters:
+        - sections/independence/FOXO1-is-a-master-regulator-of-memory-programming-in-CAR-T-cells.qmd
+    - part: "Blocked"
+    - references.qmd
+
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+    code-fold: true
+  pdf:
+    documentclass: scrreprt
+
+editor: visual
+

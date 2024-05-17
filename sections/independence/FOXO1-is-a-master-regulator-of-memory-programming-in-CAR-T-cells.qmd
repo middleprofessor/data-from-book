@@ -1,0 +1,315 @@
+---
+title: "FOXO1 is a master regulator of memory programming in CAR T cells"
+date: "17 May 2024"
+---
+
+## Background  
+
+Source article: [FOXO1 is a master regulator of memory programming in CAR T cells](https://www.nature.com/articles/s41586-024-07300-8){target="_blank"}
+
+Fig: 4h
+
+Published methods: t-test
+
+Design: CRDS
+
+Key learning concepts: pseudoreplication
+
+Comments: The researchers measure gene set expression levels in thousands of cells from mice assigned to two treatments, with five mice in each treatment. Cells from all mice within a treatment were pooled. The *t*-test assumes independent errors of all expression level scores but the scores of the different cells within a mouse are not independent -- these are technical replicates or subsampled replicates -- so the scores will be clustered (a clinical research term) or batched (a bench biology term) where each mouse is the cluster or batch.
+
+TL;DR: The experiment, as designed, is a waste of time and money because small *p*-values are almost guaranteed **even if there is no true difference in expression level**.
+
+Better than TL;DR: This design will result in extremely small *p*-values for very small, and possibly biologically meaningless, effect sizes, which is likely to result in researchers pursuing research paths with trivial consequences for mouse health.
+
+
+## Setup
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+
+data_folder <- "data"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+The data are gene set expression scores in units of log10 fold change
+
+## Fig 4h
+
+```{r fig-4h-import, message=FALSE, warning=FALSE}
+# data_from <- "FOXO1 is a master regulator of memory programming in CAR T cells"
+file_name <- "FOXO1 is a master regulator of memory programming in CAR T cells.xlsx"
+file_path <- here(data_folder, file_name)
+
+fig4h_wide <- read_excel(file_path,
+                    sheet = "Figure 4i",
+                    range = "A4:h7659",
+                    col_names = TRUE) |>
+  data.table()
+setnames(fig4h_wide,
+         old = names(fig4h_wide),
+         new = c("tNGFR_teff", "FOXO1OE_teff", "x1",
+                 "tNGFR_trm", "FOXO1OE_trm", "x2",
+                 "tNGFR_bulk", "FOXO1OE_bulk"))
+fig4h_wide <- fig4h_wide[, .SD, .SDcols = c("tNGFR_teff", "FOXO1OE_teff",
+                                            "tNGFR_trm", "FOXO1OE_trm",
+                                            "tNGFR_bulk", "FOXO1OE_bulk")]
+fig4h <- melt(fig4h_wide,
+             measure.vars = list(c("tNGFR_teff", "FOXO1OE_teff"),
+                                 c("tNGFR_trm", "FOXO1OE_trm"),
+                                 c("tNGFR_bulk", "FOXO1OE_bulk")),
+             variable.name = "treatment_code",
+             value.name = c("teff", "trm", "bulk"))
+fig4h[, treatment := ifelse(treatment_code == 1, "tNGFR", "FOXO1OE") |>
+       factor(levels = c("tNGFR", "FOXO1OE"))]
+
+```
+
+
+
+
+```{r}
+fig4h_long <- melt(fig4h,
+                  id.vars = "treatment",
+                  measure.vars = c("teff", "trm", "bulk"),
+                  variable.name = "response",
+                  value.name = "score")
+fig4h_summary <- fig4h_long[!is.na(score), .(N = .N,
+                                mean = mean(score, na.rm = TRUE),
+                              sd = sd(score, na.rm = TRUE)),
+                          by = .(treatment, response)]
+fig4h_summary
+
+```
+
+
+```{r}
+
+m1_teff <- lm(teff ~ treatment, data = fig4h)
+#coef(summary(m1_teff))
+stats_table <- data.table(
+  Response = "TEFF",
+  Difference = coef(summary(m1_teff))[2, 1],
+  "Fold Change" = 10^coef(summary(m1_teff))[2, 1],
+  Cohen = coef(summary(m1_teff))[2, 1]/summary(m1_teff)$sigma
+)
+
+m1_trm <- lm(trm ~ treatment, data = fig4h)
+stats_table <- rbind(stats_table,
+                     data.table(
+                       Response = "TRM",
+                       Difference = coef(summary(m1_trm))[2, 1],
+                       "Fold Change" = 10^coef(summary(m1_trm))[2, 1],
+                       Cohen = coef(summary(m1_trm))[2, 1]/summary(m1_trm)$sigma
+                     )
+)
+
+m1_bulk <- lm(bulk ~ treatment, data = fig4h)
+stats_table <- rbind(stats_table,
+                     data.table(
+                       Response = "Bulk",
+                       Difference = coef(summary(m1_bulk))[2, 1],
+                       "Fold Change" = 10^coef(summary(m1_bulk))[2, 1],
+                       Cohen = coef(summary(m1_bulk))[2, 1]/summary(m1_bulk)$sigma
+                     )
+)
+stats_table |>
+  kable(digits = c(1,3,2,2)) |>
+  kable_styling()
+```
+
+## CIs and P-values
+
+```{r}
+set.seed(1)
+n_reps <- 2000
+t_out <- matrix(as.numeric(NA), nrow = n_reps, ncol = 3)
+colnames(t_out) <- c("TEFF", "TRM", "Bulk")
+
+tngfr_teff <- fig4h[treatment == "tNGFR", teff] |>
+  na.omit()
+fox_teff <- fig4h[treatment == "FOXO1OE", teff] |>
+  na.omit()
+tngfr_trm <- fig4h[treatment == "tNGFR", trm] |>
+  na.omit()
+fox_trm <- fig4h[treatment == "FOXO1OE", trm] |>
+  na.omit()
+tngfr_bulk <- fig4h[treatment == "tNGFR", bulk] |>
+  na.omit()
+fox_bulk <- fig4h[treatment == "FOXO1OE", bulk] |>
+  na.omit()
+
+for(i in 1:n_reps){
+  t_out[i, "TEFF"] <- t.test(sample(tngfr_teff, 5, replace = TRUE),
+                      sample(fox_teff, 5, replace = TRUE),
+                      equal.var = TRUE)$estimate |> diff()
+  t_out[i, "TRM"] <- t.test(sample(tngfr_trm, 5, replace = TRUE),
+                      sample(fox_trm, 5, replace = TRUE),
+                      equal.var = TRUE)$estimate |> diff()
+  t_out[i, "Bulk"] <- t.test(sample(tngfr_bulk, 5, replace = TRUE),
+                      sample(fox_bulk, 5, replace = TRUE),
+                      equal.var = TRUE)$estimate |> diff()
+ 
+}
+
+ci <- function(x){
+  return(quantile(x, c(0.025, 0.975)))
+}
+
+apply(t_out, 2, ci)
+
+lt0 <- function(x){
+  return(sum(x < 0))
+}
+
+apply(t_out, 2, lt0)/n_reps
+
+```
+
+## P-values as a function of relative magnitudes of within mouse vs among mouse variation
+
+```{r}
+set.seed(1)
+n_reps <- 2000
+n <- 5
+n_ss <- 1500
+sigma_total <- summary(m1_teff)$sigma # estimated SD for TEFF
+delta <- .219 # observed difference for TEFF
+icc_vec <- c(0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 0.75)
+t <- numeric(n_reps)
+table_out <- data.table(NULL)
+#sigma_a^2: the variance among mice
+#sigma_e^2: the error variance (within mice)
+for(sim_i in 1:length(icc_vec)){
+  icc <- icc_vec[sim_i]
+  # icc = sigma_a^2/sigma_total^2
+  sigma_a <- sqrt(icc * sigma_total^2)
+  # sigma_total^2 = sigma_a^2 + sigma_e^2
+  sigma_e <- sqrt(sigma_total^2 - sigma_a^2)
+  for(rep_i in 1:n_reps){
+    tngfr_means <- rnorm(n, sd = sigma_a) 
+    fox_means <- rnorm(n, sd = sigma_a) + delta 
+    # slow
+    tngfr <- rnorm(n * n_ss, mean = rep(tngfr_means, each = n_ss), sd = sigma_e) |>
+      matrix(nrow = n_ss, ncol = n) |>
+      apply(2, mean)
+    fox <- rnorm(n * n_ss, mean = rep(fox_means, each = n_ss), sd = sigma_e) |>
+      matrix(nrow = n_ss, ncol = n) |>
+      apply(2, mean)
+    # fast shortcut since the estimated mean will be so close to true mean
+    # tngfr <- tngfr_means
+    # fox <- fox_means
+
+    t[rep_i] <- t.test(tngfr, fox, var.equal = TRUE)$statistic
+  }
+  table_out <- rbind(
+    table_out,
+    data.table(
+      icc = icc,
+      t = mean(t)
+    )
+  )
+  
+}
+
+table_out[, p := 2 * pt(t, df = n * 2 - 2, lower.tail = TRUE)]
+
+ggplot(data = table_out,
+       aes(x = icc,
+           y = p)) +
+  geom_line()
+```
+
+
+
+
+## Type I error rates as a function of relative magnitudes of within mouse vs among mouse variation
+
+```{r}
+set.seed(1)
+n_reps <- 2000
+n <- 5
+n_ss <- 1500
+sigma_total <- summary(m1_teff)$sigma
+icc_vec <- c(0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 0.75)
+p <- numeric(n_reps)
+table_out <- data.table(NULL)
+#sigma_a^2: the variance among mice
+#sigma_e^2: the error variance (within mice)
+for(sim_i in 1:length(icc_vec)){
+  icc <- icc_vec[sim_i]
+  # icc = sigma_a^2/sigma_total^2
+  sigma_a <- sqrt(icc * sigma_total^2)
+  # sigma_total^2 = sigma_a^2 + sigma_e^2
+  sigma_e <- sqrt(sigma_total^2 - sigma_a^2)
+  for(rep_i in 1:n_reps){
+    mean_vec <- rep(rnorm(n, sd = sigma_a), each = n_ss)
+    samp_1 <- rnorm(n * n_ss, mean = mean_vec, sd = sigma_e)
+    mean_vec <- rep(rnorm(n, sd = sigma_a), each = n_ss)
+    samp_2 <- rnorm(n * n_ss, mean = mean_vec, sd = sigma_e)
+    p[rep_i] <- t.test(samp_1, samp_2, var.equal = TRUE)$p.value
+  }
+  table_out <- rbind(
+    table_out,
+    data.table(
+      icc = icc,
+      Type_I = sum(p < 0.05)/n_reps
+    )
+  )
+  
+}
+
+ggplot(data = table_out,
+       aes(x = icc,
+           y = Type_I)) +
+  geom_line()
+```
+
