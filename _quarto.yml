@@ -2,16 +2,15 @@ project:
   type: book
 
 book:
-  title: "Data From -- The Book"
+  title: "Data From"
+  subtitle: "...a lot of experiments in bench biology"
   author: "Jeffrey A. Walker"
   date: "5/17/2024"
   chapters:
     - index.qmd
-    - intro.qmd
-    - summary.qmd
     - part: "Nested"
       chapters:
-        - sections/independence/FOXO1-is-a-master-regulator-of-memory-programming-in-CAR-T-cells.qmd
+        - chapters/independence/FOXO1-is-a-master-regulator-of-memory-programming-in-CAR-T-cells.qmd
     - part: "Blocked"
     - references.qmd
 

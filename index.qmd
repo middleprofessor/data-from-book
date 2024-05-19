@@ -1,9 +1,9 @@
 # Preface {.unnumbered}
 
-This is a Quarto book.
+Data From began in 2018 as the name of a project that I used to collect example data sets for my Applied Biostatics class at the University of Southern Maine and for the R Markdown book that I was creating for this class. This book is [Statistics for the Experimental Biologist](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/index.html){target="_blank"}. The Data From folder contains the archived data files (mostly Excel .xlsx files) from many published papers in experimental bench biology -- mostly from Nature journals, since they do a good job requiring authors to archive the data. Over time, I began to limit the scope of the data to articles on cell biology in the broad sense, including neurobiology and microbiology. Almost all of the data are on mice, which simply reflects the kinds of papers published in the journals that archive data.
 
-To learn more about Quarto books visit <https://quarto.org/docs/books>.
+My strategy for finding good example data went something like this: 1) scan the figure panels of a potential article for good examples, 2) download the data for the figure and move it to its own folder within the Data From folder, 3) create a new R Markdown file for this article, 4) analyze the data, 5) decide to use this example for a class lecture, or homework, or test, or for the book. Sometimes I wanted specific examples with archived statistical results, because I wanted the students to replicate the analysis in thier Reproducibility Projects. Often, I recognized better ways to analyze the data than what the researchers had done and I would give these to the students as Better than Reproducibility Projects.
 
-```{r}
-1 + 1
-```
+Over time, I've organized and analyzed a lot of data in the bench biology literature. Since about 2022, I've thought about making this project public as a learning resource for both professionals and students in any area of experimental biology but especially cell biology, broadly speaking. As a teaching resource, my R markdown files, even compiled into pretty web pages, are sparse, because I'm doing and not explaining. Creating a teaching resource out of a skeleton analysis is time consuming, and this is probably what kept me from turing Data From into a public resource.
+
+But, here it is, May 2024, and I'm doing it. I'm not sure what the public resource will include, or the format of the presentation. Right now I'm playing with a Quarto Book.
