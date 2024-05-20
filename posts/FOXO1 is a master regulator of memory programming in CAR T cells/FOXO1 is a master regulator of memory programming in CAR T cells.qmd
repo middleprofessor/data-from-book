@@ -1,9 +1,19 @@
 ---
 title: "FOXO1 is a master regulator of memory programming in CAR T cells"
-date: "17 May 2024"
+date: '17 May 2024'
+categories: ['technical replicates', 'pseudoreplication', 'nested', 'CRDS']
+description: "Technical replicates should not be analyzed as if they were randomly assigned to one of the experimental treatments. They weren't. The resulting p-value is junk."
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: console
+freeze: false
 ---
-
-TL;DR: Single-cell experiments of this design are effectively not worth the time and money because small *p*-values are almost guaranteed **even if there is no true difference in expression level**. That is, we are extremely unlikely to reliably learn anything.
 
 ## Vital info
 
@@ -27,7 +37,7 @@ Quick learning explanation: Pseudoreplication is the analysis of subsampled (tec
 
 Comments: The researchers measured gene set expression levels in thousands of cells from mice assigned to two treatments, with five mice in each treatment. Cells from all mice within a treatment were pooled. The *t*-test assumes independent errors of all expression level scores but the scores of the different cells within a mouse are not independent -- these are technical replicates or subsampled replicates -- so the scores will be clustered (a clinical research term) or batched (a bench biology term) where each mouse is the cluster or batch.
 
-Better than TL;DR: This design will result in extremely small *p*-values for very small, and possibly biologically meaningless, effect sizes. When this happens, researchers are likely to pursue research paths with trivial consequences for mouse health.
+Single-cell experiments of this design are effectively not worth the time and money because small *p*-values are almost guaranteed **even if there is no true difference in expression level**. That is, we are extremely unlikely to reliably learn anything. More generally, this design will result in extremely small *p*-values for very small, and possibly biologically meaningless, effect sizes. When this happens, researchers are likely to pursue research paths with trivial consequences for mouse health.
 
 Always Remember: A *p*-value is a measure of evidence against the null model and not a measure of the truth of an effect. In bench biology, a *p*-value is best used to aid decision making -- with a small *p*-value we can act as if an effect exists and pursue further experiments. If there is a high cost to these further experiments, we want a really small *p*-value (say < 0.01) to act. If there is little cost to these further experiments we can use a larger *p*-value (say, < 0.1) to act.
 
@@ -459,7 +469,7 @@ ggplot(data = table_out,
   theme_pubr()
 ```
 
-The plot shows that at effectively any ICC not super close to zero, the Type I error rates are elevated and this elevation is extreme at even very small ICC -- at an ICC of 0.005, this rate is 51%! At any biologically realistic ICC, the experimental design will result in significant *p*-values the majority of the time, **when the true treatment effect is zero**!
+The plot shows that at effectively any ICC not super close to zero, the Type I error rates are elevated and this elevation is extreme at even very small ICC -- at an ICC of 0.005, this rate is 51%! At any biologically realistic ICC, the experimental design will result in significant *p*-values the majority of the time **when the true treatment effect is zero**!
 
 ## Published Methods
 

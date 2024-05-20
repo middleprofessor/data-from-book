@@ -1,0 +1,16 @@
+{
+  "hash": "5d22ec59cea60f1232f80556fcd2c1fb",
+  "result": {
+    "markdown": "---\ntitle: \"test pic\"\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(ggplot2)\nlibrary(data.table)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nfd <- data.table(\n  x = rnorm(100),\n  y = rnorm(100)\n)\n\nggplot(data = fd,\n       aes(x = x, y = y)) +\n  geom_point()\n```\n\n::: {.cell-output-display}\n![](test_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "test_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
