@@ -4,7 +4,7 @@
     "href": "about.html",
     "title": "About",
     "section": "",
-    "text": "Data From began in 2018 as the name of a project that I used to collect example data sets for my Applied Biostatics class at the University of Southern Maine and for the R Markdown book that I was creating for this class. This book is Statistics for the Experimental Biologist."
+    "text": "Data From began in 2018 as the name of a project that I used to collect example data sets for my Applied Biostatics class at the University of Southern Maine and for the R Markdown book Statistics for the Experimental Biologist that I was creating for this class.\n\nJeffrey A. Walker\nDepartment of Biological Sciences\nUniversity of Southern Maine\nwalker at maine dot edu\n\n\nOther sites\nStatistics for the Experimental Biologist\nBike Geometry Project – Exploration and classification of gravel bike geometry"
   },
   {
     "objectID": "posts/FOXO1 is a master regulator of memory programming in CAR T cells/FOXO1 is a master regulator of memory programming in CAR T cells.html",
@@ -109,6 +109,6 @@
     "href": "index.html",
     "title": "Data From",
     "section": "",
-    "text": "FOXO1 is a master regulator of memory programming in CAR T cells\n\n\n\n\n\n\n\ntechnical replicates\n\n\npseudoreplication\n\n\nnested\n\n\nCRDS\n\n\n\n\nTechnical replicates should not be analyzed as if they were randomly assigned to one of the experimental treatments. They weren’t. The resulting p-value is junk.\n\n\n\n\n\n\nMay 17, 2024\n\n\n\n\n\n\nNo matching items"
+    "text": "FOXO1 is a master regulator of memory programming in CAR T cells\n\n\n\n\n\n\n\ntechnical replicates\n\n\npseudoreplication\n\n\nnested\n\n\nCRDS\n\n\n\n\nTechnical replicates should not be analyzed as if they were randomly assigned to one of the experimental treatments. They weren’t. The resulting p-value is junk.\n\n\n\n\n\n\nMay 17, 2024\n\n\nJeff Walker\n\n\n\n\n\n\nNo matching items"
   }
 ]

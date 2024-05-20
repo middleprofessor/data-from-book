@@ -1,5 +1,6 @@
 ---
 title: "FOXO1 is a master regulator of memory programming in CAR T cells"
+author: "Jeff Walker"
 date: '17 May 2024'
 date-modified: "`r Sys.Date()`"
 categories: ['technical replicates', 'pseudoreplication', 'nested', 'CRDS']
