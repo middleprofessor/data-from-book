@@ -1,5 +1,6 @@
 ---
 title: "Data From"
+subtitle: "Reanalysis of Data From the bench biology literature using R"
 listing:
   contents: posts
   sort: "date desc"

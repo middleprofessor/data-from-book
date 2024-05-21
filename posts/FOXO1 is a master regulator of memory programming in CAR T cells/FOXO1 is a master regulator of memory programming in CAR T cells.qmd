@@ -14,7 +14,7 @@ execute:
   warning: false
 editor_options: 
   chunk_output_type: console
-freeze: true
+freeze: auto
 ---
 
 ## Vital info
@@ -175,6 +175,7 @@ fig4h_summary |>
   kable_styling()
 
 ```
+
 ## Statistical analysis to get effect sizes (but no inference)
 
 Here I fit a naïve linear model (*t*-test equivalent) ignoring nesting to get the effect size (fold change) and relative effects size (Cohen's D).

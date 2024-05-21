@@ -1,0 +1,363 @@
+---
+title: "The role of somatosensory innervation of adipose tissues"
+author: "Jeff Walker"
+date: '21 May 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["linear mixed model", "random intercept", "RSPD"]
+description: "Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn't so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay!"
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+freeze: auto
+---
+
+Data From: [Wang, Yu, et al. "The role of somatosensory innervation of adipose tissues." Nature 609.7927 (2022): 569-574.](https://www.nature.com/articles/s41586-022-05137-7){target="_blank"}
+
+comments:
+
+Fig 2e, f
+
+1. 2e: Cre ablation of one limb. Excellent, Paired t.
+2. 2f: individual normalized version of 2e, so no variance in control. Use this!!!
+
+Fig 3g
+
+1. Split plot design. Cre ablation of one limb under two different conditions. Each condition is a different mouse. Researchers used RMANOVA.
+2. use base 2 for fold change! Yaaaay!
+3. lmer/afex:mixed replicates. aov_4 replicates for the 2 published p-values but the other 2 differ from lmer/afex:mixed and these weren't published so don't know if lmer/afex:mixed OR aov_4 replicates graphpad.
+4. All statistical results in Excel file! Yaaaay! This should be mandatory.
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+## Fig 3g
+
+### Vital info
+
+Fig: 3g [download data](../../data from/The role of somatosensory innervation of adipose tissues/41586_2022_5137_MOESM7_ESM.xlsx){target="_blank"}
+
+key words: 
+
+Published methods: repeated measures ANOVA
+
+Design: Randomized Split Plot Design (RSPD)
+
+Response: fold-change in gene expression
+
+Key learning concepts: linear mixed model, random intercept, RSPD
+
+More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
+
+### The experiment
+
+Treatments
+
+Factor 1: tx
+
+1. Saline (control). In the Excel file, this is labeled "SAL". This should result in intact sympathetic activity.
+2. 6-OHDA (treatment). In the Excel file, this is labeled "OHDA". This is 6-hydroxydopamine, a sympathetic neurotoxin that inhibits sympathatic activity. 
+
+Factor 2: surgery
+
+1. Cre- (control). In the Excel file, this is labeled "YFP". This is a control for the Cre injection. This should result in an intact sensory system of fat.
+2. Cre+ (treatment). In the Excel file, this is labeled "Cre". This should result in an ablated sensory system of fat.
+
+Blocking or whole plot factor: ear_tag. This is the mouse ID.
+
+For the tx treatment, either saline or 6-OHDA was delivered to both sides of a mouse. For the surgery treatment, one side was injected with Cre- and one with Cre+.
+
+There are six response variables, each a log2 fold-change for the thermogenic and lipogenic genes:
+
+1. Ucp1
+2. Elovl3
+3. Cidea
+4. Fasn
+5. Acacb
+6. ChREBPβ
+
+### What is a randomized split plot design (RSPD)?
+
+This is a randomized split plot design. tx (Sal or OHDA) is randomly assigned to Mouse - this is the "plot". Within a mouse, surgery (YFP or Cre) is assigned to side -- this is the "subplot". Mouse acts like a blocking factor for surgery but a completely randomized factor for tx. There is no subplot replication within a plot (mouse) so linear mixed model (using R formula notation is)
+
+`fc ~ tx * surgery + (1 | ear_tag)`
+
+A question I had with this is, can I replicate the researcher's results, as they used "Repeated Measures ANOVA" in GraphPad Prism. In general, I can replicate GraphPad results with a blocked design but I haven't tried a split plot design (generally because I've yet to find a paper with a split plot design that was analyzed in GraphPad using RM ANOVA)
+
+Advantages of the linear mixed model
+
+1. it can handle missing data -- ANOVA throws out data points if there is any value missing value within the Plot variable (here, this is mouse ear_tag)
+2. it is easy to handle non-normal data using generalized linear mixed models -- ANOVA is for linear models only, although one can transform the response.
+3. it is flexible, for example it is easy to add covariates. This isn't so important for the bench biology data that I mostly see, although it is useful for example if a response was dependent on mouse weight and we wanted to adjust for weight without using a ratio.
+
+Advantages of the RM ANOVA model
+1. It always works! LMM algorithms can fail (not infrequently) 
+
+### Import and Wrangle
+
+```{r fig-3g-import, message=FALSE, warning=FALSE}
+data_from <- "The role of somatosensory innervation of adipose tissues"
+file_name <- "41586_2022_5137_MOESM7_ESM.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig3g <- read_excel(file_path,
+                    sheet = "3g",
+                    range = "B6:K30",
+                    col_names = TRUE) |>
+  data.table() |>
+  clean_names()
+fig3g[, surgery := factor(surgery, levels = c("YFP", "Cre"))]
+fig3g[, tx := factor(tx, levels = c("SAL", "OHDA"))]
+```
+
+
+### Fit the models
+
+Create a function to fit the same models to each of the six responses. This is better practice than cut and paste because its less like to leave bugs if edits are made to code. Two models are fit: lmm1 -- a linear mixed model with a random intercept, aov1 -- a repeated measures ANOVA model
+
+```{r}
+
+lmm1_fit <- function(y_label){
+  # y_label is the column name of the response variable
+  r_formula <- paste(y_label, "~ tx * surgery + (1 | ear_tag)") |>
+    formula()
+  lmm1 <- lmer(r_formula, data = fig3g)
+  return(lmm1)
+}
+
+aov1_fit <- function(y_label){
+  # y_label is the column name of the response variable
+  r_formula <- paste(y_label, "~ tx * surgery + (surgery | ear_tag)") |>
+    formula()
+  aov1 <- aov_4(r_formula, data = fig3g)
+  return(aov1)
+}
+
+fig3g_lmm1 <- list()
+fig3g_aov1 <- list()
+y_list <- c("ucp1", "elovl3", "cidea", "fasn", "acacb", "ch_reb_pb")
+for(i in 1:length(y_list)){
+  y_label <- y_list[i]
+  fig3g_lmm1[[y_label]] <- lmm1_fit(y_label)
+  fig3g_aov1[[y_label]] <- aov1_fit(y_label)
+}
+
+# get emmeans using function
+
+emmeans_out <- function(m1){
+  # m1 is the fit model
+  m1_emm <- emmeans(m1,
+                    specs = c("tx", "surgery"))
+  return(m1_emm)
+}
+
+fig3g_lmm1_emm <- list()
+fig3g_aov1_emm <- list()
+for(i in 1:length(y_list)){
+  y_label <- y_list[i]
+  fig3g_lmm1_emm[[y_label]] <- emmeans_out(fig3g_lmm1[[y_label]])
+  fig3g_aov1_emm[[y_label]] <- emmeans_out(fig3g_aov1[[y_label]])
+}
+
+pairs_out <- function(m1_emm){
+  # m1 is the fit model
+  m1_pairs <- contrast(m1_emm,
+                       method = "revpairwise",
+                       simple = "each",
+                       combine = TRUE,
+                       adjust = "none") |>
+  summary(infer = TRUE) |>
+  data.table()
+  return(m1_pairs)
+}
+
+fig3g_lmm1_pairs <- list()
+fig3g_aov1_pairs <- list()
+for(i in 1:length(y_list)){
+  y_label <- y_list[i]
+  fig3g_lmm1_pairs[[y_label]] <- pairs_out(fig3g_lmm1_emm[[y_label]])
+  fig3g_aov1_pairs[[y_label]] <- pairs_out(fig3g_aov1_emm[[y_label]])
+}
+
+```
+
+### Compare LMM to RM ANOVA and to GraphPad output
+#### ANOVA replicates!
+
+tested using ucp1 only
+
+```{r}
+anova(fig3g_lmm1[["ucp1"]]) |>
+  kable(digits = 4,
+        caption = "LMM fit") |>
+  kable_styling()
+anova(fig3g_aov1[["ucp1"]]) |>
+  kable(digits = 4, caption = "RM ANOVA fit") |>
+  kable_styling()
+
+```
+
+![Fig 3g ANOVA table from Excel file](../../figs/The role of somatosensory innervation of adipose tissues/fig3g_ucp1_anova_table.png)
+
+lmm1 and aov1 give the same results here **because there is no missing data**, which the lmm is better at handling. Both replicate the GraphPad Prism results.
+
+#### Contrast replicates!
+
+for ucp1 only. Note that the direction of my contrast is Cre+ - Cre- (or, using the Excel file labels, this is Cre - YFP), since I like the direction to be what happens when you add the treatment, relative to a control.
+
+The authors used a Sidak adjustment on the two simple Cre- - Cre+ contrasts only.
+
+```{r}
+f3g_ucp1_lmm1_pairs_adj <- fig3g_lmm1_pairs[["ucp1"]]
+f3g_ucp1_lmm1_pairs_adj <- f3g_ucp1_lmm1_pairs_adj[3:4,]
+f3g_ucp1_lmm1_pairs_adj[, p.adj := Sidak.p.adjust(p.value)]
+f3g_ucp1_lmm1_pairs_adj |>
+  kable(digits = 4,
+        caption = "Contrast table with Sidak adjusted p-values for Cre - YFP contrasts only") |>
+  kable_styling()
+```
+![Fig 3g contrasts for ucp1 from Excel file](../../figs/The role of somatosensory innervation of adipose tissues/fig3g_ucp1_contrast.png)
+The contrasts replicate (other than the sign, but that is because I chose the opposite direction of the contrast)!
+
+I do have thoughts on the correction:
+
+1. The researchers do not state why the set of adjusted p-values is 2 (the two simple effects of surgery) and not 4 (the additional two simple effects tx).
+2. The holm method of adjustment is more powerful than Sidak.
+3. I would *not* adjust if I were only investigating ucp1 as the response. Each of these is a test of its own question with different expectations given working knowledge. See xxx.
+4. That said, there are 6 response variables from the experiment and if our hypothesis is something like "is there some difference in gene expression given this set of genes?" then I would adjust using the FDR, as this is a question applied to the whole gene set. This is exactly the norm in gene expression studies with thousands of genes. I never see researchers adjust for multiple responses except in these large large gene expression studies (or similar). So there is inconsistency in the logic applied to the statistical analysis not just within a field but within a single paper.
+
+### How to adjust for the 6 responses
+
+```{r}
+# this seems ultra klunky but it works
+p <- numeric(length(y_list))
+for(j in 1:4){ # do this for each simple effect in the contrast table
+  for(i in 1:length(y_list)){ # over the 6 responses
+    m1_pairs <- fig3g_lmm1_pairs[[y_list[i]]]
+    p[i] <- m1_pairs[j, p.value]
+  }
+  p_adj <- p.adjust(p, "fdr")
+  for(i in 1:length(y_list)){ # over the 6 responses
+    m1_pairs <- fig3g_lmm1_pairs[[y_list[i]]]
+    m1_pairs[j, fdr := p_adj[i]]
+    fig3g_lmm1_pairs[[y_list[i]]] <- m1_pairs
+  }
+}
+
+# create a table of p-values for cre contrasts only
+
+out_table <- data.table(
+  response = y_list,
+  Sal_p = numeric(length(y_list)),
+  OHDA_p = numeric(length(y_list)),
+  Sal_fdr = numeric(length(y_list)),
+  OHDA_fdr = numeric(length(y_list))
+)
+  for(i in 1:length(y_list)){ # over the 6 responses
+    m1_pairs <- fig3g_lmm1_pairs[[y_list[i]]]
+    out_table[response == y_list[[i]], Sal_p := m1_pairs[3, p.value]]
+    out_table[response == y_list[[i]], OHDA_p:= m1_pairs[4, p.value]]
+    out_table[response == y_list[[i]], Sal_fdr := m1_pairs[3, fdr]]
+    out_table[response == y_list[[i]], OHDA_fdr := m1_pairs[4, fdr]]
+  }
+
+out_table |>
+  kable(caption = "unadjusted and FDR adjust p-values for Cre+ - Cre- contrasts within Saline and 6-OHDA treatments") |>
+  kable_styling()
+```
+
+
+### Plots!
+
+```{r fig.height = 11, fig.width= 6}
+
+plot_it <- function(m1,
+                    m1_emm,
+                    m1_pairs,
+                    response_label){
+  gg <- ggplot_the_response(m1, m1_emm, m1_pairs,
+                            y_label = "Log 2 Fold Change") +
+    ggtitle(response_label) +
+    theme_pubr()
+  return(gg)
+}
+
+gg_list <- list()
+for(i in 1:length(y_list)){
+  m1 <- fig3g_lmm1[[y_list[i]]]
+  m1_emm <- fig3g_lmm1_emm[[y_list[i]]]
+  m1_pairs <- fig3g_lmm1_pairs[[y_list[i]]]
+  gg_list[[y_list[i]]] <- plot_it(m1, m1_emm, m1_pairs,
+                                  response_label = y_list[i])
+}
+plot_grid(plotlist = gg_list, nrow = 3)
+```
+
+
+### Methods
+
+A combination of axonal target injection of retrograde Cre and somatic expression of a Cre-dependent payload has been widely used to manipulate projection-specific circuits in the brain. However, legacy peripheral viral tracers such as pseudorabies virus and herpes simplex virus are highly toxic, restricting their use beyond acute anatomical mapping. In search for newer and safer viral vectors suitable for long-term functional manipulations, we found that AAV9 exhibited a high retrograde potential from iWAT to DRGs (Extended Data Fig. 4a). We adopted a published viral engineering pipeline22 to generate randomized mutants of AAV9 (Extended Data Fig. 4b,c). Although our initial intent was to improve retrograde efficiency from fat to DRGs, the evolved new retrograde vector optimized for organ tracing (or ROOT) is more desirable mainly for its significantly reduced off-target expression such as in SChGs, contralateral DRGs and the liver (Fig. 2a,b and Extended Data Fig. 4d–g).
+
+ROOT provides an opportunity to specifically ablate the sensory innervation in fat—we injected Cre-dependent diphtheria toxin subunit A (DTA) construct (mCherry-flex-DTA) into the T13/L1 DRGs bilaterally while injecting Cre- or YFP-expressing ROOT unilaterally in the iWATs (Fig. 2c).
+
+As thermogenic and lipogenesis programs are both downstream of sympathetic signalling24,26,29, we next tested whether the sensory-elicited gene expression changes are dependent on intact sympathetic innervation. We bilaterally injected 6-OHDA—a catecholaminergic toxin for selective sympathetic denervation (Extended Data Fig. 6c,d)—into the iWAT of mice that had previously undergone unilateral sensory ablation (Fig. 3f). 
