@@ -402,12 +402,13 @@ for(i in 1:length(y_list)){
 plot_grid(plotlist = gg_list, nrow = 2)
 ```
 
-## Whoops! The published figure has data that is backwards and upside down
-
-1. The researchers coding of the surgery levels (YFP, Cre) in the Excel file is the reverse of that in original Fig 3g plot. This affects only the direction of the difference and the directions given in GraphPad prism post-hoc tables in the archived Excel file are correct for the data given in that file. This also of course effects the interpretation of the experiment!
-2. The 6-OHDA data seems to be the reflection about the y = 0 axis -- that is it is upside down and shifted downwards.
+## Whoops! The published figure has data that is upside down
 
 ![Fig 3g ANOVA table from Excel file](../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png)
+
+Compare my figure with the published figure.
+
+The figured data is reflected about some horizontal axis, that is, it is upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The directions of the differences given in the GraphPad prism post-hoc tables in the archived Excel file are correct for the data given in that file. This also of course effects the interpretation of the experiment!
 
 ## Methods
 
