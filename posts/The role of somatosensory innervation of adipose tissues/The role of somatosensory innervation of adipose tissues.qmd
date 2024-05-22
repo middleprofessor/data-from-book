@@ -437,7 +437,7 @@ plot_grid(plotlist = gg_list, nrow = 2)
 
 ```
 
-Okay - this replicates the plot but what is the justification for reflecting the data and reversing the direction of the difference?
+Okay - this replicates the plot!
 
 
 ```{r}
