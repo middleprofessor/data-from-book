@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2024-05-21">
 <meta name="description" content="Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn’t so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay!">
 
-<title>Data From - The role of somatosensory innervation of adipose tissues</title>
+<title>Data From - Fig 3g – The role of somatosensory innervation of adipose tissues</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -146,7 +146,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">The role of somatosensory innervation of adipose tissues</h1>
+      <h1 class="title">Fig 3g – The role of somatosensory innervation of adipose tissues</h1>
                   <div>
         <div class="description">
           Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn’t so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay!
@@ -180,7 +180,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">May 21, 2024</p>
+        <p class="date-modified">May 22, 2024</p>
       </div>
     </div>
       
@@ -195,19 +195,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#setup" id="toc-setup" class="nav-link active" data-scroll-target="#setup">Setup</a></li>
-  <li><a href="#fig-3g" id="toc-fig-3g" class="nav-link" data-scroll-target="#fig-3g">Fig 3g</a>
-  <ul class="collapse">
-  <li><a href="#vital-info" id="toc-vital-info" class="nav-link" data-scroll-target="#vital-info">Vital info</a></li>
+  <li><a href="#vital-info" id="toc-vital-info" class="nav-link active" data-scroll-target="#vital-info">Vital info</a></li>
   <li><a href="#the-experiment" id="toc-the-experiment" class="nav-link" data-scroll-target="#the-experiment">The experiment</a></li>
   <li><a href="#what-is-a-randomized-split-plot-design-rspd" id="toc-what-is-a-randomized-split-plot-design-rspd" class="nav-link" data-scroll-target="#what-is-a-randomized-split-plot-design-rspd">What is a randomized split plot design (RSPD)?</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
   <li><a href="#import-and-wrangle" id="toc-import-and-wrangle" class="nav-link" data-scroll-target="#import-and-wrangle">Import and Wrangle</a></li>
   <li><a href="#fit-the-models" id="toc-fit-the-models" class="nav-link" data-scroll-target="#fit-the-models">Fit the models</a></li>
-  <li><a href="#compare-lmm-to-rm-anova-and-to-graphpad-output" id="toc-compare-lmm-to-rm-anova-and-to-graphpad-output" class="nav-link" data-scroll-target="#compare-lmm-to-rm-anova-and-to-graphpad-output">Compare LMM to RM ANOVA and to GraphPad output</a></li>
-  <li><a href="#how-to-adjust-for-the-6-responses" id="toc-how-to-adjust-for-the-6-responses" class="nav-link" data-scroll-target="#how-to-adjust-for-the-6-responses">How to adjust for the 6 responses</a></li>
-  <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots!</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  <li><a href="#compare-lmm-to-rm-anova-and-to-graphpad-output" id="toc-compare-lmm-to-rm-anova-and-to-graphpad-output" class="nav-link" data-scroll-target="#compare-lmm-to-rm-anova-and-to-graphpad-output">Compare LMM to RM ANOVA and to GraphPad output</a>
+  <ul class="collapse">
+  <li><a href="#anova-replicates" id="toc-anova-replicates" class="nav-link" data-scroll-target="#anova-replicates">ANOVA replicates!</a></li>
+  <li><a href="#contrasts-replicate" id="toc-contrasts-replicate" class="nav-link" data-scroll-target="#contrasts-replicate">Contrasts replicate!</a></li>
   </ul></li>
+  <li><a href="#improving-on-the-authors-adjusting-all-6-responses-using-fdr" id="toc-improving-on-the-authors-adjusting-all-6-responses-using-fdr" class="nav-link" data-scroll-target="#improving-on-the-authors-adjusting-all-6-responses-using-fdr">Improving on the authors: adjusting all 6 responses using FDR</a></li>
+  <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots!</a></li>
+  <li><a href="#whoops-the-published-figure-has-data-that-is-backwards-and-upside-down" id="toc-whoops-the-published-figure-has-data-that-is-backwards-and-upside-down" class="nav-link" data-scroll-target="#whoops-the-published-figure-has-data-that-is-backwards-and-upside-down">Whoops! The published figure has data that is backwards and upside down</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
   </ul>
 </nav>
     </div>
@@ -217,27 +219,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Fig 3g from the article</figcaption>
+</figure>
+</div>
+<section id="vital-info" class="level2">
+<h2 class="anchored" data-anchor-id="vital-info">Vital info</h2>
 <p>Data From: <a href="https://www.nature.com/articles/s41586-022-05137-7" target="_blank">Wang, Yu, et al.&nbsp;“The role of somatosensory innervation of adipose tissues.” Nature 609.7927 (2022): 569-574.</a></p>
-<p>comments:</p>
-<p>Fig 2e, f</p>
-<ol type="1">
-<li>2e: Cre ablation of one limb. Excellent, Paired t.</li>
-<li>2f: individual normalized version of 2e, so no variance in control. Use this!!!</li>
-</ol>
-<p>Fig 3g</p>
-<ol type="1">
-<li>Split plot design. Cre ablation of one limb under two different conditions. Each condition is a different mouse. Researchers used RMANOVA.</li>
-<li>use base 2 for fold change! Yaaaay!</li>
-<li>lmer/afex:mixed replicates. aov_4 replicates for the 2 published p-values but the other 2 differ from lmer/afex:mixed and these weren’t published so don’t know if lmer/afex:mixed OR aov_4 replicates graphpad.</li>
-<li>All statistical results in Excel file! Yaaaay! This should be mandatory.</li>
-</ol>
-<section id="setup" class="level2">
-<h2 class="anchored" data-anchor-id="setup">Setup</h2>
-</section>
-<section id="fig-3g" class="level2">
-<h2 class="anchored" data-anchor-id="fig-3g">Fig 3g</h2>
-<section id="vital-info" class="level3">
-<h3 class="anchored" data-anchor-id="vital-info">Vital info</h3>
 <p>Fig: 3g <a href="../../data from/The role of somatosensory innervation of adipose tissues/41586_2022_5137_MOESM7_ESM.xlsx" target="_blank">download data</a></p>
 <p>key words:</p>
 <p>Published methods: repeated measures ANOVA</p>
@@ -246,8 +236,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Key learning concepts: linear mixed model, random intercept, RSPD</p>
 <p>More info: <a href="https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm" target="_blank">Chapter 16 Models for non-independence – linear mixed models</a></p>
 </section>
-<section id="the-experiment" class="level3">
-<h3 class="anchored" data-anchor-id="the-experiment">The experiment</h3>
+<section id="the-experiment" class="level2">
+<h2 class="anchored" data-anchor-id="the-experiment">The experiment</h2>
 <p>Treatments</p>
 <p>Factor 1: tx</p>
 <ol type="1">
@@ -270,9 +260,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Acacb</li>
 <li>ChREBPβ</li>
 </ol>
+<p>comments:</p>
+<ol type="1">
+<li>Split plot design. Cre ablation of one limb under two different conditions. Each condition is a different mouse. Researchers used RMANOVA.</li>
+<li>use base 2 for fold change! Yaaaay!</li>
+<li>All statistical results in Excel file! Yaaaay! This should be mandatory.</li>
+</ol>
 </section>
-<section id="what-is-a-randomized-split-plot-design-rspd" class="level3">
-<h3 class="anchored" data-anchor-id="what-is-a-randomized-split-plot-design-rspd">What is a randomized split plot design (RSPD)?</h3>
+<section id="what-is-a-randomized-split-plot-design-rspd" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-a-randomized-split-plot-design-rspd">What is a randomized split plot design (RSPD)?</h2>
 <p>This is a randomized split plot design. tx (Sal or OHDA) is randomly assigned to Mouse - this is the “plot”. Within a mouse, surgery (YFP or Cre) is assigned to side – this is the “subplot”. Mouse acts like a blocking factor for surgery but a completely randomized factor for tx. There is no subplot replication within a plot (mouse) so linear mixed model (using R formula notation is)</p>
 <p><code>fc ~ tx * surgery + (1 | ear_tag)</code></p>
 <p>A question I had with this is, can I replicate the researcher’s results, as they used “Repeated Measures ANOVA” in GraphPad Prism. In general, I can replicate GraphPad results with a blocked design but I haven’t tried a split plot design (generally because I’ve yet to find a paper with a split plot design that was analyzed in GraphPad using RM ANOVA)</p>
@@ -284,8 +280,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ol>
 <p>Advantages of the RM ANOVA model 1. It always works! LMM algorithms can fail (not infrequently)</p>
 </section>
-<section id="import-and-wrangle" class="level3">
-<h3 class="anchored" data-anchor-id="import-and-wrangle">Import and Wrangle</h3>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+</section>
+<section id="import-and-wrangle" class="level2">
+<h2 class="anchored" data-anchor-id="import-and-wrangle">Import and Wrangle</h2>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -304,8 +303,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="fit-the-models" class="level3">
-<h3 class="anchored" data-anchor-id="fit-the-models">Fit the models</h3>
+<section id="fit-the-models" class="level2">
+<h2 class="anchored" data-anchor-id="fit-the-models">Fit the models</h2>
 <p>Create a function to fit the same models to each of the six responses. This is better practice than cut and paste because its less like to leave bugs if edits are made to code. Two models are fit: lmm1 – a linear mixed model with a random intercept, aov1 – a repeated measures ANOVA model</p>
 <div class="cell">
 <details>
@@ -374,10 +373,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 </div>
 </section>
-<section id="compare-lmm-to-rm-anova-and-to-graphpad-output" class="level3">
-<h3 class="anchored" data-anchor-id="compare-lmm-to-rm-anova-and-to-graphpad-output">Compare LMM to RM ANOVA and to GraphPad output</h3>
-<section id="anova-replicates" class="level4">
-<h4 class="anchored" data-anchor-id="anova-replicates">ANOVA replicates!</h4>
+<section id="compare-lmm-to-rm-anova-and-to-graphpad-output" class="level2">
+<h2 class="anchored" data-anchor-id="compare-lmm-to-rm-anova-and-to-graphpad-output">Compare LMM to RM ANOVA and to GraphPad output</h2>
+<section id="anova-replicates" class="level3">
+<h3 class="anchored" data-anchor-id="anova-replicates">ANOVA replicates!</h3>
 <p>tested using ucp1 only</p>
 <div class="cell">
 <details>
@@ -496,65 +495,137 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>lmm1 and aov1 give the same results here <strong>because there is no missing data</strong>, which the lmm is better at handling. Both replicate the GraphPad Prism results.</p>
 </section>
-<section id="contrast-replicates" class="level4">
-<h4 class="anchored" data-anchor-id="contrast-replicates">Contrast replicates!</h4>
-<p>for ucp1 only. Note that the direction of my contrast is Cre+ - Cre- (or, using the Excel file labels, this is Cre - YFP), since I like the direction to be what happens when you add the treatment, relative to a control.</p>
-<p>The authors used a Sidak adjustment on the two simple Cre- - Cre+ contrasts only.</p>
+<section id="contrasts-replicate" class="level3">
+<h3 class="anchored" data-anchor-id="contrasts-replicate">Contrasts replicate!</h3>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>f3g_ucp1_lmm1_pairs_adj <span class="ot">&lt;-</span> fig3g_lmm1_pairs[[<span class="st">"ucp1"</span>]]</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>f3g_ucp1_lmm1_pairs_adj <span class="ot">&lt;-</span> f3g_ucp1_lmm1_pairs_adj[<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>,]</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>f3g_ucp1_lmm1_pairs_adj[, p.adj <span class="sc">:</span><span class="er">=</span> <span class="fu">Sidak.p.adjust</span>(p.value)]</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>f3g_ucp1_lmm1_pairs_adj <span class="sc">|&gt;</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">4</span>,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">"Contrast table with Sidak adjusted p-values for Cre - YFP contrasts only"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create a column of sidak adjusted p-values in the contrast tables</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y_list)){ <span class="co"># over the 6 responses</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  m1_pairs <span class="ot">&lt;-</span> fig3g_lmm1_pairs[[y_list[i]]]</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  m1_pairs[<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>, p_sidak <span class="sc">:</span><span class="er">=</span> <span class="fu">Sidak.p.adjust</span>(p.value)]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  fig3g_lmm1_pairs[[y_list[i]]] <span class="ot">&lt;-</span> m1_pairs</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># make a pretty output table</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="ot">&lt;-</span> <span class="fu">data.table</span>(<span class="cn">NULL</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>keep_cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"tx"</span>, <span class="st">"contrast"</span>, <span class="st">"estimate"</span>, <span class="st">"p_sidak"</span>)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y_list)){ <span class="co"># over the 6 responses</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  m1_pairs <span class="ot">&lt;-</span> fig3g_lmm1_pairs[[y_list[i]]]</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  contrast_table <span class="ot">&lt;-</span> <span class="fu">rbind</span>(contrast_table,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                          m1_pairs[<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>, .SD, <span class="at">.SDcols =</span> keep_cols])</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="sc">|&gt;</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>() <span class="sc">|&gt;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(y_list[<span class="dv">1</span>], <span class="dv">1</span>, <span class="dv">2</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(y_list[<span class="dv">2</span>], <span class="dv">3</span>, <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(y_list[<span class="dv">3</span>], <span class="dv">5</span>, <span class="dv">6</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(y_list[<span class="dv">4</span>], <span class="dv">7</span>, <span class="dv">8</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(y_list[<span class="dv">5</span>], <span class="dv">9</span>, <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(y_list[<span class="dv">6</span>], <span class="dv">11</span>, <span class="dv">12</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small" data-quarto-postprocess="true">
-<caption>Contrast table with Sidak adjusted p-values for Cre - YFP contrasts only</caption>
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">surgery</th>
 <th style="text-align: left;" data-quarto-table-cell-role="th">tx</th>
 <th style="text-align: left;" data-quarto-table-cell-role="th">contrast</th>
 <th style="text-align: right;" data-quarto-table-cell-role="th">estimate</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">SE</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">df</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">lower.CL</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">upper.CL</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">t.ratio</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p.value</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p.adj</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">p_sidak</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">SAL</td>
-<td style="text-align: left;">Cre - YFP</td>
-<td style="text-align: right;">-3.2278</td>
-<td style="text-align: right;">0.9981</td>
-<td style="text-align: right;">10</td>
-<td style="text-align: right;">-5.4516</td>
-<td style="text-align: right;">-1.0040</td>
-<td style="text-align: right;">-3.2341</td>
-<td style="text-align: right;">0.0090</td>
-<td style="text-align: right;">0.0178</td>
+<tr class="odd" data-grouplength="2">
+<td colspan="4" style="border-bottom: 1px solid"><strong>ucp1</strong></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">OHDA</td>
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SAL</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-3.2278</td>
+<td style="text-align: right;">0.0178</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">OHDA</td>
 <td style="text-align: left;">Cre - YFP</td>
 <td style="text-align: right;">-1.3522</td>
-<td style="text-align: right;">0.9981</td>
-<td style="text-align: right;">10</td>
-<td style="text-align: right;">-3.5760</td>
-<td style="text-align: right;">0.8717</td>
-<td style="text-align: right;">-1.3548</td>
-<td style="text-align: right;">0.2053</td>
 <td style="text-align: right;">0.3684</td>
+</tr>
+<tr class="even" data-grouplength="2">
+<td colspan="4" style="border-bottom: 1px solid"><strong>elovl3</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SAL</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-3.5792</td>
+<td style="text-align: right;">0.0083</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">OHDA</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-1.5600</td>
+<td style="text-align: right;">0.2574</td>
+</tr>
+<tr class="odd" data-grouplength="2">
+<td colspan="4" style="border-bottom: 1px solid"><strong>cidea</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SAL</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-2.2268</td>
+<td style="text-align: right;">0.0119</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">OHDA</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-0.8875</td>
+<td style="text-align: right;">0.3538</td>
+</tr>
+<tr class="even" data-grouplength="2">
+<td colspan="4" style="border-bottom: 1px solid"><strong>fasn</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SAL</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-1.8012</td>
+<td style="text-align: right;">0.0060</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">OHDA</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-0.6543</td>
+<td style="text-align: right;">0.3409</td>
+</tr>
+<tr class="odd" data-grouplength="2">
+<td colspan="4" style="border-bottom: 1px solid"><strong>acacb</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SAL</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-1.8589</td>
+<td style="text-align: right;">0.0147</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">OHDA</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-0.4956</td>
+<td style="text-align: right;">0.6315</td>
+</tr>
+<tr class="even" data-grouplength="2">
+<td colspan="4" style="border-bottom: 1px solid"><strong>ch_reb_pb</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">SAL</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-2.7360</td>
+<td style="text-align: right;">0.0069</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">OHDA</td>
+<td style="text-align: left;">Cre - YFP</td>
+<td style="text-align: right;">-1.3383</td>
+<td style="text-align: right;">0.1767</td>
 </tr>
 </tbody>
 </table>
@@ -562,7 +633,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </div>
 </div>
-<p><img src="../../figs/The role of somatosensory innervation of adipose tissues/fig3g_ucp1_contrast.png" class="img-fluid" alt="Fig 3g contrasts for ucp1 from Excel file"> The contrasts replicate (other than the sign, but that is because I chose the opposite direction of the contrast)!</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../figs/The role of somatosensory innervation of adipose tissues/fig3g_contrasts.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Fig 3g contrasts from the Excel file</figcaption>
+</figure>
+</div>
+<p>Notes</p>
+<ol type="1">
+<li>the direction of my contrast is Cre+ - Cre- (or, using the Excel file labels, this is Cre - YFP), since I like the direction to be what happens when you add the treatment, relative to a control.</li>
+<li>The authors used a Sidak adjustment on the two simple Cre- - Cre+ contrasts only.</li>
+</ol>
+<p>The contrasts replicate (other than the sign, but that is because I chose the opposite direction of the contrast)!</p>
 <p>I do have thoughts on the correction:</p>
 <ol type="1">
 <li>The researchers do not state why the set of adjusted p-values is 2 (the two simple effects of surgery) and not 4 (the additional two simple effects tx).</li>
@@ -572,8 +654,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ol>
 </section>
 </section>
-<section id="how-to-adjust-for-the-6-responses" class="level3">
-<h3 class="anchored" data-anchor-id="how-to-adjust-for-the-6-responses">How to adjust for the 6 responses</h3>
+<section id="improving-on-the-authors-adjusting-all-6-responses-using-fdr" class="level2">
+<h2 class="anchored" data-anchor-id="improving-on-the-authors-adjusting-all-6-responses-using-fdr">Improving on the authors: adjusting all 6 responses using FDR</h2>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -587,7 +669,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  p_adj <span class="ot">&lt;-</span> <span class="fu">p.adjust</span>(p, <span class="st">"fdr"</span>)</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y_list)){ <span class="co"># over the 6 responses</span></span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    m1_pairs <span class="ot">&lt;-</span> fig3g_lmm1_pairs[[y_list[i]]]</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    m1_pairs[j, fdr <span class="sc">:</span><span class="er">=</span> p_adj[i]]</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    m1_pairs[j, p_fdr <span class="sc">:</span><span class="er">=</span> p_adj[i]]</span>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    fig3g_lmm1_pairs[[y_list[i]]] <span class="ot">&lt;-</span> m1_pairs</span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>}</span>
@@ -605,8 +687,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    m1_pairs <span class="ot">&lt;-</span> fig3g_lmm1_pairs[[y_list[i]]]</span>
 <span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    out_table[response <span class="sc">==</span> y_list[[i]], Sal_p <span class="sc">:</span><span class="er">=</span> m1_pairs[<span class="dv">3</span>, p.value]]</span>
 <span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    out_table[response <span class="sc">==</span> y_list[[i]], OHDA_p<span class="sc">:</span><span class="er">=</span> m1_pairs[<span class="dv">4</span>, p.value]]</span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    out_table[response <span class="sc">==</span> y_list[[i]], Sal_fdr <span class="sc">:</span><span class="er">=</span> m1_pairs[<span class="dv">3</span>, fdr]]</span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    out_table[response <span class="sc">==</span> y_list[[i]], OHDA_fdr <span class="sc">:</span><span class="er">=</span> m1_pairs[<span class="dv">4</span>, fdr]]</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    out_table[response <span class="sc">==</span> y_list[[i]], Sal_fdr <span class="sc">:</span><span class="er">=</span> m1_pairs[<span class="dv">3</span>, p_fdr]]</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    out_table[response <span class="sc">==</span> y_list[[i]], OHDA_fdr <span class="sc">:</span><span class="er">=</span> m1_pairs[<span class="dv">4</span>, p_fdr]]</span>
 <span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>out_table <span class="sc">|&gt;</span></span>
@@ -675,45 +757,90 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="plots" class="level3">
-<h3 class="anchored" data-anchor-id="plots">Plots!</h3>
+<section id="plots" class="level2">
+<h2 class="anchored" data-anchor-id="plots">Plots!</h2>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>plot_it <span class="ot">&lt;-</span> <span class="cf">function</span>(m1,</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                    m1_emm,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                    m1_pairs,</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                    response_label){</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  gg <span class="ot">&lt;-</span> <span class="fu">ggplot_the_response</span>(m1, m1_emm, m1_pairs,</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">y_label =</span> <span class="st">"Log 2 Fold Change"</span>) <span class="sc">+</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(response_label) <span class="sc">+</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_pubr</span>()</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(gg)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>gg_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y_list)){</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> fig3g_lmm1[[y_list[i]]]</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  m1_emm <span class="ot">&lt;-</span> fig3g_lmm1_emm[[y_list[i]]]</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  m1_pairs <span class="ot">&lt;-</span> fig3g_lmm1_pairs[[y_list[i]]]</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  gg_list[[y_list[i]]] <span class="ot">&lt;-</span> <span class="fu">plot_it</span>(m1, m1_emm, m1_pairs,</span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">response_label =</span> y_list[i])</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(<span class="at">plotlist =</span> gg_list, <span class="at">nrow =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fig3g[, cre <span class="sc">:</span><span class="er">=</span> <span class="fu">ifelse</span>(surgery <span class="sc">==</span> <span class="st">"YFP"</span>, <span class="st">"Cre-"</span>, <span class="st">"Cre+"</span>)]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>fig3g[, ohda <span class="sc">:</span><span class="er">=</span> <span class="fu">ifelse</span>(tx <span class="sc">==</span> <span class="st">"SAL"</span>, <span class="st">"SAL"</span>, <span class="st">"6-OHDA"</span>)]</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>fig3g[, treatment <span class="sc">:</span><span class="er">=</span> <span class="fu">paste</span>(ohda, cre, <span class="at">sep =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">factor</span>(<span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"SAL</span><span class="sc">\n</span><span class="st">Cre-"</span>, <span class="st">"SAL</span><span class="sc">\n</span><span class="st">Cre+"</span>, <span class="st">"6-OHDA</span><span class="sc">\n</span><span class="st">Cre-"</span>, <span class="st">"6-OHDA</span><span class="sc">\n</span><span class="st">Cre+"</span>))]</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>plot_it <span class="ot">&lt;-</span> <span class="cf">function</span>(y_col,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                    m1_pairs){</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  gg <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> fig3g,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                   <span class="at">y =</span> <span class="fu">get</span>(y_col))) <span class="sc">+</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> surgery),</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>               <span class="at">size =</span> <span class="dv">2</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>               <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> ear_tag),</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>              <span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylab</span>(<span class="st">"Log 2 Fold Change"</span>) <span class="sc">+</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(y_col) <span class="sc">+</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> pal_okabe_ito_2) <span class="sc">+</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_pubr</span>() <span class="sc">+</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add p-values</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  p_table <span class="ot">&lt;-</span> <span class="fu">data.table</span>(</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">group1 =</span> <span class="fu">c</span>(<span class="st">"SAL</span><span class="sc">\n</span><span class="st">Cre-"</span>, <span class="st">"6-OHDA</span><span class="sc">\n</span><span class="st">Cre-"</span>),</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">group2 =</span> <span class="fu">c</span>(<span class="st">"SAL</span><span class="sc">\n</span><span class="st">Cre+"</span>, <span class="st">"6-OHDA</span><span class="sc">\n</span><span class="st">Cre+"</span>),</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">p =</span> m1_pairs[<span class="dv">3</span><span class="sc">:</span><span class="dv">4</span>, p_sidak] <span class="sc">|&gt;</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">p_round</span>(<span class="at">digits =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="co">#rstatix package</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>      <span class="fu">p_format</span>(<span class="at">digits =</span> <span class="dv">4</span>, <span class="co">#rstatix package</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>                        <span class="at">accuracy =</span> <span class="fl">1e-04</span>,</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>                        <span class="at">add.p =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">y.position =</span> fig3g[, <span class="fu">max</span>(<span class="fu">get</span>(y_col))] <span class="sc">+</span> </span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>      <span class="fl">0.05</span><span class="sc">*</span>(fig3g[, <span class="fu">max</span>(<span class="fu">get</span>(y_col))] <span class="sc">-</span> fig3g[, <span class="fu">min</span>(<span class="fu">get</span>(y_col))])</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>  gg <span class="ot">&lt;-</span> gg <span class="sc">+</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_pvalue_manual</span>(</span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">data =</span> p_table,</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">tip.length =</span> <span class="fl">0.001</span>)</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(gg)</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>gg_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y_list)){</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> fig3g_lmm1[[y_list[i]]]</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>  m1_emm <span class="ot">&lt;-</span> fig3g_lmm1_emm[[y_list[i]]]</span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>  m1_pairs <span class="ot">&lt;-</span> fig3g_lmm1_pairs[[y_list[i]]]</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>  <span class="co"># use the sidak p-values</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>  m1_pairs[, p.value <span class="sc">:</span><span class="er">=</span> p_sidak]</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>  gg <span class="ot">&lt;-</span> <span class="fu">plot_it</span>(<span class="at">y_col =</span> y_list[i], m1_pairs)</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>  gg_list[[y_list[i]]] <span class="ot">&lt;-</span> gg</span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(<span class="at">plotlist =</span> gg_list, <span class="at">nrow =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="The-role-of-somatosensory-innervation-of-adipose-tissues_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="576"></p>
+<p><img src="The-role-of-somatosensory-innervation-of-adipose-tissues_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="1056"></p>
 </div>
 </div>
 </section>
-<section id="methods" class="level3">
-<h3 class="anchored" data-anchor-id="methods">Methods</h3>
+<section id="whoops-the-published-figure-has-data-that-is-backwards-and-upside-down" class="level2">
+<h2 class="anchored" data-anchor-id="whoops-the-published-figure-has-data-that-is-backwards-and-upside-down">Whoops! The published figure has data that is backwards and upside down</h2>
+<ol type="1">
+<li>The researchers coding of the surgery levels (YFP, Cre) in the Excel file is the reverse of that in original Fig 3g plot. This affects only the direction of the difference and the directions given in GraphPad prism post-hoc tables in the archived Excel file are correct for the data given in that file. This also of course effects the interpretation of the experiment!</li>
+<li>The 6-OHDA data seems to be the reflection about the y = 0 axis – that is it is upside down and shifted downwards.</li>
+</ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Fig 3g ANOVA table from Excel file</figcaption>
+</figure>
+</div>
+</section>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">Methods</h2>
 <p>A combination of axonal target injection of retrograde Cre and somatic expression of a Cre-dependent payload has been widely used to manipulate projection-specific circuits in the brain. However, legacy peripheral viral tracers such as pseudorabies virus and herpes simplex virus are highly toxic, restricting their use beyond acute anatomical mapping. In search for newer and safer viral vectors suitable for long-term functional manipulations, we found that AAV9 exhibited a high retrograde potential from iWAT to DRGs (Extended Data Fig. 4a). We adopted a published viral engineering pipeline22 to generate randomized mutants of AAV9 (Extended Data Fig. 4b,c). Although our initial intent was to improve retrograde efficiency from fat to DRGs, the evolved new retrograde vector optimized for organ tracing (or ROOT) is more desirable mainly for its significantly reduced off-target expression such as in SChGs, contralateral DRGs and the liver (Fig. 2a,b and Extended Data Fig. 4d–g).</p>
 <p>ROOT provides an opportunity to specifically ablate the sensory innervation in fat—we injected Cre-dependent diphtheria toxin subunit A (DTA) construct (mCherry-flex-DTA) into the T13/L1 DRGs bilaterally while injecting Cre- or YFP-expressing ROOT unilaterally in the iWATs (Fig. 2c).</p>
 <p>As thermogenic and lipogenesis programs are both downstream of sympathetic signalling24,26,29, we next tested whether the sensory-elicited gene expression changes are dependent on intact sympathetic innervation. We bilaterally injected 6-OHDA—a catecholaminergic toxin for selective sympathetic denervation (Extended Data Fig. 6c,d)—into the iWAT of mice that had previously undergone unilateral sensory ablation (Fig. 3f).</p>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

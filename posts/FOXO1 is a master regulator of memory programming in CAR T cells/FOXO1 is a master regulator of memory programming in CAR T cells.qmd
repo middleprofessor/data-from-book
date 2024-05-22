@@ -1,5 +1,5 @@
 ---
-title: "FOXO1 is a master regulator of memory programming in CAR T cells"
+title: "Fig 4h -- FOXO1 is a master regulator of memory programming in CAR T cells"
 author: "Jeff Walker"
 date: '17 May 2024'
 date-modified: "`r Sys.Date()`"
@@ -16,6 +16,8 @@ editor_options:
   chunk_output_type: console
 freeze: auto
 ---
+
+![Fig 4h](../../figs/FOXO1 is a master regulator of memory programming in CAR T cells/fig4h.png)
 
 ## Vital info
 
@@ -45,7 +47,7 @@ Always Remember: A *p*-value is a measure of evidence against the null model and
 
 ## Pseudoreplication red flag
 
-![Fig 4h](../../figs/FOXO1 is a master regulator of memory programming in CAR T cells/fig4h.png)
+Look at the figure!
 
 The typical number of experimental replicates in bench biology is 3-8 with occasional replications up to about 30. The mere presence of many 10s or 100s of points per treatment is a red flag for pseudoreplication.
 
