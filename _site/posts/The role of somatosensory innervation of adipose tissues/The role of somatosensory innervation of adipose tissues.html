@@ -8,7 +8,7 @@
 
 <meta name="author" content="Jeff Walker">
 <meta name="dcterms.date" content="2024-05-21">
-<meta name="description" content="Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn’t so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay! But, what’s going on with the direction of the effects in Fig 3g?">
+<meta name="description" content="Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn’t so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay!">
 
 <title>Data From - Fig 3g – The role of somatosensory innervation of adipose tissues</title>
 <style>
@@ -100,6 +100,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
 <link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -149,7 +151,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <h1 class="title">Fig 3g – The role of somatosensory innervation of adipose tissues</h1>
                   <div>
         <div class="description">
-          Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn’t so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay! But, what’s going on with the direction of the effects in Fig 3g?
+          Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn’t so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay!
         </div>
       </div>
                           <div class="quarto-categories">
@@ -210,7 +212,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#improving-on-the-authors-adjusting-all-6-responses-using-fdr" id="toc-improving-on-the-authors-adjusting-all-6-responses-using-fdr" class="nav-link" data-scroll-target="#improving-on-the-authors-adjusting-all-6-responses-using-fdr">Improving on the authors: adjusting all 6 responses using FDR</a></li>
   <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots!</a></li>
-  <li><a href="#whoops-the-published-figure-has-data-that-is-upside-down" id="toc-whoops-the-published-figure-has-data-that-is-upside-down" class="nav-link" data-scroll-target="#whoops-the-published-figure-has-data-that-is-upside-down">Whoops! The published figure has data that is upside down</a></li>
+  <li><a href="#whats-going-on-with-the-direction-of-the-effect-in-fig-3g" id="toc-whats-going-on-with-the-direction-of-the-effect-in-fig-3g" class="nav-link" data-scroll-target="#whats-going-on-with-the-direction-of-the-effect-in-fig-3g">What’s going on with the direction of the effect in Fig 3g?</a></li>
   <li><a href="#published-methods-cut-and-pasted-from-the-article" id="toc-published-methods-cut-and-pasted-from-the-article" class="nav-link" data-scroll-target="#published-methods-cut-and-pasted-from-the-article">Published methods, cut and pasted from the article</a></li>
   </ul>
 </nav>
@@ -823,8 +825,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="whoops-the-published-figure-has-data-that-is-upside-down" class="level2">
-<h2 class="anchored" data-anchor-id="whoops-the-published-figure-has-data-that-is-upside-down">Whoops! The published figure has data that is upside down</h2>
+<section id="whats-going-on-with-the-direction-of-the-effect-in-fig-3g" class="level2">
+<h2 class="anchored" data-anchor-id="whats-going-on-with-the-direction-of-the-effect-in-fig-3g">What’s going on with the direction of the effect in Fig 3g?</h2>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png" class="img-fluid figure-img"></p>
@@ -832,7 +834,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 <p>Compare my figure with the published figure.</p>
-<p>Compared to my figure built from the archived data, the data in Fig3g is reflected about some horizontal axis, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file, so the data in the figure would seem to be wrong, unless I’m missing something. This doesn’t matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite!</p>
+<p>Compared to my figure built from the archived data, the data in Fig3g is reflected about some horizontal axis, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file, so the data in the figure would seem to be wrong, unless I’m missing something. This doesn’t matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite.</p>
+<p>But, I think this is what we want. The top matrix of archived values are <span class="math inline">\(\Delta C_q\)</span> values, which decrease as expression levels increase. So to get the effects in the correct direction, we need to multiple the <span class="math inline">\(\Delta C_q\)</span> values by -1.</p>
 <p>Let’s reflect the gene expression values by multiplying them by -1 and replot:</p>
 <div class="cell">
 <details>
