@@ -8,7 +8,7 @@
 
 <meta name="author" content="Jeff Walker">
 <meta name="dcterms.date" content="2024-05-17">
-<meta name="description" content="Technical replicates should not be analyzed as if they were randomly assigned to one of the experimental treatments. They weren’t. The resulting p-value is junk.">
+<meta name="description" content="Fig 4h contains thousands of technical replicates. Technical replicates should not be analyzed as if they were randomly assigned to one of the experimental treatments. They weren’t. The resulting p-value is junk.">
 
 <title>Data From - Fig 4h – FOXO1 is a master regulator of memory programming in CAR T cells</title>
 <style>
@@ -151,7 +151,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <h1 class="title">Fig 4h – FOXO1 is a master regulator of memory programming in CAR T cells</h1>
                   <div>
         <div class="description">
-          Technical replicates should not be analyzed as if they were randomly assigned to one of the experimental treatments. They weren’t. The resulting p-value is junk.
+          Fig 4h contains thousands of technical replicates. Technical replicates should not be analyzed as if they were randomly assigned to one of the experimental treatments. They weren’t. The resulting p-value is junk.
         </div>
       </div>
                           <div class="quarto-categories">
@@ -159,6 +159,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
                 <div class="quarto-category">pseudoreplication</div>
                 <div class="quarto-category">nested</div>
                 <div class="quarto-category">CRDS</div>
+                <div class="quarto-category">analysis flag</div>
               </div>
                   </div>
   </div>
@@ -210,7 +211,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#a-conservative-attempt-at-inference-using-resampling" id="toc-a-conservative-attempt-at-inference-using-resampling" class="nav-link" data-scroll-target="#a-conservative-attempt-at-inference-using-resampling">A conservative attempt at inference using resampling</a></li>
   <li><a href="#better-p-valueskinda" id="toc-better-p-valueskinda" class="nav-link" data-scroll-target="#better-p-valueskinda">Better <em>p</em>-values…kinda</a></li>
   <li><a href="#why-the-actual-experimental-design-isnt-worth-the-time-money-or-cost-to-animal-welfare" id="toc-why-the-actual-experimental-design-isnt-worth-the-time-money-or-cost-to-animal-welfare" class="nav-link" data-scroll-target="#why-the-actual-experimental-design-isnt-worth-the-time-money-or-cost-to-animal-welfare">Why the actual experimental design isn’t worth the time, money, or cost to animal welfare</a></li>
-  <li><a href="#published-methods" id="toc-published-methods" class="nav-link" data-scroll-target="#published-methods">Published Methods</a></li>
+  <li><a href="#published-methods-cut-and-pasted-from-the-article" id="toc-published-methods-cut-and-pasted-from-the-article" class="nav-link" data-scroll-target="#published-methods-cut-and-pasted-from-the-article">Published Methods, cut and pasted from the article</a></li>
   </ul>
 </nav>
     </div>
@@ -829,8 +830,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>The plot shows that at effectively any ICC not super close to zero, the Type I error rates are elevated and this elevation is extreme at even very small ICC – at an ICC of 0.005, this rate is 51%! At any biologically realistic ICC, the experimental design will result in significant <em>p</em>-values the majority of the time <strong>when the true treatment effect is zero</strong>!</p>
 </section>
-<section id="published-methods" class="level2">
-<h2 class="anchored" data-anchor-id="published-methods">Published Methods</h2>
+<section id="published-methods-cut-and-pasted-from-the-article" class="level2">
+<h2 class="anchored" data-anchor-id="published-methods-cut-and-pasted-from-the-article">Published Methods, cut and pasted from the article</h2>
 <p>To determine whether FOXO1 was also capable of increasing the activ- ity of CAR T cells against solid tumours, we infused tNGFR or FOXO1OE HER2.BBζ CAR T cells into 143B osteosarcoma-bearing NSG mice.</p>
 <p>To generate single-cell RNA-seq libraries of tumour-infiltrating CAR T cells, Her2+ tumours were collected from five mice per condition, and human CD45+ cells were isolated by NGFR selection as described above (see ‘Cell selection’). Tumour-infiltrating CAR T cells were further purified by sorting human CD3+ TILs from each isolate using a Cytek Aurora Cell Sorter. A total of 20,000 CAR TILs were sorted from each tumour and pooled across five mice per group. Cells were barcoded and sequencing libraries were generated using the 10X Chromium Next GEM Single Cell 3’ v.3.1 kit (10X Genomics) according to the manufacturer’s instructions. Libraries were sequenced at the CHOP High Throughput Sequencing Core on an Illumina NovaSeq 6000 with an average read depth of 50,000 reads per cell.</p>
 <p>Gene set scores for Teff, TRM and Treg cell subtypes were calculated with AddModuleScore (Seurat), using curated gene lists from a previous study58 (Extended Data Fig. 9g–i). AddModuleScore was also used to calculate a per-cell FOXO1 transcriptional activity score, using the top 100 upregulated genes in CD8+ HA.28ζ CAR T cells overexpressing FOXO1 versus tNGFR (Fig. 2).</p>

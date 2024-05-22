@@ -3,8 +3,8 @@ title: "Fig 3g -- The role of somatosensory innervation of adipose tissues"
 author: "Jeff Walker"
 date: '21 May 2024'
 date-modified: "`r Sys.Date()`"
-categories: ["linear mixed model", "random intercept", "RSPD"]
-description: "Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn't so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay!"
+categories: ["linear mixed model", "random intercept", "split plot", "ggplot", "data flag"]
+description: "Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn't so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay! But, what's going on with the direction of the effects in Fig 3g?"
 format: 
   html: 
     toc: true 
@@ -14,7 +14,7 @@ execute:
   warning: false
 editor_options: 
   chunk_output_type: inline
-freeze: auto
+freeze: false
 ---
 
 ![Fig 3g from the article](../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png)
@@ -33,7 +33,7 @@ Design: Randomized Split Plot Design (RSPD)
 
 Response: fold-change in gene expression
 
-Key learning concepts: linear mixed model, random intercept, RSPD
+Key learning concepts: linear mixed model, random intercept, split-plot, repeated measures ANOVA
 
 More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
 
@@ -72,11 +72,13 @@ comments:
 
 ## What is a randomized split plot design (RSPD)?
 
-This is a randomized split plot design. tx (Sal or OHDA) is randomly assigned to Mouse - this is the "plot". Within a mouse, surgery (YFP or Cre) is assigned to side -- this is the "subplot". Mouse acts like a blocking factor for surgery but a completely randomized factor for tx. There is no subplot replication within a plot (mouse) so linear mixed model (using R formula notation is)
+This is a randomized split plot design. tx (Sal or OHDA) is randomly assigned to Mouse - a mouse is the "plot". Within a mouse, surgery (YFP or Cre) is assigned to side -- this is the "subplot". Mouse acts like a blocking factor for surgery but a completely randomized factor for tx. There is no subplot replication within a plot (mouse) so the linear mixed model (using R formula notation) is
 
 `fc ~ tx * surgery + (1 | ear_tag)`
 
-A question I had with this is, can I replicate the researcher's results, as they used "Repeated Measures ANOVA" in GraphPad Prism. In general, I can replicate GraphPad results with a blocked design but I haven't tried a split plot design (generally because I've yet to find a paper with a split plot design that was analyzed in GraphPad using RM ANOVA)
+The factor ear_tag is a **random intercept**.
+
+A question I had with this is, can I replicate the researcher's results, as they used "Repeated Measures ANOVA" in GraphPad Prism. In general, I can replicate GraphPad results with a blocked design but I haven't tried a split plot design (generally because I don't think that I've found a paper with a split plot design that was analyzed in GraphPad using RM ANOVA)
 
 Advantages of the linear mixed model
 
@@ -85,8 +87,7 @@ Advantages of the linear mixed model
 3. it is flexible, for example it is easy to add covariates. This isn't so important for the bench biology data that I mostly see, although it is useful for example if a response was dependent on mouse weight and we wanted to adjust for weight without using a ratio.
 
 Advantages of the RM ANOVA model
-1. It always works! LMM algorithms can fail (not infrequently) 
-
+1. It always works! LMM algorithms can fail, and not infrequently. 
 
 ## Setup
 
@@ -148,6 +149,8 @@ output_folder <- "output"
 
 ## Import and Wrangle
 
+Note: there are two sets of Fig 3g data. The bottom set looks like it is the top set recentered so that the mean of the SAL-YFP treatment has is mean zero. Since the data in the figure looked centered this way, I'll import the bottom set.
+
 ```{r fig-3g-import, message=FALSE, warning=FALSE}
 data_from <- "The role of somatosensory innervation of adipose tissues"
 file_name <- "41586_2022_5137_MOESM7_ESM.xlsx"
@@ -155,7 +158,7 @@ file_path <- here(data_folder, data_from, file_name)
 
 fig3g <- read_excel(file_path,
                     sheet = "3g",
-                    range = "B6:K30",
+                    range = "B34:K58",
                     col_names = TRUE) |>
   data.table() |>
   clean_names()
@@ -391,8 +394,6 @@ plot_it <- function(y_col,
 
 gg_list <- list()
 for(i in 1:length(y_list)){
-  m1 <- fig3g_lmm1[[y_list[i]]]
-  m1_emm <- fig3g_lmm1_emm[[y_list[i]]]
   m1_pairs <- fig3g_lmm1_pairs[[y_list[i]]]
   # use the sidak p-values
   m1_pairs[, p.value := p_sidak]
@@ -408,9 +409,42 @@ plot_grid(plotlist = gg_list, nrow = 2)
 
 Compare my figure with the published figure.
 
-The figured data is reflected about some horizontal axis, that is, it is upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The directions of the differences given in the GraphPad prism post-hoc tables in the archived Excel file are correct for the data given in that file. This also of course effects the interpretation of the experiment!
+Compared to my figure built from the archived data, the data in Fig3g is reflected about some horizontal axis, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file, so the data in the figure would seem to be wrong, unless I'm missing something. This doesn't matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite!
 
-## Methods
+Let's reflect the gene expression values by multiplying them by -1 and replot:
+
+```{r,  fig.height = 8, fig.width= 11}
+# reflect the values in the response variables
+fig3g[, ucp1_ref := -ucp1]
+fig3g[, elovl3_ref := -elovl3]
+fig3g[, cidea_ref := -cidea]
+fig3g[, fasn_ref := -fasn]
+fig3g[, acacb_ref := -acacb]
+fig3g[, ch_reb_pb_ref := -ch_reb_pb]
+
+y_list_ref <- paste0(y_list, "_ref")
+gg_list <- list()
+for(i in 1:length(y_list)){
+  m1_pairs <- fig3g_lmm1_pairs[[y_list[i]]]
+  # use the sidak p-values
+  m1_pairs[, p.value := p_sidak]
+  gg <- plot_it(y_col = y_list_ref[i], m1_pairs)
+  gg_list[[y_list[i]]] <- gg
+}
+plot_grid(plotlist = gg_list, nrow = 2)
+
+```
+
+Okay - this replicates the plot but what is the justification for reflecting the data and reversing the direction of the difference?
+
+
+```{r}
+for(i in 1:length(y_list)){
+  m1 <- fig3g_lmm1[[y_list[i]]]
+}
+```
+
+## Published methods, cut and pasted from the article
 
 A combination of axonal target injection of retrograde Cre and somatic expression of a Cre-dependent payload has been widely used to manipulate projection-specific circuits in the brain. However, legacy peripheral viral tracers such as pseudorabies virus and herpes simplex virus are highly toxic, restricting their use beyond acute anatomical mapping. In search for newer and safer viral vectors suitable for long-term functional manipulations, we found that AAV9 exhibited a high retrograde potential from iWAT to DRGs (Extended Data Fig. 4a). We adopted a published viral engineering pipeline22 to generate randomized mutants of AAV9 (Extended Data Fig. 4b,c). Although our initial intent was to improve retrograde efficiency from fat to DRGs, the evolved new retrograde vector optimized for organ tracing (or ROOT) is more desirable mainly for its significantly reduced off-target expression such as in SChGs, contralateral DRGs and the liver (Fig. 2a,b and Extended Data Fig. 4d–g).
 

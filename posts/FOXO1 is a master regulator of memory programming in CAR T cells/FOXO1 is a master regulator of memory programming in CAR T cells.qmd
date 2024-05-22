@@ -3,8 +3,8 @@ title: "Fig 4h -- FOXO1 is a master regulator of memory programming in CAR T cel
 author: "Jeff Walker"
 date: '17 May 2024'
 date-modified: "`r Sys.Date()`"
-categories: ['technical replicates', 'pseudoreplication', 'nested', 'CRDS']
-description: "Technical replicates should not be analyzed as if they were randomly assigned to one of the experimental treatments. They weren't. The resulting p-value is junk."
+categories: ['technical replicates', 'pseudoreplication', 'nested', 'CRDS', 'analysis flag']
+description: "Fig 4h contains thousands of technical replicates. Technical replicates should not be analyzed as if they were randomly assigned to one of the experimental treatments. They weren't. The resulting p-value is junk."
 format: 
   html: 
     toc: true 
@@ -476,7 +476,7 @@ ggplot(data = table_out,
 
 The plot shows that at effectively any ICC not super close to zero, the Type I error rates are elevated and this elevation is extreme at even very small ICC -- at an ICC of 0.005, this rate is 51%! At any biologically realistic ICC, the experimental design will result in significant *p*-values the majority of the time **when the true treatment effect is zero**!
 
-## Published Methods
+## Published Methods, cut and pasted from the article
 
 To determine whether FOXO1 was also capable of increasing the activ- ity of CAR T cells against solid tumours, we infused tNGFR or FOXO1OE HER2.BBζ CAR T cells into 143B osteosarcoma-bearing NSG mice.
 

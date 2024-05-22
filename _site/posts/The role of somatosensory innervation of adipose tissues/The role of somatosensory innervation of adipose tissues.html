@@ -8,7 +8,7 @@
 
 <meta name="author" content="Jeff Walker">
 <meta name="dcterms.date" content="2024-05-21">
-<meta name="description" content="Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn’t so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay!">
+<meta name="description" content="Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn’t so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay! But, what’s going on with the direction of the effects in Fig 3g?">
 
 <title>Data From - Fig 3g – The role of somatosensory innervation of adipose tissues</title>
 <style>
@@ -149,13 +149,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <h1 class="title">Fig 3g – The role of somatosensory innervation of adipose tissues</h1>
                   <div>
         <div class="description">
-          Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn’t so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay!
+          Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn’t so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay! But, what’s going on with the direction of the effects in Fig 3g?
         </div>
       </div>
                           <div class="quarto-categories">
                 <div class="quarto-category">linear mixed model</div>
                 <div class="quarto-category">random intercept</div>
-                <div class="quarto-category">RSPD</div>
+                <div class="quarto-category">split plot</div>
+                <div class="quarto-category">ggplot</div>
+                <div class="quarto-category">data flag</div>
               </div>
                   </div>
   </div>
@@ -209,7 +211,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#improving-on-the-authors-adjusting-all-6-responses-using-fdr" id="toc-improving-on-the-authors-adjusting-all-6-responses-using-fdr" class="nav-link" data-scroll-target="#improving-on-the-authors-adjusting-all-6-responses-using-fdr">Improving on the authors: adjusting all 6 responses using FDR</a></li>
   <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots!</a></li>
   <li><a href="#whoops-the-published-figure-has-data-that-is-upside-down" id="toc-whoops-the-published-figure-has-data-that-is-upside-down" class="nav-link" data-scroll-target="#whoops-the-published-figure-has-data-that-is-upside-down">Whoops! The published figure has data that is upside down</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a></li>
+  <li><a href="#published-methods-cut-and-pasted-from-the-article" id="toc-published-methods-cut-and-pasted-from-the-article" class="nav-link" data-scroll-target="#published-methods-cut-and-pasted-from-the-article">Published methods, cut and pasted from the article</a></li>
   </ul>
 </nav>
     </div>
@@ -233,7 +235,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Published methods: repeated measures ANOVA</p>
 <p>Design: Randomized Split Plot Design (RSPD)</p>
 <p>Response: fold-change in gene expression</p>
-<p>Key learning concepts: linear mixed model, random intercept, RSPD</p>
+<p>Key learning concepts: linear mixed model, random intercept, split-plot, repeated measures ANOVA</p>
 <p>More info: <a href="https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm" target="_blank">Chapter 16 Models for non-independence – linear mixed models</a></p>
 </section>
 <section id="the-experiment" class="level2">
@@ -269,22 +271,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="what-is-a-randomized-split-plot-design-rspd" class="level2">
 <h2 class="anchored" data-anchor-id="what-is-a-randomized-split-plot-design-rspd">What is a randomized split plot design (RSPD)?</h2>
-<p>This is a randomized split plot design. tx (Sal or OHDA) is randomly assigned to Mouse - this is the “plot”. Within a mouse, surgery (YFP or Cre) is assigned to side – this is the “subplot”. Mouse acts like a blocking factor for surgery but a completely randomized factor for tx. There is no subplot replication within a plot (mouse) so linear mixed model (using R formula notation is)</p>
+<p>This is a randomized split plot design. tx (Sal or OHDA) is randomly assigned to Mouse - a mouse is the “plot”. Within a mouse, surgery (YFP or Cre) is assigned to side – this is the “subplot”. Mouse acts like a blocking factor for surgery but a completely randomized factor for tx. There is no subplot replication within a plot (mouse) so the linear mixed model (using R formula notation) is</p>
 <p><code>fc ~ tx * surgery + (1 | ear_tag)</code></p>
-<p>A question I had with this is, can I replicate the researcher’s results, as they used “Repeated Measures ANOVA” in GraphPad Prism. In general, I can replicate GraphPad results with a blocked design but I haven’t tried a split plot design (generally because I’ve yet to find a paper with a split plot design that was analyzed in GraphPad using RM ANOVA)</p>
+<p>The factor ear_tag is a <strong>random intercept</strong>.</p>
+<p>A question I had with this is, can I replicate the researcher’s results, as they used “Repeated Measures ANOVA” in GraphPad Prism. In general, I can replicate GraphPad results with a blocked design but I haven’t tried a split plot design (generally because I don’t think that I’ve found a paper with a split plot design that was analyzed in GraphPad using RM ANOVA)</p>
 <p>Advantages of the linear mixed model</p>
 <ol type="1">
 <li>it can handle missing data – ANOVA throws out data points if there is any value missing value within the Plot variable (here, this is mouse ear_tag)</li>
 <li>it is easy to handle non-normal data using generalized linear mixed models – ANOVA is for linear models only, although one can transform the response.</li>
 <li>it is flexible, for example it is easy to add covariates. This isn’t so important for the bench biology data that I mostly see, although it is useful for example if a response was dependent on mouse weight and we wanted to adjust for weight without using a ratio.</li>
 </ol>
-<p>Advantages of the RM ANOVA model 1. It always works! LMM algorithms can fail (not infrequently)</p>
+<p>Advantages of the RM ANOVA model 1. It always works! LMM algorithms can fail, and not infrequently.</p>
 </section>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
 </section>
 <section id="import-and-wrangle" class="level2">
 <h2 class="anchored" data-anchor-id="import-and-wrangle">Import and Wrangle</h2>
+<p>Note: there are two sets of Fig 3g data. The bottom set looks like it is the top set recentered so that the mean of the SAL-YFP treatment has is mean zero. Since the data in the figure looked centered this way, I’ll import the bottom set.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -294,7 +298,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fig3g <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(file_path,</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sheet =</span> <span class="st">"3g"</span>,</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">range =</span> <span class="st">"B6:K30"</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">range =</span> <span class="st">"B34:K58"</span>,</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">col_names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>() <span class="sc">|&gt;</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>()</span>
@@ -806,15 +810,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>gg_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
 <span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y_list)){</span>
-<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> fig3g_lmm1[[y_list[i]]]</span>
-<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>  m1_emm <span class="ot">&lt;-</span> fig3g_lmm1_emm[[y_list[i]]]</span>
-<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>  m1_pairs <span class="ot">&lt;-</span> fig3g_lmm1_pairs[[y_list[i]]]</span>
-<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>  <span class="co"># use the sidak p-values</span></span>
-<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>  m1_pairs[, p.value <span class="sc">:</span><span class="er">=</span> p_sidak]</span>
-<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>  gg <span class="ot">&lt;-</span> <span class="fu">plot_it</span>(<span class="at">y_col =</span> y_list[i], m1_pairs)</span>
-<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>  gg_list[[y_list[i]]] <span class="ot">&lt;-</span> gg</span>
-<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(<span class="at">plotlist =</span> gg_list, <span class="at">nrow =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>  m1_pairs <span class="ot">&lt;-</span> fig3g_lmm1_pairs[[y_list[i]]]</span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># use the sidak p-values</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>  m1_pairs[, p.value <span class="sc">:</span><span class="er">=</span> p_sidak]</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>  gg <span class="ot">&lt;-</span> <span class="fu">plot_it</span>(<span class="at">y_col =</span> y_list[i], m1_pairs)</span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>  gg_list[[y_list[i]]] <span class="ot">&lt;-</span> gg</span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(<span class="at">plotlist =</span> gg_list, <span class="at">nrow =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="The-role-of-somatosensory-innervation-of-adipose-tissues_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="1056"></p>
@@ -830,10 +832,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </figure>
 </div>
 <p>Compare my figure with the published figure.</p>
-<p>The figured data is reflected about some horizontal axis, that is, it is upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The directions of the differences given in the GraphPad prism post-hoc tables in the archived Excel file are correct for the data given in that file. This also of course effects the interpretation of the experiment!</p>
+<p>Compared to my figure built from the archived data, the data in Fig3g is reflected about some horizontal axis, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file, so the data in the figure would seem to be wrong, unless I’m missing something. This doesn’t matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite!</p>
+<p>Let’s reflect the gene expression values by multiplying them by -1 and replot:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># reflect the values in the response variables</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>fig3g[, ucp1_ref <span class="sc">:</span><span class="er">=</span> <span class="sc">-</span>ucp1]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>fig3g[, elovl3_ref <span class="sc">:</span><span class="er">=</span> <span class="sc">-</span>elovl3]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>fig3g[, cidea_ref <span class="sc">:</span><span class="er">=</span> <span class="sc">-</span>cidea]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>fig3g[, fasn_ref <span class="sc">:</span><span class="er">=</span> <span class="sc">-</span>fasn]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>fig3g[, acacb_ref <span class="sc">:</span><span class="er">=</span> <span class="sc">-</span>acacb]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>fig3g[, ch_reb_pb_ref <span class="sc">:</span><span class="er">=</span> <span class="sc">-</span>ch_reb_pb]</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>y_list_ref <span class="ot">&lt;-</span> <span class="fu">paste0</span>(y_list, <span class="st">"_ref"</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>gg_list <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y_list)){</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  m1_pairs <span class="ot">&lt;-</span> fig3g_lmm1_pairs[[y_list[i]]]</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># use the sidak p-values</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  m1_pairs[, p.value <span class="sc">:</span><span class="er">=</span> p_sidak]</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  gg <span class="ot">&lt;-</span> <span class="fu">plot_it</span>(<span class="at">y_col =</span> y_list_ref[i], m1_pairs)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  gg_list[[y_list[i]]] <span class="ot">&lt;-</span> gg</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(<span class="at">plotlist =</span> gg_list, <span class="at">nrow =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="The-role-of-somatosensory-innervation-of-adipose-tissues_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="1056"></p>
+</div>
+</div>
+<p>Okay - this replicates the plot but what is the justification for reflecting the data and reversing the direction of the difference?</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(y_list)){</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> fig3g_lmm1[[y_list[i]]]</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 </section>
-<section id="methods" class="level2">
-<h2 class="anchored" data-anchor-id="methods">Methods</h2>
+<section id="published-methods-cut-and-pasted-from-the-article" class="level2">
+<h2 class="anchored" data-anchor-id="published-methods-cut-and-pasted-from-the-article">Published methods, cut and pasted from the article</h2>
 <p>A combination of axonal target injection of retrograde Cre and somatic expression of a Cre-dependent payload has been widely used to manipulate projection-specific circuits in the brain. However, legacy peripheral viral tracers such as pseudorabies virus and herpes simplex virus are highly toxic, restricting their use beyond acute anatomical mapping. In search for newer and safer viral vectors suitable for long-term functional manipulations, we found that AAV9 exhibited a high retrograde potential from iWAT to DRGs (Extended Data Fig. 4a). We adopted a published viral engineering pipeline22 to generate randomized mutants of AAV9 (Extended Data Fig. 4b,c). Although our initial intent was to improve retrograde efficiency from fat to DRGs, the evolved new retrograde vector optimized for organ tracing (or ROOT) is more desirable mainly for its significantly reduced off-target expression such as in SChGs, contralateral DRGs and the liver (Fig. 2a,b and Extended Data Fig. 4d–g).</p>
 <p>ROOT provides an opportunity to specifically ablate the sensory innervation in fat—we injected Cre-dependent diphtheria toxin subunit A (DTA) construct (mCherry-flex-DTA) into the T13/L1 DRGs bilaterally while injecting Cre- or YFP-expressing ROOT unilaterally in the iWATs (Fig. 2c).</p>
 <p>As thermogenic and lipogenesis programs are both downstream of sympathetic signalling24,26,29, we next tested whether the sensory-elicited gene expression changes are dependent on intact sympathetic innervation. We bilaterally injected 6-OHDA—a catecholaminergic toxin for selective sympathetic denervation (Extended Data Fig. 6c,d)—into the iWAT of mice that had previously undergone unilateral sensory ablation (Fig. 3f).</p>
