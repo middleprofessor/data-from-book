@@ -407,11 +407,11 @@ What's going on with the direction of the effect in Fig 3g? Compare my figure wi
 
 ![Fig 3g ANOVA table from Excel file](../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png)
 
-Compared to my figure built from the archived data, the data in Fig3g is reflected about some horizontal axis, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file, so the data in the figure would seem to be wrong, unless I'm missing something. This doesn't matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite.
+Compared to my figure built from the archived data, the data in Fig3g is reflected about the horizontal axis at y = 0, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file and not the plotted data. This doesn't matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite.
 
-But, I think this is what we want. The top matrix of archived values are $\Delta C_q$ values, which decrease as expression levels increase. So to get the effects in the correct direction, we can multiply the $\Delta C_q$ values by -1.
+So, what's up with the reflected (upside down) data? The matrices of archived values are $\Delta C_q$ and centered ($\Delta\Delta C_q$) values, which decrease as expression levels increase. We want an increase in expression to look like an increase in the y-value. So to get the effects in this meaningful direction, we can multiply the $\Delta C_q$ values by -1.
 
-Let's reflect the gene expression values by multiplying them by -1 and replot:
+Let's reflect the $\Delta\Delta C_q$ values by multiplying them by -1 and replot:
 
 ```{r,  fig.height = 8, fig.width= 11}
 # reflect the values in the response variables

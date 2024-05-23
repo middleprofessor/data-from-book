@@ -830,9 +830,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <figcaption class="figure-caption">Fig 3g ANOVA table from Excel file</figcaption>
 </figure>
 </div>
-<p>Compared to my figure built from the archived data, the data in Fig3g is reflected about some horizontal axis, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file, so the data in the figure would seem to be wrong, unless I’m missing something. This doesn’t matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite.</p>
-<p>But, I think this is what we want. The top matrix of archived values are <span class="math inline">\(\Delta C_q\)</span> values, which decrease as expression levels increase. So to get the effects in the correct direction, we can multiply the <span class="math inline">\(\Delta C_q\)</span> values by -1.</p>
-<p>Let’s reflect the gene expression values by multiplying them by -1 and replot:</p>
+<p>Compared to my figure built from the archived data, the data in Fig3g is reflected about the horizontal axis at y = 0, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file and not the plotted data. This doesn’t matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite.</p>
+<p>So, what’s up with the reflected (upside down) data? The matrices of archived values are <span class="math inline">\(\Delta C_q\)</span> and centered (<span class="math inline">\(\Delta\Delta C_q\)</span>) values, which decrease as expression levels increase. We want an increase in expression to look like an increase in the y-value. So to get the effects in this meaningful direction, we can multiply the <span class="math inline">\(\Delta C_q\)</span> values by -1.</p>
+<p>Let’s reflect the <span class="math inline">\(\Delta\Delta C_q\)</span> values by multiplying them by -1 and replot:</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
