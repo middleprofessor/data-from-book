@@ -405,7 +405,7 @@ plot_grid(plotlist = gg_list, nrow = 2)
 
 What's going on with the direction of the effect in Fig 3g? Compare my figure with the published figure.
 
-![Fig 3g ANOVA table from Excel file](../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png)
+![Fig 3g](../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png)
 
 Compared to my figure built from the archived data, the data in Fig3g is reflected about the horizontal axis at y = 0, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file and not the plotted data. This doesn't matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite.
 
