@@ -346,7 +346,7 @@ out_table |>
   kable_styling()
 ```
 
-## Plots!
+## Plots...replicate!
 
 ```{r fig.height = 8, fig.width= 11}
 
@@ -403,15 +403,13 @@ for(i in 1:length(y_list)){
 plot_grid(plotlist = gg_list, nrow = 2)
 ```
 
-## What's going on with the direction of the effect in Fig 3g?
+What's going on with the direction of the effect in Fig 3g? Compare my figure with the published figure.
 
 ![Fig 3g ANOVA table from Excel file](../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png)
 
-Compare my figure with the published figure.
-
 Compared to my figure built from the archived data, the data in Fig3g is reflected about some horizontal axis, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file, so the data in the figure would seem to be wrong, unless I'm missing something. This doesn't matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite.
 
-But, I think this is what we want. The top matrix of archived values are $\Delta C_q$ values, which decrease as expression levels increase. So to get the effects in the correct direction, we need to multiple the $\Delta C_q$ values by -1.
+But, I think this is what we want. The top matrix of archived values are $\Delta C_q$ values, which decrease as expression levels increase. So to get the effects in the correct direction, we can multiply the $\Delta C_q$ values by -1.
 
 Let's reflect the gene expression values by multiplying them by -1 and replot:
 
@@ -453,3 +451,8 @@ A combination of axonal target injection of retrograde Cre and somatic expressio
 ROOT provides an opportunity to specifically ablate the sensory innervation in fat—we injected Cre-dependent diphtheria toxin subunit A (DTA) construct (mCherry-flex-DTA) into the T13/L1 DRGs bilaterally while injecting Cre- or YFP-expressing ROOT unilaterally in the iWATs (Fig. 2c).
 
 As thermogenic and lipogenesis programs are both downstream of sympathetic signalling24,26,29, we next tested whether the sensory-elicited gene expression changes are dependent on intact sympathetic innervation. We bilaterally injected 6-OHDA—a catecholaminergic toxin for selective sympathetic denervation (Extended Data Fig. 6c,d)—into the iWAT of mice that had previously undergone unilateral sensory ablation (Fig. 3f). 
+
+```{r echo=FALSE, eval=FALSE}
+writexl::write_xlsx(fig3g, "fig3g.xlsx")
+```
+

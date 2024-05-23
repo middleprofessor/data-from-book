@@ -211,8 +211,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#contrasts-replicate" id="toc-contrasts-replicate" class="nav-link" data-scroll-target="#contrasts-replicate">Contrasts replicate!</a></li>
   </ul></li>
   <li><a href="#improving-on-the-authors-adjusting-all-6-responses-using-fdr" id="toc-improving-on-the-authors-adjusting-all-6-responses-using-fdr" class="nav-link" data-scroll-target="#improving-on-the-authors-adjusting-all-6-responses-using-fdr">Improving on the authors: adjusting all 6 responses using FDR</a></li>
-  <li><a href="#plots" id="toc-plots" class="nav-link" data-scroll-target="#plots">Plots!</a></li>
-  <li><a href="#whats-going-on-with-the-direction-of-the-effect-in-fig-3g" id="toc-whats-going-on-with-the-direction-of-the-effect-in-fig-3g" class="nav-link" data-scroll-target="#whats-going-on-with-the-direction-of-the-effect-in-fig-3g">What’s going on with the direction of the effect in Fig 3g?</a></li>
+  <li><a href="#plotsreplicate" id="toc-plotsreplicate" class="nav-link" data-scroll-target="#plotsreplicate">Plots…replicate!</a></li>
   <li><a href="#published-methods-cut-and-pasted-from-the-article" id="toc-published-methods-cut-and-pasted-from-the-article" class="nav-link" data-scroll-target="#published-methods-cut-and-pasted-from-the-article">Published methods, cut and pasted from the article</a></li>
   </ul>
 </nav>
@@ -763,8 +762,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="plots" class="level2">
-<h2 class="anchored" data-anchor-id="plots">Plots!</h2>
+<section id="plotsreplicate" class="level2">
+<h2 class="anchored" data-anchor-id="plotsreplicate">Plots…replicate!</h2>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -824,18 +823,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="The-role-of-somatosensory-innervation-of-adipose-tissues_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="1056"></p>
 </div>
 </div>
-</section>
-<section id="whats-going-on-with-the-direction-of-the-effect-in-fig-3g" class="level2">
-<h2 class="anchored" data-anchor-id="whats-going-on-with-the-direction-of-the-effect-in-fig-3g">What’s going on with the direction of the effect in Fig 3g?</h2>
+<p>What’s going on with the direction of the effect in Fig 3g? Compare my figure with the published figure.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png" class="img-fluid figure-img"></p>
 <figcaption class="figure-caption">Fig 3g ANOVA table from Excel file</figcaption>
 </figure>
 </div>
-<p>Compare my figure with the published figure.</p>
 <p>Compared to my figure built from the archived data, the data in Fig3g is reflected about some horizontal axis, that is, the data are upside down, so the apparent direction of the differences is exactly opposite that of the archived data in the Excel file. The GraphPad prism contrasts tables in the Excel file match the archived data in the Excel file, so the data in the figure would seem to be wrong, unless I’m missing something. This doesn’t matter for the p-values but since directions of the differences are exactly opposite, the interpretation of the results is exactly opposite.</p>
-<p>But, I think this is what we want. The top matrix of archived values are <span class="math inline">\(\Delta C_q\)</span> values, which decrease as expression levels increase. So to get the effects in the correct direction, we need to multiple the <span class="math inline">\(\Delta C_q\)</span> values by -1.</p>
+<p>But, I think this is what we want. The top matrix of archived values are <span class="math inline">\(\Delta C_q\)</span> values, which decrease as expression levels increase. So to get the effects in the correct direction, we can multiply the <span class="math inline">\(\Delta C_q\)</span> values by -1.</p>
 <p>Let’s reflect the gene expression values by multiplying them by -1 and replot:</p>
 <div class="cell">
 <details>
