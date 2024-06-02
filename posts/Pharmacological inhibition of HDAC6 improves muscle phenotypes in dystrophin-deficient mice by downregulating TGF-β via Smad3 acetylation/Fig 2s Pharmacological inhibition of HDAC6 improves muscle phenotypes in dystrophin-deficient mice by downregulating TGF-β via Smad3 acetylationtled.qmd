@@ -14,7 +14,7 @@ execute:
   warning: false
 editor_options: 
   chunk_output_type: inline
-freeze: auto
+freeze: false
 
 ---
 
@@ -178,6 +178,8 @@ fig2s_means[, fibrotic_area_model := predict(m1, fig2s_means)]
 m1_emm_dt <- m1_emm |>
   summary() |>
   data.table()
+m1_pairs_dt <- m1_pairs |>
+  data.table()
 gg <- ggplot(data = fig2s,
              aes(x = treatment,
                  y = fibrotic_area)) +
@@ -211,8 +213,27 @@ gg <- ggplot(data = fig2s,
   theme(axis.title.x = element_blank()) +
   NULL
 
-gg
+  # add p-values
+m1_pairs_dt[, group1 := "MDX-TubA"]
+m1_pairs_dt[, group2 := "MDX-Veh"]
+m1_pairs_dt[, p := p.value |>
+              p_round(digits = 2) |>
+              p_format(digits = 2, accuracy = 1e-04, add.p = TRUE)]
+maxy <- fig2s[, max(fibrotic_area)]
+miny <- fig2s[, min(fibrotic_area)]
+m1_pairs_dt[, y.position := maxy + 0.05*(maxy - miny)]
 
+gg <- gg +
+  stat_pvalue_manual(
+    data = m1_pairs_dt,
+    label = "p",
+    tip.length = 0.001)
+
+gg
+```
+
+
+```{r}
 save_it <- FALSE
 if(save_it){
 out_fig <- "fig2s_ggplot.png"
