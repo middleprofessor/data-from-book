@@ -186,7 +186,7 @@
     "href": "posts/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/Fig 2s Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylationtled.html",
     "title": "Fig 2s – Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation",
     "section": "",
-    "text": "Fig 2s repro generated below"
+    "text": "Fig 2s repro generated using ggplot. The technical replicates are de-emphasized by using a gray color."
   },
   {
     "objectID": "posts/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/Fig 2s Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylationtled.html#vital-info",
@@ -201,6 +201,13 @@
     "title": "Fig 2s – Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation",
     "section": "The experiment",
     "text": "The experiment"
+  },
+  {
+    "objectID": "posts/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/Fig 2s Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylationtled.html#published-results",
+    "href": "posts/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/Fig 2s Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylationtled.html#published-results",
+    "title": "Fig 2s – Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation",
+    "section": "Published results",
+    "text": "Published results\n\n\n\nFig 2s from the article"
   },
   {
     "objectID": "posts/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/Fig 2s Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylationtled.html#setup",

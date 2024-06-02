@@ -14,13 +14,12 @@ execute:
   warning: false
 editor_options: 
   chunk_output_type: inline
-freeze: false
+freeze: auto
 
 ---
 
-![Fig 2s repro generated below](../../figs/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/fig2s_ggplot.png){width=400}
+![Fig 2s repro generated using ggplot. The technical replicates are de-emphasized by using a gray color.](../../figs/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/fig2s_ggplot.png){width=400}
 
-![Fig 2s from the article](../../figs/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/fig2s.png)
 
 ## Vital info
 
@@ -44,8 +43,9 @@ More info: [Chapter 16 Models for non-independence -- linear mixed models](https
 
 ## The experiment
 
+## Published results
 
-
+![Fig 2s from the article](../../figs/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/fig2s.png)
 
 ## Setup
 
