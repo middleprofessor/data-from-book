@@ -161,6 +161,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
                 <div class="quarto-category">random intercept</div>
                 <div class="quarto-category">CRDS</div>
                 <div class="quarto-category">Nested ANOVA</div>
+                <div class="quarto-category">ggplot</div>
               </div>
                   </div>
   </div>
@@ -205,6 +206,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
   <li><a href="#import-and-wrangle" id="toc-import-and-wrangle" class="nav-link" data-scroll-target="#import-and-wrangle">Import and Wrangle</a></li>
   <li><a href="#fit-the-models" id="toc-fit-the-models" class="nav-link" data-scroll-target="#fit-the-models">Fit the models</a></li>
+  <li><a href="#plotting-technical-replicates" id="toc-plotting-technical-replicates" class="nav-link" data-scroll-target="#plotting-technical-replicates">Plotting technical replicates</a></li>
   </ul>
 </nav>
     </div>
@@ -230,6 +232,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Design: Completely Randomized Design with Subsampling (CRDS)</p>
 <p>Response: fibrotic area</p>
 <p>Key learning concepts: linear mixed model, random intercept, nested ANOVA</p>
+<p>Quick learning explanation: Pseudoreplication is the analysis of subsampled (technical) replicates as if they were experimental replicates. This is a violation of the assumption of independence of errors. Nested data are measures within a discrete unit or a hierarchy of units, for example technical replicates within a tumor within a mouse.</p>
 <p>More info: <a href="https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm" target="_blank">Chapter 16 Models for non-independence – linear mixed models</a></p>
 </section>
 <section id="the-experiment" class="level2">
@@ -294,14 +297,16 @@ alternative hypothesis: true location shift is not equal to 0</code></pre>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(fibrotic_area <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> mouse_id), <span class="at">data =</span> fig2s)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>m1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m1, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>m1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>m1_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>m1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>m1_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code> contrast               estimate     SE df t.ratio p.value
- (MDX-TubA) - (MDX-Veh)  -0.0639 0.0393  4  -1.627  0.1792
+<pre><code> contrast               estimate     SE df lower.CL upper.CL t.ratio p.value
+ (MDX-TubA) - (MDX-Veh)  -0.0639 0.0393  4   -0.173   0.0452  -1.627  0.1792
 
-Degrees-of-freedom method: kenward-roger </code></pre>
+Degrees-of-freedom method: kenward-roger 
+Confidence level used: 0.95 </code></pre>
 </div>
 </div>
 <p>A nested ANOVA is a classical method that is equivalent to the linear mixed model above when there are an equal number of technical replicates per mouse, but will be close otherwise. In general, things will rarely go wrong if one uses a nested ANOVA instead of the linear mixed-model. GraphPad Prism does nested ANOVA but not a linear mixed model.</p>
@@ -310,12 +315,71 @@ Degrees-of-freedom method: kenward-roger </code></pre>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">aov_4</span>(fibrotic_area <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> mouse_id), <span class="at">data =</span> fig2s)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>m2_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m2, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m2_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>m2_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m2_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>m2_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code> contrast               estimate     SE df t.ratio p.value
- (MDX-TubA) - (MDX-Veh)  -0.0647 0.0395  4  -1.639  0.1766</code></pre>
+<pre><code> contrast               estimate     SE df lower.CL upper.CL t.ratio p.value
+ (MDX-TubA) - (MDX-Veh)  -0.0647 0.0395  4   -0.174   0.0449  -1.639  0.1766
+
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+</section>
+<section id="plotting-technical-replicates" class="level2">
+<h2 class="anchored" data-anchor-id="plotting-technical-replicates">Plotting technical replicates</h2>
+<p>The technical replicates are de-emphasized by using a gray color. The modeled means of each mouse are colored by treatment (these are the predicted means of the linear mixed model and not the simple mean of each mouse). The model means of each treatment are colord by treatment.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get estimated means from linear model</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>fig2s_means <span class="ot">&lt;-</span> fig2s[, .(<span class="at">fibrotic_area =</span> <span class="fu">mean</span>(fibrotic_area)), by <span class="ot">=</span> .(treatment, mouse_id)]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>fig2s_means[, fibrotic_area_model <span class="sc">:</span><span class="er">=</span> <span class="fu">predict</span>(m1, fig2s_means)]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>m1_emm_dt <span class="ot">&lt;-</span> m1_emm <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>()</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>gg <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> fig2s,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> fibrotic_area)) <span class="sc">+</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># technical reps</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">color =</span> <span class="st">"gray"</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">data =</span> fig2s_means,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>              <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>                  <span class="at">y =</span> fibrotic_area_model,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>                  <span class="at">color =</span> treatment),</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>              <span class="at">size =</span> <span class="dv">3</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>              <span class="at">width =</span> <span class="fl">0.1</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>              <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mean and error</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> m1_emm_dt,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> emmean,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> treatment),</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="dv">5</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>             <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="at">data =</span> m1_emm_dt,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x =</span> treatment, </span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y =</span> emmean,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymin =</span> lower.CL, <span class="at">ymax =</span> upper.CL,</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>                    <span class="at">color =</span> treatment),</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>                <span class="at">width =</span> <span class="fl">0.05</span>,</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>                <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Fibrotic Area"</span>) <span class="sc">+</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> pal_okabe_ito_2) <span class="sc">+</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_pubr</span>() <span class="sc">+</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>()) <span class="sc">+</span></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>  <span class="cn">NULL</span></span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>gg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Fig-2s-Pharmacological-inhibition-of-HDAC6-improves-muscle-phenotypes-in-dystrophin-deficient-mice-by-downregulating-TGF-β-via-Smad3-acetylationtled_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 
