@@ -18,6 +18,8 @@ freeze: auto
 
 ---
 
+![Fig 2s repro generated below](../../figs/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/fig2s_ggplot.png){width=400}
+
 ![Fig 2s from the article](../../figs/Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation/fig2s.png)
 
 ## Vital info
@@ -210,5 +212,13 @@ gg <- ggplot(data = fig2s,
   NULL
 
 gg
+
+save_it <- FALSE
+if(save_it){
+out_fig <- "fig2s_ggplot.png"
+out_path <- here("figs", data_from, out_fig)
+ggsave(out_path)
+}
+
 ```
 
