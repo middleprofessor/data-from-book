@@ -3,7 +3,7 @@ title: "Fig 2s -- Pharmacological inhibition of HDAC6 improves muscle phenotypes
 author: "Jeff Walker"
 date: '2 Jun 2024'
 date-modified: "`r Sys.Date()`"
-categories: ["linear mixed model", "random intercept", "CRDS", "Nested ANOVA"]
+categories: ["linear mixed model", "random intercept", "CRDS", "Nested ANOVA", "ggplot"]
 description: "Fig 2s is a Completely Randomized Design with subsampling (CRDS), with 28-49 technical replicates per mouse. The researchers used a Mann-Whitney test that ignored the technical replication. This analysis is massively pseudoreplicated because techanical replicates are not independent evidence of effect of treatment. Individual mouse ID was archived, which makes it easy to re-analyze with models that account for the non-independence. The p-value accounting for non-independence is 0.18 while the p-value using Mann-Whitney on all data is 0.0002. Whoops!"
 format: 
   html: 
@@ -147,7 +147,8 @@ A linear mixed-model is the best practice method
 ```{r}
 m1 <- lmer(fibrotic_area ~ treatment + (1 | mouse_id), data = fig2s)
 m1_emm <- emmeans(m1, specs = "treatment")
-m1_pairs <- contrast(m1_emm, method = "revpairwise")
+m1_pairs <- contrast(m1_emm, method = "revpairwise") |>
+  summary(infer = TRUE)
 m1_pairs
 ```
 
@@ -157,7 +158,55 @@ A nested ANOVA is a classical method that is equivalent to the linear mixed mode
 ```{r}
 m2 <- aov_4(fibrotic_area ~ treatment + (1 | mouse_id), data = fig2s)
 m2_emm <- emmeans(m2, specs = "treatment")
-m2_pairs <- contrast(m2_emm, method = "revpairwise")
+m2_pairs <- contrast(m2_emm, method = "revpairwise") |>
+  summary(infer = TRUE)
 m2_pairs
+```
+
+## Plotting technical replicates
+
+The technical replicates are de-emphasized by using a gray color. The modeled means of each mouse are colored by treatment (these are the predicted means of the linear mixed model and not the simple mean of each mouse). The model means of each treatment are colord by treatment.
+
+```{r}
+# get estimated means from linear model
+fig2s_means <- fig2s[, .(fibrotic_area = mean(fibrotic_area)), by = .(treatment, mouse_id)]
+fig2s_means[, fibrotic_area_model := predict(m1, fig2s_means)]
+m1_emm_dt <- m1_emm |>
+  summary() |>
+  data.table()
+gg <- ggplot(data = fig2s,
+             aes(x = treatment,
+                 y = fibrotic_area)) +
+  # technical reps
+  geom_jitter(color = "gray",
+              width = 0.2) +
+  geom_jitter(data = fig2s_means,
+              aes(x = treatment,
+                  y = fibrotic_area_model,
+                  color = treatment),
+              size = 3,
+              width = 0.1,
+              show.legend = FALSE) +
+  # mean and error
+  geom_point(data = m1_emm_dt,
+             aes(x = treatment,
+                 y = emmean,
+                 color = treatment),
+             size = 5,
+             show.legend = FALSE) +
+  geom_errorbar(data = m1_emm_dt,
+                aes(x = treatment, 
+                    y = emmean,
+                    ymin = lower.CL, ymax = upper.CL,
+                    color = treatment),
+                width = 0.05,
+                show.legend = FALSE) +
+  ylab("Fibrotic Area") +
+  scale_color_manual(values = pal_okabe_ito_2) +
+  theme_pubr() +
+  theme(axis.title.x = element_blank()) +
+  NULL
+
+gg
 ```
 
