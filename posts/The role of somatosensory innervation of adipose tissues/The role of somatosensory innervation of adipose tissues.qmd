@@ -3,7 +3,7 @@ title: "Fig 3g -- The role of somatosensory innervation of adipose tissues"
 author: "Jeff Walker"
 date: '21 May 2024'
 date-modified: "`r Sys.Date()`"
-categories: ["linear mixed model", "random intercept", "split plot", "ggplot", "data flag"]
+categories: ["linear mixed model", "random intercept", "split plot", "ggplot"]
 description: "Fig 3g is a split-plot design. I often see researchers analyze these using separate paired t-tests. This isn't so bad, but is limiting, and a better alternative is a linear mixed model. But does this replicate the Repeated Measures ANOVA in GraphPad used by the researchers? It does! Yaaay!"
 format: 
   html: 
@@ -306,7 +306,7 @@ I do have thoughts on the correction:
 3. I would *not* adjust if I were only investigating ucp1 as the response. Each of these is a test of its own question with different expectations given working knowledge. See xxx.
 4. That said, there are 6 response variables from the experiment and if our hypothesis is something like "is there some difference in gene expression given this set of genes?" then I would adjust using the FDR, as this is a question applied to the whole gene set. This is exactly the norm in gene expression studies with thousands of genes. I never see researchers adjust for multiple responses except in these large large gene expression studies (or similar). So there is inconsistency in the logic applied to the statistical analysis not just within a field but within a single paper.
 
-## Improving on the authors: adjusting all 6 responses using FDR
+## How I would adjust: adjusting all 6 responses using FDR
 
 ```{r}
 # this seems ultra klunky but it works

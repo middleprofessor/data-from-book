@@ -3,7 +3,7 @@ title: "Fig 4h -- FOXO1 is a master regulator of memory programming in CAR T cel
 author: "Jeff Walker"
 date: '17 May 2024'
 date-modified: "`r Sys.Date()`"
-categories: ['technical replicates', 'pseudoreplication', 'nested', 'CRDS', 'analysis flag']
+categories: ['technical replicates', 'pseudoreplication', 'nested ANOVA', 'CRDS', 'analysis flag']
 description: "Fig 4h contains thousands of technical replicates. Technical replicates should not be analyzed as if they were randomly assigned to one of the experimental treatments. They weren't. The resulting p-value is junk."
 format: 
   html: 
