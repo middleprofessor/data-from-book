@@ -1,0 +1,305 @@
+---
+title: "Fig 3b -- The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity"
+author: "Jeff Walker"
+date: '8 June 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["linear mixed model", "ratio paired t-test", "generalized linear mixed model", "ggplot"]
+description: "The researchers analyzed figure 3b with a ratio paired t-test, which is a special case of a linear mixed model with a log-transformed response or a generalized linear mixed model with a Gamma distribution and log link. An advantage to fitting the LMM or GLMM is asymmetric confidence intervals of the group means that reflect the skew of the data. Plot the model!"
+draft: false
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+freeze: auto
+---
+
+![ggplot better-than-replication of Fig 3b from the article. It's better than because the confidence intervals from the model are asymmetric and reflect the right (upward) skew of the data](../../figs/The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity/fig3b_ggplot.png){width=4in fig-align="left"}
+
+## Vital info
+
+Data From: [Serrano, J., Boyd, J., Brown, I.S. et al. The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity. Nat Commun 15, 4915 (2024). https://doi.org/10.1038/s41467-024-49100-8](https://www.nature.com/articles/s41467-024-49100-8){target="_blank"}
+
+Fig: 3b [download data](../../data from/The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity/41467_2024_49100_MOESM5_ESM.xlsx){target="_blank"}
+
+key words: 
+
+Published methods: ratio paired t-test
+
+Design: Randomized Complete Block Design (RCBD)
+
+Response: gel intensity
+
+Key learning concepts: generalized linear mixed model
+
+More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
+
+## The experiment
+
+The researchers engineered mice to express human TAS1R2 receptor in the muscles of muscle-specific TAS1R2 knockout (mKO) mice. Aspartame is a TAS1R2 agonist in humans but not mice. Presumably Saline was injected in muscle on one side and Aspartame on the other side of the same mouse, so mouse is a block, hence the ratio paierd *t*-test.
+
+Treatments
+
+1. Veh -- Saline? injected into mTg mice muscle
+2. Asp -- Aspartame injected into mTg mice muscle
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+## Import and Wrangle
+
+```{r fig-3b-import, message=FALSE, warning=FALSE}
+data_from <- "The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity"
+file_name <- "41467_2024_49100_MOESM5_ESM.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig3b_wide <- read_excel(file_path,
+                    sheet = "Fig.3b",
+                    range = "B7:C13",
+                    col_names = TRUE) |>
+  data.table()
+setnames(fig3b_wide, old = names(fig3b_wide), new = c("Veh", "Asp"))
+fig3b_wide[, mouse := paste0("mouse_", .I)]
+fig3b <- melt(fig3b_wide,
+              id.vars = "mouse",
+              variable.name = "genotype",
+              value.name = "ppar1")
+
+# output as clean excel file
+fileout_name <- "fig3b-RCBD-The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity.xlsx"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig3b, fileout_path)
+```
+
+
+## Fit the model
+
+The paired t-test is a special case of a linear mixed model -- specifically a linear mixed model with a single fixed factor and a single random intercept. For the ratio paired t-test, simply fit the model to the log transformed response.
+
+For this experiment, `genotype` is the fixed factor, and `mouse` is the block, so will be fit as a random factor. Note that I include the log transorm in the model formula, which signals the emmeans package to report the results on the response scale, which makes the treatment effect a ratio instead of a log ratio.
+
+```{r}
+lmm1 <- lmer(log(ppar1) ~ genotype + (1 | mouse),
+             data = fig3b)
+```
+
+## The linear mixed model results replicate the published results
+
+```{r}
+lmm1_emm <- emmeans(lmm1,
+                     specs ="genotype",
+                     type = "response")
+lmm1_pairs <- contrast(lmm1_emm,
+                        method ="revpairwise") |>
+  summary(infer = TRUE)
+lmm1_pairs
+```
+
+The treatment effect ("ratio") is the geometric mean (not the mean!) of the ratios Asp/Veh. Ratios are nice for interpretation: p-PAR1 levels in the Aspartame treatment are 2.05 times the levels in the Vehicle treatment.
+
+The effect (ratio of Asp/Veh), confidence interval, and p-value from the LMM are the same as in the archived table shown below.
+
+![Excel table from the archived data file](../../figs/The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity/fig3b-table.png){width=3in fig-align="left"}
+
+## Plot the model!
+
+```{r}
+lmm1_emm_dt <- summary(lmm1_emm) |>
+  data.table()
+lmm1_pairs_dt <- lmm1_pairs |>
+  data.table()
+
+gg <- ggplot(data = fig3b,
+             aes(x = genotype,
+                 y = ppar1,
+                 color = genotype)) +
+  geom_jitter(width = 0.1,
+                show.legend = FALSE) +
+  geom_point(data = lmm1_emm_dt,
+                aes(x = genotype,
+                    y = response),
+                size = 3,
+                show.legend = FALSE) +
+  geom_errorbar(data = lmm1_emm_dt,
+                aes(x = genotype,
+                    y = response,
+                    ymin = lower.CL,
+                    ymax = upper.CL),
+                width = 0.05,
+                show.legend = FALSE) +
+  ylab("p-PAR1") +
+  scale_color_manual(values = pal_okabe_ito_2) +
+  theme_pubr() +
+  theme(axis.title.x = element_blank()) +
+  NULL
+
+  # add p-values
+lmm1_pairs_dt[, group1 := "Veh"]
+lmm1_pairs_dt[, group2 := "Asp"]
+lmm1_pairs_dt[, p := p.value |>
+              p_round(digits = 2) |>
+              p_format(digits = 2, accuracy = 1e-04, add.p = TRUE)]
+maxy <- fig3b[, max(ppar1)]
+miny <- fig3b[, min(ppar1)]
+lmm1_pairs_dt[, y.position := maxy + 0.05*(maxy - miny)]
+
+gg <- gg +
+  stat_pvalue_manual(
+    data = lmm1_pairs_dt,
+    label = "p",
+    tip.length = 0.001)
+
+gg
+```
+
+::: {.callout-note}
+Note the asymetric intervals! This is because the intevals were computed on the log-transformed values and then backtransformed to the scale of the response.
+:::
+
+```{r}
+save_it <- FALSE
+if(save_it){
+out_fig <- "fig3b_ggplot.png"
+out_path <- here("figs", data_from, out_fig)
+ggsave(out_path)
+}
+
+```
+
+## The ratio paired *t*-test
+
+The ratio paired *t*-test is a one-sample t-test of the log of the Asp/Veh ratios. For a null hypothesis of no effect, we expect the geometric mean of the ratios to be 1, so the log of this to be 0.
+
+```{r}
+a <- fig3b[genotype == "Veh", ppar1]
+b <- fig3b[genotype == "Asp", ppar1]
+log_ba <- log(b/a)
+t.test(log_ba, mu = 0)
+```
+
+These are the same values as the archived values and the results from the linear mixed model above.
+
+## The ratio paired t-test is just a paired t-test of the log-transformed response
+
+This was implied above but here are the results to verify this.
+
+```{r}
+log_a <- fig3b[genotype == "Veh", ppar1] |>
+  log()
+log_b <- fig3b[genotype == "Asp", ppar1] |>
+  log()
+t.test(log_b, log_a, paired = TRUE)
+
+```
+
+
+## A generalized linear mixed model is a more modern way of analyzing these data
+
+Intensity levels often have a non-Normal distribution that is characterized by a right skew and a variance that increases with the mean (you can see this even with the small sample in Fig 3b. A modern way to analyze data like this is a generalized linear model, or, since we have a RBCD, a generalized linear mixed model.
+
+Here, I fit a GLMM using the Gamma distribution, which is useful for continuous, positive data.
+
+```{r}
+glmm1 <- glmmTMB(ppar1 ~ genotype + (1 | mouse),
+                 family = Gamma(link="log"),
+                 data = fig3b)
+
+glmm1_emm <- emmeans(glmm1,
+                     specs ="genotype",
+                     type = "response")
+glmm1_pairs <- contrast(glmm1_emm,
+                        method ="revpairwise") |>
+  summary(infer = TRUE)
+glmm1_pairs
+```
+
+Huh. This is equivalent to the LMM/ratio paired t-test, except its an "asymptotic test", so the p-value is optimistic and the confidence interval is narrow.
+
+I was expecting the effect to be the ratio of the means and not geometric mean of the ratios. This would have been the case with a GLM without the random intercept -- see below, but first, here are the different means (expand the code block to see what each is)
+
+```{r}
+a <- fig3b[genotype == "Veh", ppar1]
+b <- fig3b[genotype == "Asp", ppar1]
+mean(b)/mean(a) # ratio of means
+exp(log(mean(b)) - log(mean(a))) # difference of log transformed means backtransformed = 
+exp(mean(log(b)) - mean(log(a))) # means of log transformed data backtransformed = geometric mean
+prod(b/a)^(1/length(b/a)) # geometric mean computation 1
+exp(mean(log(b/a))) # geometric mean computation 2
+```
+And here is the GLM to show that the effect is the ratio of means
+
+```{r}
+glmm0 <- glmmTMB(ppar1 ~ genotype,
+                 family = Gamma(link="log"),
+                 data = fig3b)
+
+glmm0_emm <- emmeans(glmm0,
+                     specs ="genotype",
+                     type = "response")
+glmm0_pairs <- contrast(glmm0_emm,
+                        method ="revpairwise") |>
+  summary(infer = TRUE)
+glmm0_pairs
+
+```
+

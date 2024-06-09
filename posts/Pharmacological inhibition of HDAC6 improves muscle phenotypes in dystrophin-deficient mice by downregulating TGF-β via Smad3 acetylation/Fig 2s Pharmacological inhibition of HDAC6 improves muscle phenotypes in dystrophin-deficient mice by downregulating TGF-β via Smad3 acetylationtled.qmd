@@ -3,7 +3,7 @@ title: "Fig 2s -- Pharmacological inhibition of HDAC6 improves muscle phenotypes
 author: "Jeff Walker"
 date: '2 Jun 2024'
 date-modified: "`r Sys.Date()`"
-categories: ["linear mixed model", "random intercept", "CRDS", "Nested ANOVA", "ggplot"]
+categories: ["linear mixed model", "random intercept", "CRDS", "nested ANOVA", "ggplot"]
 description: "Fig 2s is a Completely Randomized Design with subsampling (CRDS), with 28-49 technical replicates per mouse. The researchers used a Mann-Whitney test that ignored the technical replication. This analysis is massively pseudoreplicated because techanical replicates are not independent evidence of effect of treatment. Individual mouse ID was archived, which makes it easy to re-analyze with models that account for the non-independence. The p-value accounting for non-independence is 0.18 while the p-value using Mann-Whitney on all data is 0.0002. Whoops!"
 format: 
   html: 
@@ -37,7 +37,7 @@ Response: fibrotic area
 
 Key learning concepts: linear mixed model, random intercept, nested ANOVA
 
-Quick learning explanation: Pseudoreplication is the analysis of subsampled (technical) replicates as if they were experimental replicates. This is a violation of the assumption of independence of errors. Nested data are measures within a discrete unit or a hierarchy of units, for example technical replicates within a tumor within a mouse.
+Quick learning explanation: Nested data are measures within a discrete unit or a hierarchy of units, for example technical replicates within a tumor within a mouse.Pseudoreplication is the analysis of subsampled (technical) replicates as if they were independent measures of treatment effects. They aren't, because technical replicates within a unit (a mouse, a culture) share causes of variation that not shared by technical replicates in other units. This is a violation of the assumption of independence of errors.
 
 More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
 

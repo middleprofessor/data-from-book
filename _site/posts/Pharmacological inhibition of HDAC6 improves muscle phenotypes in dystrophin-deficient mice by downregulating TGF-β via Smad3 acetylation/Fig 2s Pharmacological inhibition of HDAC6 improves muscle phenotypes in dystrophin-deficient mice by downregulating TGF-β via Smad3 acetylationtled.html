@@ -160,7 +160,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
                 <div class="quarto-category">linear mixed model</div>
                 <div class="quarto-category">random intercept</div>
                 <div class="quarto-category">CRDS</div>
-                <div class="quarto-category">Nested ANOVA</div>
+                <div class="quarto-category">nested ANOVA</div>
                 <div class="quarto-category">ggplot</div>
               </div>
                   </div>
@@ -186,7 +186,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">June 2, 2024</p>
+        <p class="date-modified">June 9, 2024</p>
       </div>
     </div>
       
@@ -233,7 +233,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Design: Completely Randomized Design with Subsampling (CRDS)</p>
 <p>Response: fibrotic area</p>
 <p>Key learning concepts: linear mixed model, random intercept, nested ANOVA</p>
-<p>Quick learning explanation: Pseudoreplication is the analysis of subsampled (technical) replicates as if they were experimental replicates. This is a violation of the assumption of independence of errors. Nested data are measures within a discrete unit or a hierarchy of units, for example technical replicates within a tumor within a mouse.</p>
+<p>Quick learning explanation: Nested data are measures within a discrete unit or a hierarchy of units, for example technical replicates within a tumor within a mouse.Pseudoreplication is the analysis of subsampled (technical) replicates as if they were independent measures of treatment effects. They aren’t, because technical replicates within a unit (a mouse, a culture) share causes of variation that not shared by technical replicates in other units. This is a violation of the assumption of independence of errors.</p>
 <p>More info: <a href="https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm" target="_blank">Chapter 16 Models for non-independence – linear mixed models</a></p>
 </section>
 <section id="the-experiment" class="level2">

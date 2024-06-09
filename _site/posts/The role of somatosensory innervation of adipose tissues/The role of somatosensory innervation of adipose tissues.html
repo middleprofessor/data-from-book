@@ -216,7 +216,7 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">June 2, 2024</p>
+        <p class="date-modified">June 9, 2024</p>
       </div>
     </div>
       
@@ -337,7 +337,12 @@ window.Quarto = {
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>() <span class="sc">|&gt;</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>()</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>fig3g[, surgery <span class="sc">:</span><span class="er">=</span> <span class="fu">factor</span>(surgery, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"YFP"</span>, <span class="st">"Cre"</span>))]</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>fig3g[, tx <span class="sc">:</span><span class="er">=</span> <span class="fu">factor</span>(tx, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"SAL"</span>, <span class="st">"OHDA"</span>))]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>fig3g[, tx <span class="sc">:</span><span class="er">=</span> <span class="fu">factor</span>(tx, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"SAL"</span>, <span class="st">"OHDA"</span>))]</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># output as clean excel file</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>fileout_name <span class="ot">&lt;-</span> <span class="st">"fig3g-SPD-The role of somatosensory innervation of adipose tissues.xlsx"</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>fileout_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, fileout_name)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(fig3g, fileout_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>

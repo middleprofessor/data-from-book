@@ -98,6 +98,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(here) # here makes a project transportable
 library(janitor) # clean_names
 library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
 library(data.table) # magical data frames
 library(magrittr) # pipes
 library(stringr) # string functions
@@ -164,6 +165,11 @@ fig3g <- read_excel(file_path,
   clean_names()
 fig3g[, surgery := factor(surgery, levels = c("YFP", "Cre"))]
 fig3g[, tx := factor(tx, levels = c("SAL", "OHDA"))]
+
+# output as clean excel file
+fileout_name <- "fig3g-SPD-The role of somatosensory innervation of adipose tissues.xlsx"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig3g, fileout_path)
 ```
 
 
