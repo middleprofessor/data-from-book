@@ -216,6 +216,7 @@ gg
 Note the asymetric intervals! This is because the intevals were computed on the log-transformed values and then backtransformed to the scale of the response.
 :::
 
+
 ```{r}
 save_it <- FALSE
 if(save_it){
@@ -286,6 +287,7 @@ exp(mean(log(b)) - mean(log(a))) # means of log transformed data backtransformed
 prod(b/a)^(1/length(b/a)) # geometric mean computation 1
 exp(mean(log(b/a))) # geometric mean computation 2
 ```
+
 And here is the GLM to show that the effect is the ratio of means
 
 ```{r}
@@ -303,3 +305,53 @@ glmm0_pairs
 
 ```
 
+## Plot the GLMM model!
+
+```{r}
+glmm1_emm_dt <- summary(glmm1_emm) |>
+  data.table()
+glmm1_pairs_dt <- glmm1_pairs |>
+  data.table()
+
+gg <- ggplot(data = fig3b,
+             aes(x = genotype,
+                 y = ppar1,
+                 color = genotype)) +
+  geom_jitter(width = 0.1,
+                show.legend = FALSE) +
+  geom_point(data = glmm1_emm_dt,
+                aes(x = genotype,
+                    y = response),
+                size = 3,
+                show.legend = FALSE) +
+  geom_errorbar(data = glmm1_emm_dt,
+                aes(x = genotype,
+                    y = response,
+                    ymin = asymp.LCL,
+                    ymax = asymp.UCL),
+                width = 0.05,
+                show.legend = FALSE) +
+  ylab("p-PAR1") +
+  scale_color_manual(values = pal_okabe_ito_2) +
+  theme_pubr() +
+  theme(axis.title.x = element_blank()) +
+  NULL
+
+  # add p-values
+glmm1_pairs_dt[, group1 := "Veh"]
+glmm1_pairs_dt[, group2 := "Asp"]
+glmm1_pairs_dt[, p := p.value |>
+              p_round(digits = 2) |>
+              p_format(digits = 2, accuracy = 1e-03, add.p = TRUE)]
+maxy <- fig3b[, max(ppar1)]
+miny <- fig3b[, min(ppar1)]
+glmm1_pairs_dt[, y.position := maxy + 0.05*(maxy - miny)]
+
+gg <- gg +
+  stat_pvalue_manual(
+    data = glmm1_pairs_dt,
+    label = "p",
+    tip.length = 0.001)
+
+gg
+```

@@ -210,6 +210,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#the-ratio-paired-t-test" id="toc-the-ratio-paired-t-test" class="nav-link" data-scroll-target="#the-ratio-paired-t-test">The ratio paired <em>t</em>-test</a></li>
   <li><a href="#the-ratio-paired-t-test-is-just-a-paired-t-test-of-the-log-transformed-response" id="toc-the-ratio-paired-t-test-is-just-a-paired-t-test-of-the-log-transformed-response" class="nav-link" data-scroll-target="#the-ratio-paired-t-test-is-just-a-paired-t-test-of-the-log-transformed-response">The ratio paired t-test is just a paired t-test of the log-transformed response</a></li>
   <li><a href="#a-generalized-linear-mixed-model-is-a-more-modern-way-of-analyzing-these-data" id="toc-a-generalized-linear-mixed-model-is-a-more-modern-way-of-analyzing-these-data" class="nav-link" data-scroll-target="#a-generalized-linear-mixed-model-is-a-more-modern-way-of-analyzing-these-data">A generalized linear mixed model is a more modern way of analyzing these data</a></li>
+  <li><a href="#plot-the-glmm-model" id="toc-plot-the-glmm-model" class="nav-link" data-scroll-target="#plot-the-glmm-model">Plot the GLMM model!</a></li>
   </ul>
 </nav>
     </div>
@@ -552,6 +553,67 @@ Tests are performed on the log scale </code></pre>
 Confidence level used: 0.95 
 Intervals are back-transformed from the log scale 
 Tests are performed on the log scale </code></pre>
+</div>
+</div>
+</section>
+<section id="plot-the-glmm-model" class="level2">
+<h2 class="anchored" data-anchor-id="plot-the-glmm-model">Plot the GLMM model!</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>glmm1_emm_dt <span class="ot">&lt;-</span> <span class="fu">summary</span>(glmm1_emm) <span class="sc">|&gt;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>()</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>glmm1_pairs_dt <span class="ot">&lt;-</span> glmm1_pairs <span class="sc">|&gt;</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>()</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>gg <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> fig3b,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> genotype,</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> ppar1,</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> genotype)) <span class="sc">+</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_jitter</span>(<span class="at">width =</span> <span class="fl">0.1</span>,</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> glmm1_emm_dt,</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x =</span> genotype,</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y =</span> response),</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>                <span class="at">size =</span> <span class="dv">3</span>,</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>                <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="at">data =</span> glmm1_emm_dt,</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x =</span> genotype,</span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y =</span> response,</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymin =</span> asymp.LCL,</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymax =</span> asymp.UCL),</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>                <span class="at">width =</span> <span class="fl">0.05</span>,</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>                <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"p-PAR1"</span>) <span class="sc">+</span></span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> pal_okabe_ito_2) <span class="sc">+</span></span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_pubr</span>() <span class="sc">+</span></span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>()) <span class="sc">+</span></span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>  <span class="cn">NULL</span></span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add p-values</span></span>
+<span id="cb25-31"><a href="#cb25-31" aria-hidden="true" tabindex="-1"></a>glmm1_pairs_dt[, group1 <span class="sc">:</span><span class="er">=</span> <span class="st">"Veh"</span>]</span>
+<span id="cb25-32"><a href="#cb25-32" aria-hidden="true" tabindex="-1"></a>glmm1_pairs_dt[, group2 <span class="sc">:</span><span class="er">=</span> <span class="st">"Asp"</span>]</span>
+<span id="cb25-33"><a href="#cb25-33" aria-hidden="true" tabindex="-1"></a>glmm1_pairs_dt[, p <span class="sc">:</span><span class="er">=</span> p.value <span class="sc">|&gt;</span></span>
+<span id="cb25-34"><a href="#cb25-34" aria-hidden="true" tabindex="-1"></a>              <span class="fu">p_round</span>(<span class="at">digits =</span> <span class="dv">2</span>) <span class="sc">|&gt;</span></span>
+<span id="cb25-35"><a href="#cb25-35" aria-hidden="true" tabindex="-1"></a>              <span class="fu">p_format</span>(<span class="at">digits =</span> <span class="dv">2</span>, <span class="at">accuracy =</span> <span class="fl">1e-03</span>, <span class="at">add.p =</span> <span class="cn">TRUE</span>)]</span>
+<span id="cb25-36"><a href="#cb25-36" aria-hidden="true" tabindex="-1"></a>maxy <span class="ot">&lt;-</span> fig3b[, <span class="fu">max</span>(ppar1)]</span>
+<span id="cb25-37"><a href="#cb25-37" aria-hidden="true" tabindex="-1"></a>miny <span class="ot">&lt;-</span> fig3b[, <span class="fu">min</span>(ppar1)]</span>
+<span id="cb25-38"><a href="#cb25-38" aria-hidden="true" tabindex="-1"></a>glmm1_pairs_dt[, y.position <span class="sc">:</span><span class="er">=</span> maxy <span class="sc">+</span> <span class="fl">0.05</span><span class="sc">*</span>(maxy <span class="sc">-</span> miny)]</span>
+<span id="cb25-39"><a href="#cb25-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-40"><a href="#cb25-40" aria-hidden="true" tabindex="-1"></a>gg <span class="ot">&lt;-</span> gg <span class="sc">+</span></span>
+<span id="cb25-41"><a href="#cb25-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_pvalue_manual</span>(</span>
+<span id="cb25-42"><a href="#cb25-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> glmm1_pairs_dt,</span>
+<span id="cb25-43"><a href="#cb25-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">"p"</span>,</span>
+<span id="cb25-44"><a href="#cb25-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">tip.length =</span> <span class="fl">0.001</span>)</span>
+<span id="cb25-45"><a href="#cb25-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-46"><a href="#cb25-46" aria-hidden="true" tabindex="-1"></a>gg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="The-TAS1R2-G-protein-coupled-receptor-is-an-ambient-glucose-sensor-in-skeletal-muscle-that-regulates-NAD-homeostasis-and-mitochondrial-capacity_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 
