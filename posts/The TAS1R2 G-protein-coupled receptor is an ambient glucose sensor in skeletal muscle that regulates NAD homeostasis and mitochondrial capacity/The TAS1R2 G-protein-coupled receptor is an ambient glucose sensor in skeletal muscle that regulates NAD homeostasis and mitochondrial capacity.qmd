@@ -34,7 +34,7 @@ Design: Randomized Complete Block Design (RCBD)
 
 Response: gel intensity
 
-Key learning concepts: generalized linear mixed model
+Key learning concepts: asymmetric confidence intervals
 
 More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
 
