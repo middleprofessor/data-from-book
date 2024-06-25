@@ -1,0 +1,289 @@
+---
+title: "Fig 7d -- LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice"
+author: "Jeff Walker"
+date: '25 June 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["p-values", "multiple testing", "generalized linear model", "pseudoreplication", "analysis flag"]
+description: "The researchers analyzed figure 7b using one-way ANOVA with Tukey adjustment. The data (RNA levels) have a typical count distribution with right skew and variances that increase with the mean. The example is a good one to talk about p-values in bench biology. Two decisions in the analysis result in conservative p-values: 1) The ANOVA model has less power than a generalized linear model (GLM) that explicitly models a cound distribution, and 2) The Tukey correction, which isn't justified here. One decision results in liberal p-values: the researchers analyzed the two technical replicates per mouse as if they were independent."
+draft: true
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+freeze: auto
+---
+
+## Vital info
+
+Data From: [Cai, Q., Sahu, R., Ueberschlag-Pitiot, V., Souali-Crespo, S., Charvet, C., Silem, I., ... & Duteil, D. (2024). LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice. Nature Communications, 15(1), 3563.](https://www.nature.com/articles/s41467-024-47846-9){target="_blank"}
+
+Fig: 7d [download data](../../data from/The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity/41467_2024_49100_MOESM5_ESM.xlsx){target="_blank"}
+
+key words: 
+
+Published methods: ratio paired t-test
+
+Design: Randomized Complete Block Design (RCBD)
+
+Response: gel intensity
+
+Key learning concepts: asymmetric confidence intervals
+
+More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
+
+## The Experiment
+
+Dexamethasone (DEX) is a synthetic glucocortacoid hormone used to treat inflammation and chronic autoimmune diseases but it also stimulates muscle atrophy. The authors are investigating the role of interactions between Lysine-specific demethylase 1 (LSD1) and the glucocortacoid recepter (GCR) in the development of muscle atrophy.
+
+Earlier experiments presented in the paper show evidence that atrophy is mediated by a LSD1/GCR complex that regulates genes related to atrophy and other pathways. For this experiment, mice were treated with a combination of DEX and the LSD1-specific inhibitor CC-90011. Here the researchers are looking at the effect of the different treatment combinations on RNA expression of genes related to the ubiquitin-proteasome system (Fbxo32, Trim63) and the autophagy system (Atg7, Becn1, Bnip3).
+
+Treatment levels
+
+1. Vehicle (Dex-/CC-) Expected to have low levels of target gene expression
+2. Dex (Dex+/CC-)           Positive control. Expected to have elevated levels of target gene expression relative to vehicle
+3. CC (Dex-/CC+)           Important negative control. We don't expect this to be elevated relative to Vehicle. If it is, we need the interaction.
+4. DEX+CC (Dex+/CC+)           If LSD1 is necessary, then we expect these levels to be lower than Dex+/CC- *if CC is not elevated* but how much depends on CC concentration. If CC is elevated we need the interaction. We expect a negative interaction.
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+source_path <- here("R", "ggptm.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+## Import and Wrangle
+
+
+```{r fig-7d-import, message=FALSE, warning=FALSE}
+data_from <- "LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice"
+file_name <- "41467_2024_47846_MOESM4_ESM.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+read7d <- function(range_val = "B3:E13", label_val = "Fbxo32"){
+  fig7d_part <- read_excel(file_path,
+                    sheet = "Fig. 7d",
+                    range = range_val,
+                    col_names = TRUE) |>
+  data.table() |>
+    melt(variable.name = "excel_label", value.name = label_val)
+  fig7d_part[, mouse_id := paste0("mouse_", .I)]
+  return(fig7d_part)
+}
+fig7d <- read7d(range_val = "B3:E13", label_val = "Fbxo32")
+fig7d <- merge(fig7d,
+               read7d(range_val = "B16:E26", label_val = "Trim63"),
+               by = c("excel_label", "mouse_id"))
+fig7d <- merge(fig7d,
+               read7d(range_val = "B29:E39", label_val = "Atg7"),
+               by = c("excel_label", "mouse_id"))
+fig7d <- merge(fig7d,
+               read7d(range_val = "B42:E52", label_val = "Becn1"),
+               by = c("excel_label", "mouse_id"))
+fig7d <- merge(fig7d,
+               read7d(range_val = "B55:E65", label_val = "Bnip3"),
+               by = c("excel_label", "mouse_id"))
+
+# better treatment labels than in excel file
+fig7d[excel_label == "Ctrl Oil", treatment := "Vehicle"]
+fig7d[excel_label == "DEX", treatment := "DEX"]
+fig7d[excel_label == "DEX+CC-90011", treatment := "DEX+CC"]
+fig7d[excel_label == "CC-90011", treatment := "CC"]
+fig7d[, treatment := factor(treatment, levels = unique(fig7d$treatment))]
+
+# split treatment into two factors
+fig7d[treatment == "Vehicle", dex := "Dex_neg"]
+fig7d[treatment == "Vehicle", cc := "CC_neg"]
+fig7d[treatment == "DEX", dex := "Dex_pos"]
+fig7d[treatment == "DEX", cc := "CC_neg"]
+fig7d[treatment == "DEX+CC", dex := "Dex_pos"]
+fig7d[treatment == "DEX+CC", cc := "CC_pos"]
+fig7d[treatment == "CC", dex := "Dex_neg"]
+fig7d[treatment == "CC", cc := "CC_pos"]
+
+fig7d[, dex := factor(dex, levels = c("Dex_neg", "Dex_pos"))]
+fig7d[, cc := factor(cc, levels = c("CC_neg", "CC_pos"))]
+
+file_out_name <- "LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice.xlsx"
+fileout_path <- here(data_folder, data_from, file_out_name)
+write_xlsx(fig7d, fileout_path)
+```
+
+## 1. The reported p-values are conservative (a bit on the "multiple testing" problem), or not!
+
+The researchers reported Tukey-adjusted p-values. The Tukey method adjusts for the number of tests in a "family" of tests, where a family is the set of tests that answer one question. The researchers follow the norm in bench bio and choose the whole set of six contrasts as the family. This would answer a question such as: "if we were to create these combinations, would we find any difference between at least on pair?", which isn't a very interesting question.
+
+The researchers have a much more specific question, something like: "Do we have evidence for a smaller expression level in the DEX+CC group compared to the DEX group" but this question is complicated by the factorial design. So, the experiment really has three families of questions:
+
+1. Family 1: Is there evidence that DEX increase expression levels, as expected? This is the "positive control" family. There is only one test in this family: DEX - Vehicle.
+2. Family 2: What is the effect of CC alone? This is "negative control" family. If CC is less elevated than vehicle, then DEX + CC might be lower than DEX because of the effect of CC independent of DEX effects. If CC is more elevated than Vehicle, then DEX + CC might be similar to DEX alone even if CC inhibition of LSD1 is working as expected. There is only one test in this family: CC - Vehicle.
+3. Family 3: Is there evidence for a negative interaction? This is the focal family. The contrast (DEX+CC - DEX) is the focal contrast if there is no effect of CC alone but p-values don't answer this so we need to compare (DEX+CC - DEX) to the effect of CC, which is (CC - Vehicle). This is the interaction contrast (DEX+CC - DEX) - (CC - Vehicle). There is only one test in this family. The interaction contrast.
+
+So we have three p-values that we care about and each is from a different family, so there is no justification of p-value adjustment for multiple tests. This would make the reported p-values conservative. But, it is really the interaction p-value and not the (DEX+CC - DEX) p-value that gives us the best evidence of our working model, and interaction p-values have less power than that for main effects. So this makes it more conservative. And this discussion emphasizes that p-values reflect lots of decisions -- there is no "correct" p-value. In general, if I wanted to be more conservative, in order to avoid research time and waste, I'd simply make my "alpha" smaller, such as 0.01 or 0.005 instead of using more conservative tests like a tukey p-value adjustment, since the conservative alpha doesn't depend on things like number of tests in a family.
+
+
+```{r p-value-adjustment}
+# the researcher's analysis
+m0 <- lm(Fbxo32 ~ treatment, data = fig7d)
+m0_emm <- emmeans(m0, c("treatment"))
+m0_pairs <- contrast(m0_emm,
+                     method = "revpairwise",
+                     adjust = "tukey") |>
+  summary(infer = TRUE)
+
+# the analysis only comparing the three families of tests that we care about
+veh = c(1, 0, 0, 0)
+dex = c(0, 1, 0, 0)
+dex_cc = c(0, 0, 1, 0) # note the wonky ordering in fig 7d
+cc = c(0,0,0,1)
+focal_contrasts = list(
+  dex = dex - veh,
+  cc = cc - veh,
+  interaction = (dex_cc - dex) - (cc - veh),
+  "dex+cc - dex" = dex_cc - dex
+)
+m1 <- lm(Fbxo32 ~ treatment, data = fig7d)
+m1_emm <- emmeans(m0, c("treatment"))
+m1_pairs <- contrast(m0_emm,
+                     method = focal_contrasts,
+                     adjust = "none") |>
+  summary(infer = TRUE)
+
+contrast_table <-
+  rbind(m0_pairs, m1_pairs)
+contrast_table |>
+  kable(digits = 4) |>
+  kable_styling() |>
+  pack_rows("Adjusted", 1, 6) |>
+  pack_rows("Non-adjusted", 7, 10)
+```
+## 2. For these data, a Generalized Linear Model will have more power than the linear model/ANOVA.
+
+```{r, warning=FALSE}
+# the original analysis in m0, m0_emm, and m0_pairs are computed above
+
+m1 <- glm.nb(Fbxo32 ~ treatment, data = fig7d)
+m1_emm <- emmeans(m1, c("treatment"), type = "response")
+m1_pairs <- contrast(m1_emm,
+                     method = "revpairwise",
+                     adjust = "tukey") |>
+  summary(infer = TRUE)
+
+m1_pairs <- m1_pairs[, -7]
+colnames(m1_pairs) <- colnames(m0_pairs)
+contrast_table <-
+  rbind(m0_pairs, m1_pairs)
+contrast_table |>
+  kable(digits = 4) |>
+  kable_styling() |>
+  pack_rows("LM/ANOVA", 1, 6) |>
+  pack_rows("GLM", 7, 12)
+
+```
+## Let's put it all together
+
+```{r, warning = FALSE}
+# the original analysis in m0, m0_emm, and m0_pairs are computed above
+
+# the analysis only comparing the three families of tests that we care about
+veh = c(1, 0, 0, 0)
+dex = c(0, 1, 0, 0)
+dex_cc = c(0, 0, 1, 0) # note the wonky ordering in fig 7d
+cc = c(0,0,0,1)
+focal_contrasts = list(
+  dex = dex - veh,
+  cc = cc - veh,
+  interaction = (dex_cc - dex) - (cc - veh),
+  "dex+cc - dex" = dex_cc - dex
+)
+m1 <- glm.nb(Fbxo32 ~ treatment, data = fig7d)
+m1_emm <- emmeans(m1, c("treatment"), type = "response")
+m1_pairs <- contrast(m1_emm,
+                     method = focal_contrasts,
+                     adjust = "none") |>
+  summary(infer = TRUE)
+m1_pairs <- m1_pairs[, -7]
+colnames(m1_pairs) <- colnames(m0_pairs)
+contrast_table <-
+  rbind(m0_pairs, m1_pairs)
+contrast_table |>
+  kable(digits = 4) |>
+  kable_styling() |>
+  pack_rows("LM/ANOVA adjusted", 1, 6) |>
+  pack_rows("GLM not adjusted", 7, 10)
+
+```
+
+
+## Let's plot the model
+```{r warning = FALSE}
+m1 <- glm.nb(Fbxo32 ~ dex * cc, data = fig7d)
+m1_emm <- emmeans(m1, c("dex", "cc"), type = "response")
+m1_pairs <- contrast(m1_emm,
+                     method = "revpairwise",
+                     simple = "each",
+                     combine = TRUE,
+                     adjust = "none") |>
+  summary(infer = TRUE)
+gg <- plot_response(m1, m1_emm, m1_pairs)
+gg
+```
+
