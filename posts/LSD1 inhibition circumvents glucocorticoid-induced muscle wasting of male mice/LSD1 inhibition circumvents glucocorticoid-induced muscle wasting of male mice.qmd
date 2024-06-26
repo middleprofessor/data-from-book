@@ -124,7 +124,10 @@ read7d <- function(range_val = "B3:E13", label_val = "Fbxo32"){
                     range = range_val,
                     col_names = TRUE) |>
   data.table() |>
-    melt(variable.name = "excel_label", value.name = label_val)
+    melt(variable.name = "excel_label", value.name = "y")
+  # un-normalize count by multiplying by 10^6
+  fig7d_part[, y := as.integer(y * 10^6)]
+  setnames(fig7d_part, old = "y", new = label_val)
   fig7d_part[, mouse_id := paste0("mouse_", .I)]
   return(fig7d_part)
 }
@@ -141,6 +144,9 @@ fig7d <- merge(fig7d,
 fig7d <- merge(fig7d,
                read7d(range_val = "B55:E65", label_val = "Bnip3"),
                by = c("excel_label", "mouse_id"))
+
+# remove the missing count
+fig7d <- na.omit(fig7d)
 
 # better treatment labels than in excel file
 fig7d[excel_label == "Ctrl Oil", treatment := "Vehicle"]
@@ -162,10 +168,26 @@ fig7d[treatment == "CC", cc := "CC_pos"]
 fig7d[, dex := factor(dex, levels = c("Dex_neg", "Dex_pos"))]
 fig7d[, cc := factor(cc, levels = c("CC_neg", "CC_pos"))]
 
+
 file_out_name <- "LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice.xlsx"
 fileout_path <- here(data_folder, data_from, file_out_name)
 write_xlsx(fig7d, fileout_path)
+
 ```
+
+## Does the unstandardization matter
+
+```{r}
+Fbxo32_4 <- fig7d[, Fbxo32]/10^6 * 10^4
+m1 <- lm(Fbxo32 ~ treatment, data = fig7d)
+m2 <- lm(Fbxo32_4 ~ treatment, data = fig7d)
+coef(summary(m1))
+coef(summary(m2))
+```
+```{r}
+m1 <- lm(Fbxo32 ~ treatment, data = fig7d)
+```
+
 
 ## 1. The reported p-values are conservative (a bit on the "multiple testing" problem), or not!
 
@@ -196,9 +218,10 @@ dex = c(0, 1, 0, 0)
 dex_cc = c(0, 0, 1, 0) # note the wonky ordering in fig 7d
 cc = c(0,0,0,1)
 focal_contrasts = list(
-  dex = dex - veh,
-  cc = cc - veh,
-  "dex+cc - dex" = dex_cc - dex
+  "dex" = dex - veh,
+  "cc" = cc - veh,
+  "dex+cc - dex" = dex_cc - dex,
+  "interaction" = (dex_cc - dex) - (cc - veh)
 )
 m1 <- lm(Fbxo32 ~ treatment, data = fig7d)
 m1_emm <- emmeans(m1, c("treatment"))
@@ -213,7 +236,7 @@ contrast_table |>
   kable(digits = 4) |>
   kable_styling() |>
   pack_rows("Adjusted", 1, 6) |>
-  pack_rows("Non-adjusted", 7, 9)
+  pack_rows("Non-adjusted", 7, 10)
 ```
 ## 2. For these data, a Generalized Linear Model will have more power than the linear model/ANOVA.
 
@@ -255,7 +278,7 @@ contrast_table |>
   kable(digits = 4) |>
   kable_styling() |>
   pack_rows("LM/ANOVA adjusted", 1, 6) |>
-  pack_rows("GLM not adjusted", 7, 9)
+  pack_rows("GLM not adjusted", 7, 10)
 
 ```
 
@@ -312,43 +335,51 @@ gg4
 gg5
 ```
 
-```{r warning = FALSE}
-fig7d[, Fbxo32_ct4 := as.integer(Fbxo32*10^4)]
-fig7d[, Fbxo32_ct6 := as.integer(Fbxo32*10^6)]
-res1 <- get_model_result("Fbxo32")
-gg1 <- plot_response(res1$m1, res1$m1_emm, res1$m1_pairs, palette = "pal_okabe_ito_blue")
-res6 <- get_model_result("Fbxo32_ct4")
-gg6 <- plot_response(res6$m1, res6$m1_emm, res6$m1_pairs, palette = "pal_okabe_ito_blue")
-res7 <- get_model_result("Fbxo32_ct6")
-gg7 <- plot_response(res7$m1, res7$m1_emm, res7$m1_pairs, palette = "pal_okabe_ito_blue")
-gg1
-gg6
-gg7
-```
 
 ```{r}
-fig7d[, Fbxo32_ct := as.integer(Fbxo32*10^6)]
-fig7d[, Trim63_ct := as.integer(Trim63*10^6)]
-fig7d[, Atg7_ct := as.integer(Atg7*10^6)]
-fig7d[, Becn1_ct := as.integer(Becn1*10^6)]
-fig7d[, Bnip3_ct := as.integer(Bnip3*10^6)]
-res1 <- get_model_result("Fbxo32_ct")
-gg1 <- plot_response(res1$m1, res1$m1_emm, res1$m1_pairs, palette = "pal_okabe_ito_blue")
-res2 <- get_model_result("Trim63_ct")
-gg2 <- plot_response(res2$m1, res2$m1_emm, res2$m1_pairs, palette = "pal_okabe_ito_blue")
-res3 <- get_model_result("Atg7_ct")
-gg3 <- plot_response(res3$m1, res3$m1_emm, res3$m1_pairs, palette = "pal_okabe_ito_blue")
-res4 <- get_model_result("Becn1_ct")
-gg4 <- plot_response(res4$m1, res4$m1_emm, res4$m1_pairs, palette = "pal_okabe_ito_blue")
-res5 <- get_model_result("Bnip3_ct")
-gg5 <- plot_response(res5$m1, res5$m1_emm, res5$m1_pairs, palette = "pal_okabe_ito_blue")
+veh = c(1, 0, 0, 0)
+dex = c(0, 1, 0, 0)
+dex_cc = c(0, 0, 1, 0) # note the wonky ordering in fig 7d
+cc = c(0,0,0,1)
+focal_contrasts = list(
+  "dex" = dex - veh,
+  "cc" = cc - veh,
+  "dex+cc - dex" = dex_cc - dex,
+  "interaction" = (dex_cc - dex) - (cc - veh)
+)
+m1 <- glm.nb(Fbxo32 ~ treatment, data = fig7d)
+m1_emm <- emmeans(m1, c("treatment"))
+m1_pairs <- contrast(m1_emm,
+                     method = focal_contrasts,
+                     adjust = "none") |>
+  summary(infer = TRUE)
 
-plot_grid(gg1, gg2, gg3, gg4, gg5, nrow = 3)
-gg1
-gg2
-gg3
-gg4
-gg5
+m1b_pairs <- contrast(m1_emm,
+                      method = "revpairwise",
+                      adjust = "none") |>
+  summary(infer = TRUE)
+
+m1c <- glm.nb(Fbxo32 ~ dex * cc, data = fig7d)
+m1c_emm <- emmeans(m1c, c("dex", "cc"))
+m1c_pairs <- contrast(m1c_emm,
+                      method = "revpairwise",
+                      simple = "each",
+                      combine = TRUE,
+                      adjust = "none") |>
+  summary(infer = TRUE)
+
+m1_pairs
+coef(summary(m1c))
+
+contrast_table <-
+  rbind(m1_pairs, m1b_pairs, m1c_pairs)
+contrast_table |>
+  kable(digits = 4) |>
+  kable_styling() |>
+  pack_rows("manual", 1, 4) |>
+  pack_rows("flat", 5, 10) |>
+  pack_rows("2x2", 11, 14)
 
 ```
+
 
