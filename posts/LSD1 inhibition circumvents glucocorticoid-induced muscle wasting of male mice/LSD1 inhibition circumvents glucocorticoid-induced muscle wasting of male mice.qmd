@@ -171,13 +171,14 @@ write_xlsx(fig7d, fileout_path)
 
 The researchers reported Tukey-adjusted p-values. The Tukey method adjusts for the number of tests in a "family" of tests, where a family is the set of tests that answer one question. The researchers follow the norm in bench bio and choose the whole set of six contrasts as the family. This would answer a question such as: "if we were to create these combinations, would we find any difference between at least on pair?", which isn't a very interesting question.
 
-The researchers have a much more specific question, something like: "Do we have evidence for a smaller expression level in the DEX+CC group compared to the DEX group" but this question is complicated by the factorial design. So, the experiment really has three families of questions:
+The researchers are focussed on a much more specific question, and at least two questions related to controls:
 
-1. Family 1: Is there evidence that DEX increase expression levels, as expected? This is the "positive control" family. There is only one test in this family: DEX - Vehicle.
-2. Family 2: What is the effect of CC alone? This is "negative control" family. If CC is less elevated than vehicle, then DEX + CC might be lower than DEX because of the effect of CC independent of DEX effects. If CC is more elevated than Vehicle, then DEX + CC might be similar to DEX alone even if CC inhibition of LSD1 is working as expected. There is only one test in this family: CC - Vehicle.
-3. Family 3: Is there evidence for a negative interaction? This is the focal family. The contrast (DEX+CC - DEX) is the focal contrast if there is no effect of CC alone but p-values don't answer this so we need to compare (DEX+CC - DEX) to the effect of CC, which is (CC - Vehicle). This is the interaction contrast (DEX+CC - DEX) - (CC - Vehicle). There is only one test in this family. The interaction contrast.
+1. Family 1: Is there evidence that CC attenuates DEX-induced expression? There is only one test in this family: DEX+CC - DEXI. This is the focal family. The contrast (DEX+CC - DEX) is the focal contrast if there is no effect of CC alone but p-values don't answer this so we need to compare (DEX+CC - DEX) to the effect of CC, which is (CC - Vehicle). This is the interaction contrast (DEX+CC - DEX) - (CC - Vehicle). There is only one test in this family. The interaction contrast.
+2. Family 2: Is there evidence that DEX increase expression levels, as expected? This is the "positive control" family. There is only one test in this family: DEX - Vehicle.
+3. Family 3: What is the effect of CC alone? This is "negative control" family. If CC is less elevated than vehicle, then DEX + CC might be lower than DEX because of the effect of CC independent of DEX effects. If CC is more elevated than Vehicle, then DEX + CC might be similar to DEX alone even if CC inhibition of LSD1 is working as expected. There is only one test in this family: CC - Vehicle.
 
-So we have three p-values that we care about and each is from a different family, so there is no justification of p-value adjustment for multiple tests. This would make the reported p-values conservative. But, it is really the interaction p-value and not the (DEX+CC - DEX) p-value that gives us the best evidence of our working model, and interaction p-values have less power than that for main effects. So this makes it more conservative. And this discussion emphasizes that p-values reflect lots of decisions -- there is no "correct" p-value. In general, if I wanted to be more conservative, in order to avoid research time and waste, I'd simply make my "alpha" smaller, such as 0.01 or 0.005 instead of using more conservative tests like a tukey p-value adjustment, since the conservative alpha doesn't depend on things like number of tests in a family.
+
+So we have three p-values that we care about and each is from a different family, so there is no justification of p-value adjustment for multiple tests. This would make the reported p-values conservative. In general, if I wanted to be more conservative, in order to avoid research time and waste, I'd simply make my "alpha" smaller, such as 0.01 or 0.005 instead of using more conservative tests like a tukey p-value adjustment, since the conservative alpha doesn't depend on things like number of tests in a family.
 
 
 ```{r p-value-adjustment}
@@ -197,12 +198,11 @@ cc = c(0,0,0,1)
 focal_contrasts = list(
   dex = dex - veh,
   cc = cc - veh,
-  interaction = (dex_cc - dex) - (cc - veh),
   "dex+cc - dex" = dex_cc - dex
 )
 m1 <- lm(Fbxo32 ~ treatment, data = fig7d)
-m1_emm <- emmeans(m0, c("treatment"))
-m1_pairs <- contrast(m0_emm,
+m1_emm <- emmeans(m1, c("treatment"))
+m1_pairs <- contrast(m1_emm,
                      method = focal_contrasts,
                      adjust = "none") |>
   summary(infer = TRUE)
@@ -213,24 +213,24 @@ contrast_table |>
   kable(digits = 4) |>
   kable_styling() |>
   pack_rows("Adjusted", 1, 6) |>
-  pack_rows("Non-adjusted", 7, 10)
+  pack_rows("Non-adjusted", 7, 9)
 ```
 ## 2. For these data, a Generalized Linear Model will have more power than the linear model/ANOVA.
 
 ```{r, warning=FALSE}
 # the original analysis in m0, m0_emm, and m0_pairs are computed above
 
-m1 <- glm.nb(Fbxo32 ~ treatment, data = fig7d)
-m1_emm <- emmeans(m1, c("treatment"), type = "response")
-m1_pairs <- contrast(m1_emm,
+m2 <- glm.nb(Fbxo32 ~ treatment, data = fig7d)
+m2_emm <- emmeans(m2, c("treatment"), type = "response")
+m2_pairs <- contrast(m2_emm,
                      method = "revpairwise",
                      adjust = "tukey") |>
   summary(infer = TRUE)
 
-m1_pairs <- m1_pairs[, -7]
-colnames(m1_pairs) <- colnames(m0_pairs)
+m2_pairs <- m2_pairs[, -7]
+colnames(m2_pairs) <- colnames(m0_pairs)
 contrast_table <-
-  rbind(m0_pairs, m1_pairs)
+  rbind(m0_pairs, m2_pairs)
 contrast_table |>
   kable(digits = 4) |>
   kable_styling() |>
@@ -238,52 +238,117 @@ contrast_table |>
   pack_rows("GLM", 7, 12)
 
 ```
-## Let's put it all together
+
+## Putting #1 and #2 together
 
 ```{r, warning = FALSE}
-# the original analysis in m0, m0_emm, and m0_pairs are computed above
 
-# the analysis only comparing the three families of tests that we care about
-veh = c(1, 0, 0, 0)
-dex = c(0, 1, 0, 0)
-dex_cc = c(0, 0, 1, 0) # note the wonky ordering in fig 7d
-cc = c(0,0,0,1)
-focal_contrasts = list(
-  dex = dex - veh,
-  cc = cc - veh,
-  interaction = (dex_cc - dex) - (cc - veh),
-  "dex+cc - dex" = dex_cc - dex
-)
-m1 <- glm.nb(Fbxo32 ~ treatment, data = fig7d)
-m1_emm <- emmeans(m1, c("treatment"), type = "response")
-m1_pairs <- contrast(m1_emm,
+m2_pairs_focal <- contrast(m2_emm,
                      method = focal_contrasts,
                      adjust = "none") |>
   summary(infer = TRUE)
-m1_pairs <- m1_pairs[, -7]
-colnames(m1_pairs) <- colnames(m0_pairs)
+m2_pairs_focal <- m2_pairs_focal[, -7]
+colnames(m2_pairs_focal) <- colnames(m0_pairs)
 contrast_table <-
-  rbind(m0_pairs, m1_pairs)
+  rbind(m0_pairs, m2_pairs_focal)
 contrast_table |>
   kable(digits = 4) |>
   kable_styling() |>
   pack_rows("LM/ANOVA adjusted", 1, 6) |>
-  pack_rows("GLM not adjusted", 7, 10)
+  pack_rows("GLM not adjusted", 7, 9)
 
 ```
 
-
 ## Let's plot the model
+
 ```{r warning = FALSE}
-m1 <- glm.nb(Fbxo32 ~ dex * cc, data = fig7d)
-m1_emm <- emmeans(m1, c("dex", "cc"), type = "response")
-m1_pairs <- contrast(m1_emm,
+m2_v2 <- glm.nb(Fbxo32 ~ dex * cc, data = fig7d)
+m2_v2_emm <- emmeans(m2_v2, specs = c("dex", "cc"), type = "response")
+m2_v2_pairs <- contrast(m2_v2_emm,
                      method = "revpairwise",
                      simple = "each",
                      combine = TRUE,
                      adjust = "none") |>
   summary(infer = TRUE)
-gg <- plot_response(m1, m1_emm, m1_pairs)
-gg
+
+plot_response(m2_v2, m2_v2_emm, m2_v2_pairs,
+              palette = "pal_okabe_ito_blue")
+
+```
+
+## Finally, do this for all the genes
+
+```{r warning = FALSE}
+get_model_result <- function(gene_i){
+  model_formula <- paste(gene_i, "~ dex * cc") |>
+    as.formula()
+  m1 <- glm.nb(model_formula, data = fig7d)
+  m1_emm <- emmeans(m1, specs = c("dex", "cc"), type = "response")
+  m1_pairs <- contrast(m1_emm,
+                       method = "revpairwise",
+                       simple = "each",
+                       combine = TRUE,
+                       adjust = "none") |>
+    summary(infer = TRUE)
+  return(list(m1 = m1, m1_emm = m1_emm, m1_pairs = m1_pairs))
+}
+
+res1 <- get_model_result("Fbxo32")
+gg1 <- plot_response(res1$m1, res1$m1_emm, res1$m1_pairs, palette = "pal_okabe_ito_blue")
+res2 <- get_model_result("Trim63")
+gg2 <- plot_response(res2$m1, res2$m1_emm, res2$m1_pairs, palette = "pal_okabe_ito_blue")
+res3 <- get_model_result("Atg7")
+gg3 <- plot_response(res3$m1, res3$m1_emm, res3$m1_pairs, palette = "pal_okabe_ito_blue")
+res4 <- get_model_result("Becn1")
+gg4 <- plot_response(res4$m1, res4$m1_emm, res4$m1_pairs, palette = "pal_okabe_ito_blue")
+res5 <- get_model_result("Bnip3")
+gg5 <- plot_response(res5$m1, res5$m1_emm, res5$m1_pairs, palette = "pal_okabe_ito_blue")
+
+plot_grid(gg1, gg2, gg3, gg4, gg5, nrow = 3)
+gg1
+gg2
+gg3
+gg4
+gg5
+```
+
+```{r warning = FALSE}
+fig7d[, Fbxo32_ct4 := as.integer(Fbxo32*10^4)]
+fig7d[, Fbxo32_ct6 := as.integer(Fbxo32*10^6)]
+res1 <- get_model_result("Fbxo32")
+gg1 <- plot_response(res1$m1, res1$m1_emm, res1$m1_pairs, palette = "pal_okabe_ito_blue")
+res6 <- get_model_result("Fbxo32_ct4")
+gg6 <- plot_response(res6$m1, res6$m1_emm, res6$m1_pairs, palette = "pal_okabe_ito_blue")
+res7 <- get_model_result("Fbxo32_ct6")
+gg7 <- plot_response(res7$m1, res7$m1_emm, res7$m1_pairs, palette = "pal_okabe_ito_blue")
+gg1
+gg6
+gg7
+```
+
+```{r}
+fig7d[, Fbxo32_ct := as.integer(Fbxo32*10^6)]
+fig7d[, Trim63_ct := as.integer(Trim63*10^6)]
+fig7d[, Atg7_ct := as.integer(Atg7*10^6)]
+fig7d[, Becn1_ct := as.integer(Becn1*10^6)]
+fig7d[, Bnip3_ct := as.integer(Bnip3*10^6)]
+res1 <- get_model_result("Fbxo32_ct")
+gg1 <- plot_response(res1$m1, res1$m1_emm, res1$m1_pairs, palette = "pal_okabe_ito_blue")
+res2 <- get_model_result("Trim63_ct")
+gg2 <- plot_response(res2$m1, res2$m1_emm, res2$m1_pairs, palette = "pal_okabe_ito_blue")
+res3 <- get_model_result("Atg7_ct")
+gg3 <- plot_response(res3$m1, res3$m1_emm, res3$m1_pairs, palette = "pal_okabe_ito_blue")
+res4 <- get_model_result("Becn1_ct")
+gg4 <- plot_response(res4$m1, res4$m1_emm, res4$m1_pairs, palette = "pal_okabe_ito_blue")
+res5 <- get_model_result("Bnip3_ct")
+gg5 <- plot_response(res5$m1, res5$m1_emm, res5$m1_pairs, palette = "pal_okabe_ito_blue")
+
+plot_grid(gg1, gg2, gg3, gg4, gg5, nrow = 3)
+gg1
+gg2
+gg3
+gg4
+gg5
+
 ```
 
