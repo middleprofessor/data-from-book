@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Jeff Walker">
+<meta name="dcterms.date" content="2024-06-25">
+<meta name="description" content="The researchers analyzed figure 7b using one-way ANOVA with Tukey adjustment. The data (RNA levels) have a typical count distribution with right skew and variances that increase with the mean. The example is a good one to talk about p-values in bench biology. Two decisions in the analysis result in conservative p-values: 1) The ANOVA model has less power than a generalized linear model (GLM) that explicitly models a count distribution, and 2) The Tukey correction, which isn’t justified here. A third decision results in liberal p-values: the researchers analyzed the two technical replicates per mouse as if they were independent.">
+
+<title>Data From - Fig 7d – LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Data From</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Fig 7d – LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice</h1>
+                  <div>
+        <div class="description">
+          The researchers analyzed figure 7b using one-way ANOVA with Tukey adjustment. The data (RNA levels) have a typical count distribution with right skew and variances that increase with the mean. The example is a good one to talk about p-values in bench biology. Two decisions in the analysis result in conservative p-values: 1) The ANOVA model has less power than a generalized linear model (GLM) that explicitly models a count distribution, and 2) The Tukey correction, which isn’t justified here. A third decision results in liberal p-values: the researchers analyzed the two technical replicates per mouse as if they were independent.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">p-values</div>
+                <div class="quarto-category">multiple testing</div>
+                <div class="quarto-category">generalized linear model</div>
+                <div class="quarto-category">pseudoreplication</div>
+                <div class="quarto-category">analysis flag</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Jeff Walker </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 25, 2024</p>
+      </div>
+    </div>
+    
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">June 26, 2024</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#vital-info" id="toc-vital-info" class="nav-link active" data-scroll-target="#vital-info">Vital info</a></li>
+  <li><a href="#the-experiment" id="toc-the-experiment" class="nav-link" data-scroll-target="#the-experiment">The Experiment</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#import-and-wrangle" id="toc-import-and-wrangle" class="nav-link" data-scroll-target="#import-and-wrangle">Import and Wrangle</a></li>
+  <li><a href="#does-the-unstandardization-matter" id="toc-does-the-unstandardization-matter" class="nav-link" data-scroll-target="#does-the-unstandardization-matter">Does the unstandardization matter</a></li>
+  <li><a href="#the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not" id="toc-the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not" class="nav-link" data-scroll-target="#the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not">1. The reported p-values are conservative (a bit on the “multiple testing” problem), or not!</a></li>
+  <li><a href="#for-these-data-a-generalized-linear-model-will-have-more-power-than-the-linear-modelanova." id="toc-for-these-data-a-generalized-linear-model-will-have-more-power-than-the-linear-modelanova." class="nav-link" data-scroll-target="#for-these-data-a-generalized-linear-model-will-have-more-power-than-the-linear-modelanova.">2. For these data, a Generalized Linear Model will have more power than the linear model/ANOVA.</a></li>
+  <li><a href="#putting-1-and-2-together" id="toc-putting-1-and-2-together" class="nav-link" data-scroll-target="#putting-1-and-2-together">Putting #1 and #2 together</a></li>
+  <li><a href="#lets-plot-the-model-for-all-genes" id="toc-lets-plot-the-model-for-all-genes" class="nav-link" data-scroll-target="#lets-plot-the-model-for-all-genes">Let’s plot the model for all genes</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<section id="vital-info" class="level2">
+<h2 class="anchored" data-anchor-id="vital-info">Vital info</h2>
+<p>Data From: <a href="https://www.nature.com/articles/s41467-024-47846-9" target="_blank">Cai, Q., Sahu, R., Ueberschlag-Pitiot, V., Souali-Crespo, S., Charvet, C., Silem, I., … &amp; Duteil, D. (2024). LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice. Nature Communications, 15(1), 3563.</a></p>
+<p>Fig: 7d <a href="../../data from/LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice/41467_2024_47846_MOESM4_ESM.xlsx" target="_blank">download data</a></p>
+<p>key words:</p>
+<p>Published methods: one-way ANOVA with Tukey adjustment</p>
+<p>Design: Completely Randomized Design with subsampling (CRDS)</p>
+<p>Response: mRNA level</p>
+<p>Key learning concepts: not adjusting for multiple p-values</p>
+<p>More info: <a href="https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm" target="_blank">Chapter 16 Models for non-independence – linear mixed models</a></p>
+</section>
+<section id="the-experiment" class="level2">
+<h2 class="anchored" data-anchor-id="the-experiment">The Experiment</h2>
+<p>Dexamethasone (DEX) is a synthetic glucocortacoid hormone used to treat inflammation and chronic autoimmune diseases but it also stimulates muscle atrophy. The authors are investigating the role of interactions between Lysine-specific demethylase 1 (LSD1) and the glucocortacoid recepter (GCR) in the development of muscle atrophy.</p>
+<p>Earlier experiments presented in the paper show evidence that atrophy is mediated by a LSD1/GCR complex that regulates genes related to atrophy and other pathways. For this experiment, mice were treated with a combination of DEX and the LSD1-specific inhibitor CC-90011. Here the researchers are looking at the effect of the different treatment combinations on RNA expression of genes related to the ubiquitin-proteasome system (Fbxo32, Trim63) and the autophagy system (Atg7, Becn1, Bnip3).</p>
+<p>Treatment levels</p>
+<ol type="1">
+<li>Vehicle (Dex-/CC-) Expected to have low levels of target gene expression</li>
+<li>Dex (Dex+/CC-) Positive control. Expected to have elevated levels of target gene expression relative to vehicle</li>
+<li>CC (Dex-/CC+) Important negative control. We expect this to be similar to Vehicle. If it is not, we need the interaction.</li>
+<li>DEX+CC (Dex+/CC+) If LSD1 works with the GCR as expected, then we expect these levels to be lower than Dex+/CC- but how much depends on CC concentration.</li>
+</ol>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+</section>
+<section id="import-and-wrangle" class="level2">
+<h2 class="anchored" data-anchor-id="import-and-wrangle">Import and Wrangle</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data_from <span class="ot">&lt;-</span> <span class="st">"LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>file_name <span class="ot">&lt;-</span> <span class="st">"41467_2024_47846_MOESM4_ESM.xlsx"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, file_name)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>read7d <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">range_val =</span> <span class="st">"B3:E13"</span>, <span class="at">label_val =</span> <span class="st">"Fbxo32"</span>){</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  fig7d_part <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(file_path,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sheet =</span> <span class="st">"Fig. 7d"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">range =</span> range_val,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                    <span class="at">col_names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">melt</span>(<span class="at">variable.name =</span> <span class="st">"excel_label"</span>, <span class="at">value.name =</span> <span class="st">"y"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># un-normalize count by multiplying by 10^6</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  fig7d_part[, y <span class="sc">:</span><span class="er">=</span> <span class="fu">as.integer</span>(y <span class="sc">*</span> <span class="dv">10</span><span class="sc">^</span><span class="dv">6</span>)]</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">setnames</span>(fig7d_part, <span class="at">old =</span> <span class="st">"y"</span>, <span class="at">new =</span> label_val)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  fig7d_part[, mouse_id <span class="sc">:</span><span class="er">=</span> <span class="fu">paste0</span>(<span class="st">"mouse_"</span>, .I)]</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(fig7d_part)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>fig7d <span class="ot">&lt;-</span> <span class="fu">read7d</span>(<span class="at">range_val =</span> <span class="st">"B3:E13"</span>, <span class="at">label_val =</span> <span class="st">"Fbxo32"</span>)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>fig7d <span class="ot">&lt;-</span> <span class="fu">merge</span>(fig7d,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>               <span class="fu">read7d</span>(<span class="at">range_val =</span> <span class="st">"B16:E26"</span>, <span class="at">label_val =</span> <span class="st">"Trim63"</span>),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>               <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"excel_label"</span>, <span class="st">"mouse_id"</span>))</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>fig7d <span class="ot">&lt;-</span> <span class="fu">merge</span>(fig7d,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>               <span class="fu">read7d</span>(<span class="at">range_val =</span> <span class="st">"B29:E39"</span>, <span class="at">label_val =</span> <span class="st">"Atg7"</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>               <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"excel_label"</span>, <span class="st">"mouse_id"</span>))</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>fig7d <span class="ot">&lt;-</span> <span class="fu">merge</span>(fig7d,</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>               <span class="fu">read7d</span>(<span class="at">range_val =</span> <span class="st">"B42:E52"</span>, <span class="at">label_val =</span> <span class="st">"Becn1"</span>),</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>               <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"excel_label"</span>, <span class="st">"mouse_id"</span>))</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>fig7d <span class="ot">&lt;-</span> <span class="fu">merge</span>(fig7d,</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>               <span class="fu">read7d</span>(<span class="at">range_val =</span> <span class="st">"B55:E65"</span>, <span class="at">label_val =</span> <span class="st">"Bnip3"</span>),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>               <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"excel_label"</span>, <span class="st">"mouse_id"</span>))</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co"># remove the missing count</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>fig7d <span class="ot">&lt;-</span> <span class="fu">na.omit</span>(fig7d)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co"># better treatment labels than in excel file</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>fig7d[excel_label <span class="sc">==</span> <span class="st">"Ctrl Oil"</span>, treatment <span class="sc">:</span><span class="er">=</span> <span class="st">"Vehicle"</span>]</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>fig7d[excel_label <span class="sc">==</span> <span class="st">"DEX"</span>, treatment <span class="sc">:</span><span class="er">=</span> <span class="st">"DEX"</span>]</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>fig7d[excel_label <span class="sc">==</span> <span class="st">"DEX+CC-90011"</span>, treatment <span class="sc">:</span><span class="er">=</span> <span class="st">"DEX+CC"</span>]</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>fig7d[excel_label <span class="sc">==</span> <span class="st">"CC-90011"</span>, treatment <span class="sc">:</span><span class="er">=</span> <span class="st">"CC"</span>]</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>fig7d[, treatment <span class="sc">:</span><span class="er">=</span> <span class="fu">factor</span>(treatment, <span class="at">levels =</span> <span class="fu">unique</span>(fig7d<span class="sc">$</span>treatment))]</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="co"># split treatment into two factors</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>fig7d[treatment <span class="sc">==</span> <span class="st">"Vehicle"</span>, dex <span class="sc">:</span><span class="er">=</span> <span class="st">"Dex_neg"</span>]</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>fig7d[treatment <span class="sc">==</span> <span class="st">"Vehicle"</span>, cc <span class="sc">:</span><span class="er">=</span> <span class="st">"CC_neg"</span>]</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>fig7d[treatment <span class="sc">==</span> <span class="st">"DEX"</span>, dex <span class="sc">:</span><span class="er">=</span> <span class="st">"Dex_pos"</span>]</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>fig7d[treatment <span class="sc">==</span> <span class="st">"DEX"</span>, cc <span class="sc">:</span><span class="er">=</span> <span class="st">"CC_neg"</span>]</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>fig7d[treatment <span class="sc">==</span> <span class="st">"DEX+CC"</span>, dex <span class="sc">:</span><span class="er">=</span> <span class="st">"Dex_pos"</span>]</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>fig7d[treatment <span class="sc">==</span> <span class="st">"DEX+CC"</span>, cc <span class="sc">:</span><span class="er">=</span> <span class="st">"CC_pos"</span>]</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>fig7d[treatment <span class="sc">==</span> <span class="st">"CC"</span>, dex <span class="sc">:</span><span class="er">=</span> <span class="st">"Dex_neg"</span>]</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>fig7d[treatment <span class="sc">==</span> <span class="st">"CC"</span>, cc <span class="sc">:</span><span class="er">=</span> <span class="st">"CC_pos"</span>]</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>fig7d[, dex <span class="sc">:</span><span class="er">=</span> <span class="fu">factor</span>(dex, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Dex_neg"</span>, <span class="st">"Dex_pos"</span>))]</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>fig7d[, cc <span class="sc">:</span><span class="er">=</span> <span class="fu">factor</span>(cc, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"CC_neg"</span>, <span class="st">"CC_pos"</span>))]</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>file_out_name <span class="ot">&lt;-</span> <span class="st">"LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice.xlsx"</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>fileout_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, file_out_name)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(fig7d, fileout_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="does-the-unstandardization-matter" class="level2">
+<h2 class="anchored" data-anchor-id="does-the-unstandardization-matter">Does the unstandardization matter</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Fbxo32_4 <span class="ot">&lt;-</span> fig7d[, Fbxo32]<span class="sc">/</span><span class="dv">10</span><span class="sc">^</span><span class="dv">6</span> <span class="sc">*</span> <span class="dv">10</span><span class="sc">^</span><span class="dv">4</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Fbxo32_4 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(m1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 Estimate Std. Error   t value     Pr(&gt;|t|)
+(Intercept)      999999.5   744928.5 1.3424101 1.881059e-01
+treatmentDEX    5499807.1  1053487.9 5.2205695 8.229828e-06
+treatmentDEX+CC 2310044.2  1053487.9 2.1927581 3.506200e-02
+treatmentCC      127648.4  1082356.0 0.1179357 9.067929e-01</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(m2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                 Estimate Std. Error   t value     Pr(&gt;|t|)
+(Intercept)      9999.995   7449.285 1.3424101 1.881059e-01
+treatmentDEX    54998.071  10534.879 5.2205695 8.229828e-06
+treatmentDEX+CC 23100.442  10534.879 2.1927581 3.506200e-02
+treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not" class="level2">
+<h2 class="anchored" data-anchor-id="the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not">1. The reported p-values are conservative (a bit on the “multiple testing” problem), or not!</h2>
+<p>The researchers reported Tukey-adjusted p-values. The Tukey method adjusts for the number of tests in a “family” of tests, where a family is the set of tests that answer one question. The researchers follow the norm in bench bio and choose the whole set of six contrasts as the family. This would answer a question such as: “if we were to create these combinations, would we find any difference between at least on pair?”, which isn’t a very interesting question.</p>
+<p>The researchers are focused on a much more specific question and at least two more questions, both related to controls:</p>
+<ol type="1">
+<li>Family 1: Is there evidence that CC attenuates DEX-induced expression? There is only one test in this family: DEX+CC - DEXI. This is the focal family.</li>
+<li>Family 2: Is there evidence that DEX increase expression levels, as expected? This is the “positive control” family. There is only one test in this family: DEX - Vehicle.</li>
+<li>Family 3: What is the effect of CC alone? This is “negative control” family. Without DEX-induced elevated express, we would expect this response to be similar to Vehicle. There is only one test in this family: CC - Vehicle.</li>
+</ol>
+<p>What about the interaction effect? The contrast (DEX+CC - DEX) is the focal contrast <em>if there is no effect of CC alone</em>. We could look at the CC alone effect (CC - Vehicle) and if it is sufficiently small, use (DEX+CC - DEX) as the focal contrast. Of course “sufficiently small” has a subjective bright line. The statistically correct way to address this is to compare the effect of CC with DEX (the focal contrast) to the effect of CC without DEX (CC - Vehicle). This comparison is the interaction effect. So we’ll add the interaction contrast as a 4th family, which we should think of as replacing the focal contrast (Family 1) and not “in addition to” the three families. But, I’ll compute both. Regardless, for these data, I think most researchers would agree that CC - Vehicle is sufficiently small that we can use the DEX+CC - DEX comparison without issue.</p>
+<p>So we have three p-values that we care about and each is from a different family, so there is no justification for p-value adjustment for multiple tests. This would make the reported p-values conservative. In general, if I wanted to be more conservative, in order to avoid research time and waste, I’d simply make my “alpha” smaller, such as 0.01 or 0.005 instead of using more conservative tests like a Tukey p-value adjustment, since the conservative alpha doesn’t depend on things like number of tests in a family.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the researcher's analysis</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>m0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>m0_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m0, <span class="fu">c</span>(<span class="st">"treatment"</span>))</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>m0_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m0_emm,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">"revpairwise"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"tukey"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># the analysis only comparing the three families of tests that we care about</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>veh <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>dex <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>dex_cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="co"># note the wonky ordering in fig 7d</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>focal_contrasts <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"dex"</span> <span class="ot">=</span> dex <span class="sc">-</span> veh,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cc"</span> <span class="ot">=</span> cc <span class="sc">-</span> veh,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"dex+cc - dex"</span> <span class="ot">=</span> dex_cc <span class="sc">-</span> dex,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"interaction"</span> <span class="ot">=</span> (dex_cc <span class="sc">-</span> dex) <span class="sc">-</span> (cc <span class="sc">-</span> veh)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>m1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m1, <span class="fu">c</span>(<span class="st">"treatment"</span>))</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>m1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1_emm,</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> focal_contrasts,</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="ot">&lt;-</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(m0_pairs, m1_pairs)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="sc">|&gt;</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"Adjusted"</span>, <span class="dv">1</span>, <span class="dv">6</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"Non-adjusted"</span>, <span class="dv">7</span>, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">contrast</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">estimate</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">SE</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">df</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">lower.CL</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">upper.CL</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">t.ratio</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd" data-grouplength="6">
+<td colspan="8" style="border-bottom: 1px solid"><strong>Adjusted</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX - Vehicle</td>
+<td style="text-align: right;">5499807.1</td>
+<td style="text-align: right;">1053488</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">2658652.5</td>
+<td style="text-align: right;">8340961.7</td>
+<td style="text-align: right;">5.2206</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - Vehicle</td>
+<td style="text-align: right;">2310044.2</td>
+<td style="text-align: right;">1053488</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-531110.4</td>
+<td style="text-align: right;">5151198.8</td>
+<td style="text-align: right;">2.1928</td>
+<td style="text-align: right;">0.1452</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - DEX</td>
+<td style="text-align: right;">-3189762.9</td>
+<td style="text-align: right;">1053488</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-6030917.5</td>
+<td style="text-align: right;">-348608.3</td>
+<td style="text-align: right;">-3.0278</td>
+<td style="text-align: right;">0.0228</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - Vehicle</td>
+<td style="text-align: right;">127648.4</td>
+<td style="text-align: right;">1082356</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-2791360.5</td>
+<td style="text-align: right;">3046657.2</td>
+<td style="text-align: right;">0.1179</td>
+<td style="text-align: right;">0.9994</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - DEX</td>
+<td style="text-align: right;">-5372158.7</td>
+<td style="text-align: right;">1082356</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-8291167.6</td>
+<td style="text-align: right;">-2453149.9</td>
+<td style="text-align: right;">-4.9634</td>
+<td style="text-align: right;">0.0001</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - (DEX+CC)</td>
+<td style="text-align: right;">-2182395.8</td>
+<td style="text-align: right;">1082356</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-5101404.7</td>
+<td style="text-align: right;">736613.0</td>
+<td style="text-align: right;">-2.0163</td>
+<td style="text-align: right;">0.2015</td>
+</tr>
+<tr class="even" data-grouplength="4">
+<td colspan="8" style="border-bottom: 1px solid"><strong>Non-adjusted</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex</td>
+<td style="text-align: right;">5499807.1</td>
+<td style="text-align: right;">1053488</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">3361112.9</td>
+<td style="text-align: right;">7638501.3</td>
+<td style="text-align: right;">5.2206</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">cc</td>
+<td style="text-align: right;">127648.4</td>
+<td style="text-align: right;">1082356</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-2069651.1</td>
+<td style="text-align: right;">2324947.8</td>
+<td style="text-align: right;">0.1179</td>
+<td style="text-align: right;">0.9068</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex+cc - dex</td>
+<td style="text-align: right;">-3189762.9</td>
+<td style="text-align: right;">1053488</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-5328457.1</td>
+<td style="text-align: right;">-1051068.7</td>
+<td style="text-align: right;">-3.0278</td>
+<td style="text-align: right;">0.0046</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">interaction</td>
+<td style="text-align: right;">-3317411.3</td>
+<td style="text-align: right;">1510408</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-6383701.9</td>
+<td style="text-align: right;">-251120.7</td>
+<td style="text-align: right;">-2.1964</td>
+<td style="text-align: right;">0.0348</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+<p>The top table contains the six Tukey-adjusted p-values reported by the researchers. The bottom table contains the unadjusted values of only the contrasts of interest. The adjusted <em>p</em>-value for the focal contrast DEX+CC - DEX is 0.023 while the unadjusted value is 0.0046.</p>
+<p>The p-value of the interaction is 0.035 – note that it’s effect size is very similar to that of the DEX+CC - DEX but the p-value is bigger because the SE of an interaction is bigger than the SE of a main contrast (because the interaction is a function of 4 means and not just 2). Using the interaction p-value is not just statistically correct, it is more conservative.</p>
+</section>
+<section id="for-these-data-a-generalized-linear-model-will-have-more-power-than-the-linear-modelanova." class="level2">
+<h2 class="anchored" data-anchor-id="for-these-data-a-generalized-linear-model-will-have-more-power-than-the-linear-modelanova.">2. For these data, a Generalized Linear Model will have more power than the linear model/ANOVA.</h2>
+<p>Several simulation experiments have shown that <em>t</em>-tests and linear models/ANOVA generally work well for count data, where “work well” means that Type I errors aren’t too elevated and Power is relatively high. However, the simulations also show that negative-binomial Generalized Linear Models do better at controlling Type I error and have higher power, relative to <em>t</em>-tests/linear models/ANOVA models. For any one experiment, using a <em>t</em>-test/linear model/ANOVA model will have little consequence but over many, many experiments, we would expect to have fewer false negatives and positives if we use GLMs. That said, I prefer the GLM for two additional reasons: 1) The effect is a multiple of the reference, which is a really meaningful way of comparing responses (for example, looking at the table below, the effect is 6.5, meaning the expression level is 6.5 times larger than that of Vehicle), and 2) the CIs of the means are asymmetric, which reflects the skewed distribution of the data. This also avoids absurd CIs such as a negative lower bound (counts can’t be negative!).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the original analysis in m0, m0_emm, and m0_pairs are computed above</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>m2_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m2, <span class="fu">c</span>(<span class="st">"treatment"</span>), <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m2_emm,</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">"revpairwise"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"tukey"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> m2_pairs[, <span class="sc">-</span><span class="dv">7</span>]</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(m2_pairs) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(m0_pairs)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="ot">&lt;-</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(m0_pairs, m2_pairs)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="sc">|&gt;</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>() <span class="sc">|&gt;</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"LM/ANOVA"</span>, <span class="dv">1</span>, <span class="dv">6</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"GLM"</span>, <span class="dv">7</span>, <span class="dv">12</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">contrast</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">estimate</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">SE</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">df</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">lower.CL</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">upper.CL</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">t.ratio</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd" data-grouplength="6">
+<td colspan="8" style="border-bottom: 1px solid"><strong>LM/ANOVA</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX - Vehicle</td>
+<td style="text-align: right;">5499807.1000</td>
+<td style="text-align: right;">1053487.9480</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">2658652.5086</td>
+<td style="text-align: right;">8340961.6914</td>
+<td style="text-align: right;">5.2206</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - Vehicle</td>
+<td style="text-align: right;">2310044.2000</td>
+<td style="text-align: right;">1053487.9480</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-531110.3914</td>
+<td style="text-align: right;">5151198.7914</td>
+<td style="text-align: right;">2.1928</td>
+<td style="text-align: right;">0.1452</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - DEX</td>
+<td style="text-align: right;">-3189762.9000</td>
+<td style="text-align: right;">1053487.9480</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-6030917.4914</td>
+<td style="text-align: right;">-348608.3086</td>
+<td style="text-align: right;">-3.0278</td>
+<td style="text-align: right;">0.0228</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - Vehicle</td>
+<td style="text-align: right;">127648.3889</td>
+<td style="text-align: right;">1082355.9764</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-2791360.4691</td>
+<td style="text-align: right;">3046657.2468</td>
+<td style="text-align: right;">0.1179</td>
+<td style="text-align: right;">0.9994</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - DEX</td>
+<td style="text-align: right;">-5372158.7111</td>
+<td style="text-align: right;">1082355.9764</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-8291167.5691</td>
+<td style="text-align: right;">-2453149.8532</td>
+<td style="text-align: right;">-4.9634</td>
+<td style="text-align: right;">0.0001</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - (DEX+CC)</td>
+<td style="text-align: right;">-2182395.8111</td>
+<td style="text-align: right;">1082355.9764</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-5101404.6691</td>
+<td style="text-align: right;">736613.0468</td>
+<td style="text-align: right;">-2.0163</td>
+<td style="text-align: right;">0.2015</td>
+</tr>
+<tr class="even" data-grouplength="6">
+<td colspan="8" style="border-bottom: 1px solid"><strong>GLM</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX / Vehicle</td>
+<td style="text-align: right;">6.4998</td>
+<td style="text-align: right;">1.6230</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">3.4222</td>
+<td style="text-align: right;">12.3452</td>
+<td style="text-align: right;">7.4960</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) / Vehicle</td>
+<td style="text-align: right;">3.3100</td>
+<td style="text-align: right;">0.8265</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">1.7428</td>
+<td style="text-align: right;">6.2868</td>
+<td style="text-align: right;">4.7935</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) / DEX</td>
+<td style="text-align: right;">0.5093</td>
+<td style="text-align: right;">0.1272</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">0.2681</td>
+<td style="text-align: right;">0.9672</td>
+<td style="text-align: right;">-2.7025</td>
+<td style="text-align: right;">0.0347</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC / Vehicle</td>
+<td style="text-align: right;">1.1276</td>
+<td style="text-align: right;">0.2893</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">0.5834</td>
+<td style="text-align: right;">2.1797</td>
+<td style="text-align: right;">0.4683</td>
+<td style="text-align: right;">0.9660</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC / DEX</td>
+<td style="text-align: right;">0.1735</td>
+<td style="text-align: right;">0.0445</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">0.0898</td>
+<td style="text-align: right;">0.3354</td>
+<td style="text-align: right;">-6.8278</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC / (DEX+CC)</td>
+<td style="text-align: right;">0.3407</td>
+<td style="text-align: right;">0.0874</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">0.1762</td>
+<td style="text-align: right;">0.6585</td>
+<td style="text-align: right;">-4.1974</td>
+<td style="text-align: right;">0.0002</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+<p>The top table contains the six Tukey-adjusted p-values reported by the researchers. The bottom table contains the six Tukey-adjusted p-values using a negative-binomial Generalized Linear Model (a useful model for count data). The focal-contrast <em>p</em>-value for the linear model/ANOVA and the GLM are similar (0.023 and 0.0347).</p>
+</section>
+<section id="putting-1-and-2-together" class="level2">
+<h2 class="anchored" data-anchor-id="putting-1-and-2-together">Putting #1 and #2 together</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m2_pairs_focal <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m2_emm,</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> focal_contrasts,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>m2_pairs_focal <span class="ot">&lt;-</span> m2_pairs_focal[, <span class="sc">-</span><span class="dv">7</span>]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(m2_pairs_focal) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(m0_pairs)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="ot">&lt;-</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(m0_pairs, m2_pairs_focal)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="sc">|&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>() <span class="sc">|&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"LM/ANOVA adjusted"</span>, <span class="dv">1</span>, <span class="dv">6</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"GLM not adjusted"</span>, <span class="dv">7</span>, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">contrast</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">estimate</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">SE</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">df</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">lower.CL</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">upper.CL</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">t.ratio</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd" data-grouplength="6">
+<td colspan="8" style="border-bottom: 1px solid"><strong>LM/ANOVA adjusted</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX - Vehicle</td>
+<td style="text-align: right;">5499807.1000</td>
+<td style="text-align: right;">1053487.9480</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">2658652.5086</td>
+<td style="text-align: right;">8340961.6914</td>
+<td style="text-align: right;">5.2206</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - Vehicle</td>
+<td style="text-align: right;">2310044.2000</td>
+<td style="text-align: right;">1053487.9480</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-531110.3914</td>
+<td style="text-align: right;">5151198.7914</td>
+<td style="text-align: right;">2.1928</td>
+<td style="text-align: right;">0.1452</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - DEX</td>
+<td style="text-align: right;">-3189762.9000</td>
+<td style="text-align: right;">1053487.9480</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-6030917.4914</td>
+<td style="text-align: right;">-348608.3086</td>
+<td style="text-align: right;">-3.0278</td>
+<td style="text-align: right;">0.0228</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - Vehicle</td>
+<td style="text-align: right;">127648.3889</td>
+<td style="text-align: right;">1082355.9764</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-2791360.4691</td>
+<td style="text-align: right;">3046657.2468</td>
+<td style="text-align: right;">0.1179</td>
+<td style="text-align: right;">0.9994</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - DEX</td>
+<td style="text-align: right;">-5372158.7111</td>
+<td style="text-align: right;">1082355.9764</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-8291167.5691</td>
+<td style="text-align: right;">-2453149.8532</td>
+<td style="text-align: right;">-4.9634</td>
+<td style="text-align: right;">0.0001</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - (DEX+CC)</td>
+<td style="text-align: right;">-2182395.8111</td>
+<td style="text-align: right;">1082355.9764</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">-5101404.6691</td>
+<td style="text-align: right;">736613.0468</td>
+<td style="text-align: right;">-2.0163</td>
+<td style="text-align: right;">0.2015</td>
+</tr>
+<tr class="even" data-grouplength="4">
+<td colspan="8" style="border-bottom: 1px solid"><strong>GLM not adjusted</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex</td>
+<td style="text-align: right;">6.4998</td>
+<td style="text-align: right;">1.6230</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">3.9843</td>
+<td style="text-align: right;">10.6035</td>
+<td style="text-align: right;">7.4960</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">cc</td>
+<td style="text-align: right;">1.1276</td>
+<td style="text-align: right;">0.2893</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">0.6820</td>
+<td style="text-align: right;">1.8644</td>
+<td style="text-align: right;">0.4683</td>
+<td style="text-align: right;">0.6396</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex+cc / dex</td>
+<td style="text-align: right;">0.5093</td>
+<td style="text-align: right;">0.1272</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">0.3122</td>
+<td style="text-align: right;">0.8308</td>
+<td style="text-align: right;">-2.7025</td>
+<td style="text-align: right;">0.0069</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">interaction</td>
+<td style="text-align: right;">0.4516</td>
+<td style="text-align: right;">0.1617</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">0.2239</td>
+<td style="text-align: right;">0.9109</td>
+<td style="text-align: right;">-2.2205</td>
+<td style="text-align: right;">0.0264</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+<p>The top table contains the six Tukey-adjusted p-values reported by the researchers. The bottom table contains the four unadjusted p-values using a negative-binomial Generalized Linear Model.</p>
+</section>
+<section id="lets-plot-the-model-for-all-genes" class="level2">
+<h2 class="anchored" data-anchor-id="lets-plot-the-model-for-all-genes">Let’s plot the model for all genes</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>get_model_result <span class="ot">&lt;-</span> <span class="cf">function</span>(gene_i){</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  model_formula <span class="ot">&lt;-</span> <span class="fu">paste</span>(gene_i, <span class="st">"~ dex * cc"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.formula</span>()</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(model_formula, <span class="at">data =</span> fig7d)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  m1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m1, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>), <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  m1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1_emm,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                       <span class="at">method =</span> <span class="st">"revpairwise"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>                       <span class="at">simple =</span> <span class="st">"each"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                       <span class="at">combine =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>                       <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">m1 =</span> m1, <span class="at">m1_emm =</span> m1_emm, <span class="at">m1_pairs =</span> m1_pairs))</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>res1 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Fbxo32"</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>gg1 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res1<span class="sc">$</span>m1, res1<span class="sc">$</span>m1_emm, res1<span class="sc">$</span>m1_pairs, <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>res2 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Trim63"</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>gg2 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res2<span class="sc">$</span>m1, res2<span class="sc">$</span>m1_emm, res2<span class="sc">$</span>m1_pairs, <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>res3 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Atg7"</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>gg3 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res3<span class="sc">$</span>m1, res3<span class="sc">$</span>m1_emm, res3<span class="sc">$</span>m1_pairs, <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>res4 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Becn1"</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>gg4 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res4<span class="sc">$</span>m1, res4<span class="sc">$</span>m1_emm, res4<span class="sc">$</span>m1_pairs, <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>res5 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Bnip3"</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>gg5 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res5<span class="sc">$</span>m1, res5<span class="sc">$</span>m1_emm, res5<span class="sc">$</span>m1_pairs, <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(gg1, gg2, gg3, gg4, gg5, <span class="at">nrow =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>gg1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gg2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>gg3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gg4</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>gg5</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-6.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>veh <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>dex <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>dex_cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="co"># note the wonky ordering in fig 7d</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>focal_contrasts <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"dex"</span> <span class="ot">=</span> dex <span class="sc">-</span> veh,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cc"</span> <span class="ot">=</span> cc <span class="sc">-</span> veh,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"dex+cc - dex"</span> <span class="ot">=</span> dex_cc <span class="sc">-</span> dex,</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"interaction"</span> <span class="ot">=</span> (dex_cc <span class="sc">-</span> dex) <span class="sc">-</span> (cc <span class="sc">-</span> veh)</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>m1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m1, <span class="fu">c</span>(<span class="st">"treatment"</span>))</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>m1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1_emm,</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> focal_contrasts,</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>m1b_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1_emm,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">"revpairwise"</span>,</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>                      <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>m1c <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Fbxo32 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fig7d)</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>m1c_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m1c, <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>))</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>m1c_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1c_emm,</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">"revpairwise"</span>,</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>                      <span class="at">simple =</span> <span class="st">"each"</span>,</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>                      <span class="at">combine =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>                      <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>m1_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast     estimate    SE  df asymp.LCL asymp.UCL z.ratio p.value
+ dex             1.872 0.250 Inf     1.382    2.3612   7.496  &lt;.0001
+ cc              0.120 0.257 Inf    -0.383    0.6230   0.468  0.6396
+ dex+cc - dex   -0.675 0.250 Inf    -1.164   -0.1854  -2.702  0.0069
+ interaction    -0.795 0.358 Inf    -1.497   -0.0933  -2.220  0.0264
+
+Results are given on the log (not the response) scale. 
+Confidence level used: 0.95 </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(m1c))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                      Estimate Std. Error    z value     Pr(&gt;|z|)
+(Intercept)         13.8155101  0.1765671 78.2451122 0.000000e+00
+dexDex_pos           1.8717729  0.2497034  7.4959857 6.580195e-14
+ccCC_pos             0.1201344  0.2565460  0.4682765 6.395869e-01
+dexDex_pos:ccCC_pos -0.7949455  0.3580049 -2.2204874 2.638570e-02</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="ot">&lt;-</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(m1_pairs, m1b_pairs, m1c_pairs)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="sc">|&gt;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>() <span class="sc">|&gt;</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"manual"</span>, <span class="dv">1</span>, <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"flat"</span>, <span class="dv">5</span>, <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"2x2"</span>, <span class="dv">11</span>, <span class="dv">14</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">contrast</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">cc</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">dex</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">estimate</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">SE</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">df</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">asymp.LCL</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">asymp.UCL</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">z.ratio</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd" data-grouplength="4">
+<td colspan="10" style="border-bottom: 1px solid"><strong>manual</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">1.8718</td>
+<td style="text-align: right;">0.2497</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">1.3824</td>
+<td style="text-align: right;">2.3612</td>
+<td style="text-align: right;">7.4960</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">cc</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">0.1201</td>
+<td style="text-align: right;">0.2565</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">-0.3827</td>
+<td style="text-align: right;">0.6230</td>
+<td style="text-align: right;">0.4683</td>
+<td style="text-align: right;">0.6396</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex+cc - dex</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">-0.6748</td>
+<td style="text-align: right;">0.2497</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">-1.1642</td>
+<td style="text-align: right;">-0.1854</td>
+<td style="text-align: right;">-2.7025</td>
+<td style="text-align: right;">0.0069</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">interaction</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">-0.7949</td>
+<td style="text-align: right;">0.3580</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">-1.4966</td>
+<td style="text-align: right;">-0.0933</td>
+<td style="text-align: right;">-2.2205</td>
+<td style="text-align: right;">0.0264</td>
+</tr>
+<tr class="even" data-grouplength="6">
+<td colspan="10" style="border-bottom: 1px solid"><strong>flat</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX - Vehicle</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">1.8718</td>
+<td style="text-align: right;">0.2497</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">1.3824</td>
+<td style="text-align: right;">2.3612</td>
+<td style="text-align: right;">7.4960</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - Vehicle</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">1.1970</td>
+<td style="text-align: right;">0.2497</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">0.7076</td>
+<td style="text-align: right;">1.6864</td>
+<td style="text-align: right;">4.7935</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - DEX</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">-0.6748</td>
+<td style="text-align: right;">0.2497</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">-1.1642</td>
+<td style="text-align: right;">-0.1854</td>
+<td style="text-align: right;">-2.7025</td>
+<td style="text-align: right;">0.0069</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - Vehicle</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">0.1201</td>
+<td style="text-align: right;">0.2565</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">-0.3827</td>
+<td style="text-align: right;">0.6230</td>
+<td style="text-align: right;">0.4683</td>
+<td style="text-align: right;">0.6396</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - DEX</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">-1.7516</td>
+<td style="text-align: right;">0.2565</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">-2.2545</td>
+<td style="text-align: right;">-1.2488</td>
+<td style="text-align: right;">-6.8278</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - (DEX+CC)</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">-1.0768</td>
+<td style="text-align: right;">0.2565</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">-1.5796</td>
+<td style="text-align: right;">-0.5740</td>
+<td style="text-align: right;">-4.1974</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd" data-grouplength="4">
+<td colspan="10" style="border-bottom: 1px solid"><strong>2x2</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Dex_pos - Dex_neg</td>
+<td style="text-align: left;">CC_neg</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">1.8718</td>
+<td style="text-align: right;">0.2497</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">1.3824</td>
+<td style="text-align: right;">2.3612</td>
+<td style="text-align: right;">7.4960</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Dex_pos - Dex_neg</td>
+<td style="text-align: left;">CC_pos</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: right;">1.0768</td>
+<td style="text-align: right;">0.2565</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">0.5740</td>
+<td style="text-align: right;">1.5796</td>
+<td style="text-align: right;">4.1974</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC_pos - CC_neg</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">Dex_neg</td>
+<td style="text-align: right;">0.1201</td>
+<td style="text-align: right;">0.2565</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">-0.3827</td>
+<td style="text-align: right;">0.6230</td>
+<td style="text-align: right;">0.4683</td>
+<td style="text-align: right;">0.6396</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC_pos - CC_neg</td>
+<td style="text-align: left;">.</td>
+<td style="text-align: left;">Dex_pos</td>
+<td style="text-align: right;">-0.6748</td>
+<td style="text-align: right;">0.2497</td>
+<td style="text-align: right;">Inf</td>
+<td style="text-align: right;">-1.1642</td>
+<td style="text-align: right;">-0.1854</td>
+<td style="text-align: right;">-2.7025</td>
+<td style="text-align: right;">0.0069</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,15 @@
+{
+  "hash": "a98166226ba66e4e194d04a9f273313b",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Mitochondria from osteolineage cells regulate myeloid cell-mediated bone resorption\"\nauthor: \"Jeff Walker\"\ndate: '23 Jun 2024'\ndate-modified: \"2024-06-26\"\ncategories: [\"linear mixed model\", \"random intercept\", \"CRDS\", \"nested ANOVA\", \"ggplot\"]\ndescription: \"xxx\"\ndraft: true\nformat: \n  html: \n    toc: true \n    toc-location: right\nexecute: \n  message: false\n  warning: false\neditor_options: \n  chunk_output_type: inline\nfreeze: auto\n\n---\n\n\n## Setup\n\n\n\n\n\n## Import and Wrangle\n\n\n\n::: {.cell}\n\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -82,28 +82,5 @@ output_folder <- "output"
 
 
 ```{r fig-3g-import, message=FALSE, warning=FALSE}
-data_from <- "Mitochondria from osteolineage cells regulate myeloid cell-mediated bone resorption"
-file_name <- "ncomms-source-data files OSSENI et al.xlsx"
-file_path <- here(data_folder, data_from, file_name)
 
-fig2s_wide <- read_excel(file_path,
-                    sheet = "Figure 2",
-                    range = "E138:J186",
-                    col_names = FALSE) |>
-  data.table()
-mouse_id <- paste("mouse", 1:6, sep = "_")
-treatment_levels <- c("MDX-Veh", "MDX-TubA")
-mouse_treatment <- paste(rep(treatment_levels, each = 3), mouse_id)
-colnames(fig2s_wide) <- mouse_treatment
-fig2s <- melt(fig2s_wide,
-              measure.vars = mouse_treatment,
-              variable.name = "mouse_treatment",
-              value.name = "fibrotic_area") |>
-  na.omit()
-fig2s[, c("treatment", "mouse_id") := tstrsplit(mouse_treatment, " ")]
-fig2s[, treatment := factor(treatment, levels = treatment_levels)]
-
-file_out_name <- "fig2s-CRDS-Pharmacological inhibition of HDAC6 improves muscle phenotypes in dystrophin-deficient mice by downregulating TGF-β via Smad3 acetylation.xlsx"
-fileout_path <- here(data_folder, data_from, file_out_name)
-write_xlsx(fig2s, fileout_path)
 ```

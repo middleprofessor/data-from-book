@@ -4,7 +4,7 @@ author: "Jeff Walker"
 date: '25 June 2024'
 date-modified: "`r Sys.Date()`"
 categories: ["p-values", "multiple testing", "generalized linear model", "pseudoreplication", "analysis flag"]
-description: "The researchers analyzed figure 7b using one-way ANOVA with Tukey adjustment. The data (RNA levels) have a typical count distribution with right skew and variances that increase with the mean. The example is a good one to talk about p-values in bench biology. Two decisions in the analysis result in conservative p-values: 1) The ANOVA model has less power than a generalized linear model (GLM) that explicitly models a cound distribution, and 2) The Tukey correction, which isn't justified here. One decision results in liberal p-values: the researchers analyzed the two technical replicates per mouse as if they were independent."
+description: "The researchers analyzed figure 7b using one-way ANOVA with Tukey adjustment. The data (RNA levels) have a typical count distribution with right skew and variances that increase with the mean. The example is a good one to talk about p-values in bench biology. Two decisions in the analysis result in conservative p-values: 1) The ANOVA model has less power than a generalized linear model (GLM) that explicitly models a count distribution, and 2) The Tukey correction, which isn't justified here. A third decision results in liberal p-values: the researchers analyzed the two technical replicates per mouse as if they were independent."
 draft: true
 format: 
   html: 
@@ -22,17 +22,17 @@ freeze: auto
 
 Data From: [Cai, Q., Sahu, R., Ueberschlag-Pitiot, V., Souali-Crespo, S., Charvet, C., Silem, I., ... & Duteil, D. (2024). LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice. Nature Communications, 15(1), 3563.](https://www.nature.com/articles/s41467-024-47846-9){target="_blank"}
 
-Fig: 7d [download data](../../data from/The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity/41467_2024_49100_MOESM5_ESM.xlsx){target="_blank"}
+Fig: 7d [download data](../../data from/LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice/41467_2024_47846_MOESM4_ESM.xlsx){target="_blank"}
 
 key words: 
 
-Published methods: ratio paired t-test
+Published methods: one-way ANOVA with Tukey adjustment
 
-Design: Randomized Complete Block Design (RCBD)
+Design: Completely Randomized Design with subsampling (CRDS)
 
-Response: gel intensity
+Response: mRNA level
 
-Key learning concepts: asymmetric confidence intervals
+Key learning concepts: not adjusting for multiple p-values
 
 More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
 
@@ -45,9 +45,9 @@ Earlier experiments presented in the paper show evidence that atrophy is mediate
 Treatment levels
 
 1. Vehicle (Dex-/CC-) Expected to have low levels of target gene expression
-2. Dex (Dex+/CC-)           Positive control. Expected to have elevated levels of target gene expression relative to vehicle
-3. CC (Dex-/CC+)           Important negative control. We don't expect this to be elevated relative to Vehicle. If it is, we need the interaction.
-4. DEX+CC (Dex+/CC+)           If LSD1 is necessary, then we expect these levels to be lower than Dex+/CC- *if CC is not elevated* but how much depends on CC concentration. If CC is elevated we need the interaction. We expect a negative interaction.
+2. Dex (Dex+/CC-)     Positive control. Expected to have elevated levels of target gene expression relative to vehicle
+3. CC (Dex-/CC+)      Important negative control. We expect this to be similar to Vehicle. If it is not, we need the interaction.
+4. DEX+CC (Dex+/CC+)  If LSD1 works with the GCR as expected, then we expect these levels to be lower than Dex+/CC- but how much depends on CC concentration.
 
 ## Setup
 
@@ -193,14 +193,15 @@ m1 <- lm(Fbxo32 ~ treatment, data = fig7d)
 
 The researchers reported Tukey-adjusted p-values. The Tukey method adjusts for the number of tests in a "family" of tests, where a family is the set of tests that answer one question. The researchers follow the norm in bench bio and choose the whole set of six contrasts as the family. This would answer a question such as: "if we were to create these combinations, would we find any difference between at least on pair?", which isn't a very interesting question.
 
-The researchers are focussed on a much more specific question, and at least two questions related to controls:
+The researchers are focused on a much more specific question and at least two more questions, both related to controls:
 
-1. Family 1: Is there evidence that CC attenuates DEX-induced expression? There is only one test in this family: DEX+CC - DEXI. This is the focal family. The contrast (DEX+CC - DEX) is the focal contrast if there is no effect of CC alone but p-values don't answer this so we need to compare (DEX+CC - DEX) to the effect of CC, which is (CC - Vehicle). This is the interaction contrast (DEX+CC - DEX) - (CC - Vehicle). There is only one test in this family. The interaction contrast.
+1. Family 1: Is there evidence that CC attenuates DEX-induced expression? There is only one test in this family: DEX+CC - DEXI. This is the focal family.
 2. Family 2: Is there evidence that DEX increase expression levels, as expected? This is the "positive control" family. There is only one test in this family: DEX - Vehicle.
-3. Family 3: What is the effect of CC alone? This is "negative control" family. If CC is less elevated than vehicle, then DEX + CC might be lower than DEX because of the effect of CC independent of DEX effects. If CC is more elevated than Vehicle, then DEX + CC might be similar to DEX alone even if CC inhibition of LSD1 is working as expected. There is only one test in this family: CC - Vehicle.
+3. Family 3: What is the effect of CC alone? This is "negative control" family. Without DEX-induced elevated express, we would expect this response to be similar to Vehicle. There is only one test in this family: CC - Vehicle.
 
+What about the interaction effect? The contrast (DEX+CC - DEX) is the focal contrast *if there is no effect of CC alone*. We could look at the CC alone effect (CC - Vehicle) and if it is sufficiently small, use (DEX+CC - DEX) as the focal contrast. Of course "sufficiently small" has a subjective bright line. The statistically correct way to address this is to compare the effect of CC with DEX (the focal contrast) to the effect of CC without DEX (CC - Vehicle). This comparison is the interaction effect. So we'll add the interaction contrast as a 4th family, which we should think of as replacing the focal contrast (Family 1) and not "in addition to" the three families. But, I'll compute both. Regardless, for these data, I think most researchers would agree that CC - Vehicle is sufficiently small that we can use the DEX+CC - DEX comparison without issue.
 
-So we have three p-values that we care about and each is from a different family, so there is no justification of p-value adjustment for multiple tests. This would make the reported p-values conservative. In general, if I wanted to be more conservative, in order to avoid research time and waste, I'd simply make my "alpha" smaller, such as 0.01 or 0.005 instead of using more conservative tests like a tukey p-value adjustment, since the conservative alpha doesn't depend on things like number of tests in a family.
+So we have three p-values that we care about and each is from a different family, so there is no justification for p-value adjustment for multiple tests. This would make the reported p-values conservative. In general, if I wanted to be more conservative, in order to avoid research time and waste, I'd simply make my "alpha" smaller, such as 0.01 or 0.005 instead of using more conservative tests like a Tukey p-value adjustment, since the conservative alpha doesn't depend on things like number of tests in a family.
 
 
 ```{r p-value-adjustment}
@@ -238,7 +239,14 @@ contrast_table |>
   pack_rows("Adjusted", 1, 6) |>
   pack_rows("Non-adjusted", 7, 10)
 ```
+
+The top table contains the six Tukey-adjusted p-values reported by the researchers. The bottom table contains the unadjusted values of only the contrasts of interest. The adjusted *p*-value for the focal contrast DEX+CC - DEX is 0.023 while the unadjusted value is 0.0046.
+
+The p-value of the interaction is 0.035 -- note that it's effect size is very similar to that of the DEX+CC - DEX but the p-value is bigger because the SE of an interaction is bigger than the SE of a main contrast (because the interaction is a function of 4 means and not just 2). Using the interaction p-value is not just statistically correct, it is more conservative.
+
 ## 2. For these data, a Generalized Linear Model will have more power than the linear model/ANOVA.
+
+Several simulation experiments have shown that *t*-tests and linear models/ANOVA generally work well for count data, where "work well" means that Type I errors aren't too elevated and Power is relatively high. However, the simulations also show that negative-binomial Generalized Linear Models do better at controlling Type I error and have higher power, relative to *t*-tests/linear models/ANOVA models. For any one experiment, using a *t*-test/linear model/ANOVA model will have little consequence but over many, many experiments, we would expect to have fewer false negatives and positives if we use GLMs. That said, I prefer the GLM for two additional reasons: 1) The effect is a multiple of the reference, which is a really meaningful way of comparing responses (for example, looking at the table below, the effect is 6.5, meaning the expression level is 6.5 times larger than that of Vehicle), and 2) the CIs of the means are asymmetric, which reflects the skewed distribution of the data. This also avoids absurd CIs such as a negative lower bound (counts can't be negative!).
 
 ```{r, warning=FALSE}
 # the original analysis in m0, m0_emm, and m0_pairs are computed above
@@ -261,6 +269,7 @@ contrast_table |>
   pack_rows("GLM", 7, 12)
 
 ```
+The top table contains the six Tukey-adjusted p-values reported by the researchers. The bottom table contains the six Tukey-adjusted p-values using a negative-binomial Generalized Linear Model (a useful model for count data). The focal-contrast *p*-value for the linear model/ANOVA and the GLM are similar (0.023 and 0.0347). 
 
 ## Putting #1 and #2 together
 
@@ -282,24 +291,9 @@ contrast_table |>
 
 ```
 
-## Let's plot the model
+The top table contains the six Tukey-adjusted p-values reported by the researchers. The bottom table contains the four unadjusted p-values using a negative-binomial Generalized Linear Model.
 
-```{r warning = FALSE}
-m2_v2 <- glm.nb(Fbxo32 ~ dex * cc, data = fig7d)
-m2_v2_emm <- emmeans(m2_v2, specs = c("dex", "cc"), type = "response")
-m2_v2_pairs <- contrast(m2_v2_emm,
-                     method = "revpairwise",
-                     simple = "each",
-                     combine = TRUE,
-                     adjust = "none") |>
-  summary(infer = TRUE)
-
-plot_response(m2_v2, m2_v2_emm, m2_v2_pairs,
-              palette = "pal_okabe_ito_blue")
-
-```
-
-## Finally, do this for all the genes
+## Let's plot the model for all genes
 
 ```{r warning = FALSE}
 get_model_result <- function(gene_i){
