@@ -3,9 +3,9 @@ title: "Fig 7d -- LSD1 inhibition circumvents glucocorticoid-induced muscle wast
 author: "Jeff Walker"
 date: '25 June 2024'
 date-modified: "`r Sys.Date()`"
-categories: ["p-values", "multiple testing", "generalized linear model", "pseudoreplication", "analysis flag"]
-description: "The researchers analyzed figure 7b using one-way ANOVA with Tukey adjustment. The data (RNA levels) have a typical count distribution with right skew and variances that increase with the mean. The example is a good one to talk about p-values in bench biology. Two decisions in the analysis result in conservative p-values: 1) The ANOVA model has less power than a generalized linear model (GLM) that explicitly models a count distribution, and 2) The Tukey correction, which isn't justified here. A third decision results in liberal p-values: the researchers analyzed the two technical replicates per mouse as if they were independent."
-draft: true
+categories: ["p-values", "multiple testing", "generalized linear model", "power", "simulation", "pseudoreplication", "analysis flag"]
+description: "The researchers made three important decisions that affect p-values in different directions. 1) First, they analyzed figure 7b using one-way ANOVA with Tukey adjustment. Post-hoc p-value adjusment is common but typically unjustified for bench biology data like these. The example is a good one to talk about p-values in bench biology. 2) The data (RNA levels) also has a typical count distribution with right skew and variances that increase with the mean. There is good evidence that a LM/ANOVA model has less power than a generalized linear model (GLM) that explicitly models a count distribution, so I explore that with a simulation and find the LM/ANOVA performs well for these data. 3), the researchers analyzed the two technical replicates per mouse as if they were independent."
+draft: false
 format: 
   html: 
     toc: true 
@@ -244,9 +244,96 @@ The top table contains the six Tukey-adjusted p-values reported by the researche
 
 The p-value of the interaction is 0.035 -- note that it's effect size is very similar to that of the DEX+CC - DEX but the p-value is bigger because the SE of an interaction is bigger than the SE of a main contrast (because the interaction is a function of 4 means and not just 2). Using the interaction p-value is not just statistically correct, it is more conservative.
 
-## 2. For these data, a Generalized Linear Model will have more power than the linear model/ANOVA.
+## 2. For these data, a Generalized Linear Model might have more power than the linear model/ANOVA.
 
-Several simulation experiments have shown that *t*-tests and linear models/ANOVA generally work well for count data, where "work well" means that Type I errors aren't too elevated and Power is relatively high. However, the simulations also show that negative-binomial Generalized Linear Models do better at controlling Type I error and have higher power, relative to *t*-tests/linear models/ANOVA models. For any one experiment, using a *t*-test/linear model/ANOVA model will have little consequence but over many, many experiments, we would expect to have fewer false negatives and positives if we use GLMs. That said, I prefer the GLM for two additional reasons: 1) The effect is a multiple of the reference, which is a really meaningful way of comparing responses (for example, looking at the table below, the effect is 6.5, meaning the expression level is 6.5 times larger than that of Vehicle), and 2) the CIs of the means are asymmetric, which reflects the skewed distribution of the data. This also avoids absurd CIs such as a negative lower bound (counts can't be negative!).
+Several simulation experiments have shown that *t*-tests and linear models/ANOVA generally work well for count data, where "work well" means that Type I errors aren't elevated and Power is relatively high. However, simulations also show that negative-binomial Generalized Linear Models can have substantially higher power under certain conditions. Here I use a simulation to compare the Type I error and Power of the Linear/ANOVA model and for a Negative Binomial GLM for data that look like those in Figure 7d. I explicitly simulate the Trim63 response with the same unbalanced data as in the experiment (the CC group only has 9 measures and not 10).
+
+```{r}
+# get parameters
+data_params <- fig7d[, .(mean = mean(Trim63),
+                         N = .N), by = "treatment"]
+mu <- rep(data_params$mean, data_params$N)
+N <- sum(data_params$N)
+m1 <- glm.nb(Trim63 ~ dex * cc, data = fig7d)
+theta_sim <- m1$theta
+
+n_sim <- 2000
+fd <- data.table(
+  treatment = rep(c("veh", "dex", "dex_cc", "cc"), data_params$N),
+  dex = rep(c("no_dex", "dex", "dex", "no_dex"), data_params$N),
+  cc = rep(c("no_cc", "no_cc", "cc", "cc"), data_params$N),
+  Trim63 = as.numeric(NA)
+)
+
+# power
+power_matrix <- matrix(nrow = n_sim, ncol = 4)
+colnames(power_matrix) <- c("lm_focal", "lm_ixn", "glm_focal", "glm_ixn")
+for(sim_i in 1:n_sim){
+  # fake data
+  fd[, Trim63 := rnegbin(N, mu, theta_sim)]
+  
+  # lm/ANOVA
+  m_lm <- lm(Trim63 ~ dex * cc, data = fd)
+  power_matrix[sim_i, "lm_ixn"] <- coef(summary(m_lm))["dexno_dex:ccno_cc", "Pr(>|t|)"]
+  m_lm_pairs <- emmeans(m_lm, specs = c("dex", "cc")) |>
+    contrast(method = "revpairwise", simple = "each", combine = TRUE, adjust = "none") |>
+    summary(infer = TRUE)
+  power_matrix[sim_i, "lm_focal"] <- m_lm_pairs[3, "p.value"] # effect of CC when dex is present
+  
+  # glm neg bin
+  m_glm <- glm.nb(Trim63 ~ dex * cc, data = fd)
+  power_matrix[sim_i, "glm_ixn"] <- coef(summary(m_glm))["dexno_dex:ccno_cc", "Pr(>|z|)"]
+  m_glm_pairs <- emmeans(m_glm, specs = c("dex", "cc")) |>
+    contrast(method = "revpairwise", simple = "each", combine = TRUE, adjust = "none") |>
+    summary(infer = TRUE)
+  power_matrix[sim_i, "glm_focal"] <- m_glm_pairs[3, "p.value"] # effect of CC when dex is present
+}
+
+
+# type I
+type1_matrix <- matrix(nrow = n_sim, ncol = 4)
+colnames(type1_matrix) <- c("lm_focal", "lm_ixn", "glm_focal", "glm_ixn")
+for(sim_i in 1:n_sim){
+  # fake data
+  fd[, Trim63 := rnegbin(N, mu[1], theta_sim)]
+  
+  # lm/ANOVA
+  m_lm <- lm(Trim63 ~ dex * cc, data = fd)
+  type1_matrix[sim_i, "lm_ixn"] <- coef(summary(m_lm))["dexno_dex:ccno_cc", "Pr(>|t|)"]
+  m_lm_pairs <- emmeans(m_lm, specs = c("dex", "cc")) |>
+    contrast(method = "revpairwise", simple = "each", combine = TRUE, adjust = "none") |>
+    summary(infer = TRUE)
+  type1_matrix[sim_i, "lm_focal"] <- m_lm_pairs[3, "p.value"] # effect of CC when dex is present
+  
+  # glm neg bin
+  m_glm <- glm.nb(Trim63 ~ dex * cc, data = fd)
+  type1_matrix[sim_i, "glm_ixn"] <- coef(summary(m_glm))["dexno_dex:ccno_cc", "Pr(>|z|)"]
+  m_glm_pairs <- emmeans(m_glm, specs = c("dex", "cc")) |>
+    contrast(method = "revpairwise", simple = "each", combine = TRUE, adjust = "none") |>
+    summary(infer = TRUE)
+  type1_matrix[sim_i, "glm_focal"] <- m_glm_pairs[3, "p.value"] # effect of CC when dex is present
+}
+
+pless <- function(x){
+  stat <- sum(x < 0.05)/length(x)
+  return(stat)
+}
+
+res <- data.table(
+  Test = c("LM: DEX+CC - DEX", "LM: Interaction", "GLM: DEX+CC - DEX", "GLM: Interaction"),
+  Power = apply(power_matrix, 2, pless),
+  "Type I" = apply(type1_matrix, 2, pless)
+)
+res |>
+  kable() |>
+  kable_styling(full_width = FALSE)
+```
+
+Curious. The linear model with an untransformed response has better Type I control and slightly more power than a negative binomial GLM.
+
+That said, I really like the GLM for two reasons: 1) The effect is a multiple of the reference, which is a really meaningful way of comparing responses (for example, looking at the table below, the effect is 6.5, meaning the expression level is 6.5 times larger than that of Vehicle), and 2) the CIs of the means are asymmetric, which reflects the skewed distribution of the data. This also avoids absurd CIs such as a negative lower bound (counts can't be negative!).
+
+## A Negative Binomial GLM fit to the data
 
 ```{r, warning=FALSE}
 # the original analysis in m0, m0_emm, and m0_pairs are computed above
@@ -271,9 +358,9 @@ contrast_table |>
 ```
 The top table contains the six Tukey-adjusted p-values reported by the researchers. The bottom table contains the six Tukey-adjusted p-values using a negative-binomial Generalized Linear Model (a useful model for count data). The focal-contrast *p*-value for the linear model/ANOVA and the GLM are similar (0.023 and 0.0347). 
 
-## Putting #1 and #2 together
+## Putting it all together
 
-```{r, warning = FALSE}
+```{r}
 
 m2_pairs_focal <- contrast(m2_emm,
                      method = focal_contrasts,
@@ -295,7 +382,7 @@ The top table contains the six Tukey-adjusted p-values reported by the researche
 
 ## Let's plot the model for all genes
 
-```{r warning = FALSE}
+```{r, fig.height = 11, fig.width= 8}
 get_model_result <- function(gene_i){
   model_formula <- paste(gene_i, "~ dex * cc") |>
     as.formula()
@@ -311,22 +398,27 @@ get_model_result <- function(gene_i){
 }
 
 res1 <- get_model_result("Fbxo32")
-gg1 <- plot_response(res1$m1, res1$m1_emm, res1$m1_pairs, palette = "pal_okabe_ito_blue")
+gg1 <- plot_response(res1$m1, res1$m1_emm, res1$m1_pairs, palette = "pal_okabe_ito_blue",
+                     x_axis_labels = c("DEX-\nCC-", "DEX+\nCC-", "DEX-\nCC+", "DEX+\nCC+"))
 res2 <- get_model_result("Trim63")
-gg2 <- plot_response(res2$m1, res2$m1_emm, res2$m1_pairs, palette = "pal_okabe_ito_blue")
+gg2 <- plot_response(res2$m1, res2$m1_emm, res2$m1_pairs, palette = "pal_okabe_ito_blue",
+                     x_axis_labels = c("DEX-\nCC-", "DEX+\nCC-", "DEX-\nCC+", "DEX+\nCC+"))
 res3 <- get_model_result("Atg7")
-gg3 <- plot_response(res3$m1, res3$m1_emm, res3$m1_pairs, palette = "pal_okabe_ito_blue")
+gg3 <- plot_response(res3$m1, res3$m1_emm, res3$m1_pairs, palette = "pal_okabe_ito_blue",
+                     x_axis_labels = c("DEX-\nCC-", "DEX+\nCC-", "DEX-\nCC+", "DEX+\nCC+"))
 res4 <- get_model_result("Becn1")
-gg4 <- plot_response(res4$m1, res4$m1_emm, res4$m1_pairs, palette = "pal_okabe_ito_blue")
+gg4 <- plot_response(res4$m1, res4$m1_emm, res4$m1_pairs, palette = "pal_okabe_ito_blue",
+                     x_axis_labels = c("DEX-\nCC-", "DEX+\nCC-", "DEX-\nCC+", "DEX+\nCC+"))
 res5 <- get_model_result("Bnip3")
-gg5 <- plot_response(res5$m1, res5$m1_emm, res5$m1_pairs, palette = "pal_okabe_ito_blue")
+gg5 <- plot_response(res5$m1, res5$m1_emm, res5$m1_pairs, palette = "pal_okabe_ito_blue",
+                     x_axis_labels = c("DEX-\nCC-", "DEX+\nCC-", "DEX-\nCC+", "DEX+\nCC+"))
 
 plot_grid(gg1, gg2, gg3, gg4, gg5, nrow = 3)
-gg1
-gg2
-gg3
-gg4
-gg5
+# gg1
+# gg2
+# gg3
+# gg4
+# gg5
 ```
 
 

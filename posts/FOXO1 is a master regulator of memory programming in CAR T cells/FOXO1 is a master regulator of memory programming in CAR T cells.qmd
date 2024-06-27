@@ -14,7 +14,7 @@ execute:
   warning: false
 editor_options: 
   chunk_output_type: console
-freeze: false
+freeze: true
 ---
 
 ![Fig 4h](../../figs/FOXO1 is a master regulator of memory programming in CAR T cells/fig4h.png)

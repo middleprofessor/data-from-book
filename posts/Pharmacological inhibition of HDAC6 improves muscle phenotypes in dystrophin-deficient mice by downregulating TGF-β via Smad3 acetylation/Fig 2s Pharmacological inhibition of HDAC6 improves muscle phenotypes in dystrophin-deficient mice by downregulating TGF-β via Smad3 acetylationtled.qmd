@@ -14,7 +14,7 @@ execute:
   warning: false
 editor_options: 
   chunk_output_type: inline
-freeze: false
+freeze: true
 
 ---
 

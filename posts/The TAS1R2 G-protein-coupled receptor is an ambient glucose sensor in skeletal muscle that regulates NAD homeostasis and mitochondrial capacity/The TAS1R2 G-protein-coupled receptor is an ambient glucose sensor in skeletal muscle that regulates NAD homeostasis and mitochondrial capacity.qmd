@@ -15,7 +15,7 @@ execute:
   warning: false
 editor_options: 
   chunk_output_type: inline
-freeze: false
+freeze: true
 ---
 
 ![ggplot better-than-replication of Fig 3b from the article. It's better than because the confidence intervals from the model are asymmetric and reflect the right (upward) skew of the data](../../figs/The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity/fig3b_ggplot.png){width=4in fig-align="left"}
