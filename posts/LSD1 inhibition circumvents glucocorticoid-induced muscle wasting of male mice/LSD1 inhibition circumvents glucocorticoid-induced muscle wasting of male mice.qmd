@@ -15,7 +15,7 @@ execute:
   warning: false
 editor_options: 
   chunk_output_type: inline
-freeze: auto
+freeze: false
 ---
 
 ## Vital info

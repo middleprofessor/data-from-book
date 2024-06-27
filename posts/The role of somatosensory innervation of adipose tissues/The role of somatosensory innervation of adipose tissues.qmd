@@ -14,7 +14,7 @@ execute:
   warning: false
 editor_options: 
   chunk_output_type: inline
-freeze: true
+freeze: false
 ---
 
 ![Fig 3g from the article](../../figs/The role of somatosensory innervation of adipose tissues/fig3g.png)
