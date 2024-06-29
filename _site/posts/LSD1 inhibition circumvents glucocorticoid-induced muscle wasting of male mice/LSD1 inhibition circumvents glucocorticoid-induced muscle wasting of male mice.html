@@ -2,15 +2,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.553">
+<meta name="generator" content="quarto-1.5.52">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Jeff Walker">
 <meta name="dcterms.date" content="2024-06-25">
-<meta name="description" content="The researchers analyzed figure 7b using one-way ANOVA with Tukey adjustment. The data (RNA levels) have a typical count distribution with right skew and variances that increase with the mean. The example is a good one to talk about p-values in bench biology. Two decisions in the analysis result in conservative p-values: 1) The ANOVA model has less power than a generalized linear model (GLM) that explicitly models a count distribution, and 2) The Tukey correction, which isn’t justified here. A third decision results in liberal p-values: the researchers analyzed the two technical replicates per mouse as if they were independent.">
+<meta name="description" content="Two interesting bits with Fig 7d: 1) The researchers analyzed figure 7b data using one-way ANOVA with Tukey adjustment. Post-hoc p-value adjusment is common but typically unjustified for bench biology data like these. The example is a good one to talk about p-value adjustment in bench biology. 2) The linear/ANOVA model implies absurd inference from the CI/SE error bars, including mean counts less than zero!">
 
-<title>Data From - Fig 7d – LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice</title>
+<title>Fig 7d – LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice – Data From</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -36,7 +36,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -122,7 +122,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -143,7 +143,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
-          <div class="quarto-navbar-tools">
+            <div class="quarto-navbar-tools">
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -155,13 +155,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <h1 class="title">Fig 7d – LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice</h1>
                   <div>
         <div class="description">
-          The researchers analyzed figure 7b using one-way ANOVA with Tukey adjustment. The data (RNA levels) have a typical count distribution with right skew and variances that increase with the mean. The example is a good one to talk about p-values in bench biology. Two decisions in the analysis result in conservative p-values: 1) The ANOVA model has less power than a generalized linear model (GLM) that explicitly models a count distribution, and 2) The Tukey correction, which isn’t justified here. A third decision results in liberal p-values: the researchers analyzed the two technical replicates per mouse as if they were independent.
+          Two interesting bits with Fig 7d: 1) The researchers analyzed figure 7b data using one-way ANOVA with Tukey adjustment. Post-hoc p-value adjusment is common but typically unjustified for bench biology data like these. The example is a good one to talk about p-value adjustment in bench biology. 2) The linear/ANOVA model implies absurd inference from the CI/SE error bars, including mean counts less than zero!
         </div>
       </div>
                           <div class="quarto-categories">
                 <div class="quarto-category">p-values</div>
                 <div class="quarto-category">multiple testing</div>
                 <div class="quarto-category">generalized linear model</div>
+                <div class="quarto-category">absurd CI</div>
+                <div class="quarto-category">power</div>
+                <div class="quarto-category">simulation</div>
                 <div class="quarto-category">pseudoreplication</div>
                 <div class="quarto-category">analysis flag</div>
               </div>
@@ -188,7 +191,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">June 27, 2024</p>
+        <p class="date-modified">June 29, 2024</p>
       </div>
     </div>
       
@@ -208,9 +211,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
   <li><a href="#import-and-wrangle" id="toc-import-and-wrangle" class="nav-link" data-scroll-target="#import-and-wrangle">Import and Wrangle</a></li>
   <li><a href="#does-the-unstandardization-matter" id="toc-does-the-unstandardization-matter" class="nav-link" data-scroll-target="#does-the-unstandardization-matter">Does the unstandardization matter</a></li>
-  <li><a href="#the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not" id="toc-the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not" class="nav-link" data-scroll-target="#the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not">1. The reported p-values are conservative (a bit on the “multiple testing” problem), or not!</a></li>
-  <li><a href="#for-these-data-a-generalized-linear-model-will-have-more-power-than-the-linear-modelanova." id="toc-for-these-data-a-generalized-linear-model-will-have-more-power-than-the-linear-modelanova." class="nav-link" data-scroll-target="#for-these-data-a-generalized-linear-model-will-have-more-power-than-the-linear-modelanova.">2. For these data, a Generalized Linear Model will have more power than the linear model/ANOVA.</a></li>
-  <li><a href="#putting-1-and-2-together" id="toc-putting-1-and-2-together" class="nav-link" data-scroll-target="#putting-1-and-2-together">Putting #1 and #2 together</a></li>
+  <li><a href="#the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not" id="toc-the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not" class="nav-link" data-scroll-target="#the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not">The reported p-values are conservative (a bit on the “multiple testing” problem), or not!</a></li>
+  <li><a href="#fig7d-is-a-good-example-of-how-a-linearanova-model-for-count-data-often-implies-silly-confidence-intervals" id="toc-fig7d-is-a-good-example-of-how-a-linearanova-model-for-count-data-often-implies-silly-confidence-intervals" class="nav-link" data-scroll-target="#fig7d-is-a-good-example-of-how-a-linearanova-model-for-count-data-often-implies-silly-confidence-intervals">Fig7d is a good example of how a linear/ANOVA model for count data often implies silly confidence intervals</a></li>
+  <li><a href="#a-bit-more-about-generalized-linear-models-glm" id="toc-a-bit-more-about-generalized-linear-models-glm" class="nav-link" data-scroll-target="#a-bit-more-about-generalized-linear-models-glm">A bit more about Generalized Linear Models (GLM)</a></li>
+  <li><a href="#for-these-data-the-linearanova-model-has-more-power-than-a-negative-binomial-glm" id="toc-for-these-data-the-linearanova-model-has-more-power-than-a-negative-binomial-glm" class="nav-link" data-scroll-target="#for-these-data-the-linearanova-model-has-more-power-than-a-negative-binomial-glm">For these data, the Linear/ANOVA model has more power than a Negative-Binomial GLM</a></li>
   <li><a href="#lets-plot-the-model-for-all-genes" id="toc-lets-plot-the-model-for-all-genes" class="nav-link" data-scroll-target="#lets-plot-the-model-for-all-genes">Let’s plot the model for all genes</a></li>
   </ul>
 </nav>
@@ -222,6 +226,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="../../figs/LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice/fig7d_ggplot.png" class="img-fluid figure-img" style="width:6in"></p>
+<figcaption>(A) Reproduced published plot using ANOVA model. Note the modeled CIs imply negative counts and absurd variances. (B) Better-than-reproduced plot using NB-GLM modeled CIs that don’t dip below zero and reflect true variance among groups.</figcaption>
+</figure>
+</div>
 <section id="vital-info" class="level2">
 <h2 class="anchored" data-anchor-id="vital-info">Vital info</h2>
 <p>Data From: <a href="https://www.nature.com/articles/s41467-024-47846-9" target="_blank">Cai, Q., Sahu, R., Ueberschlag-Pitiot, V., Souali-Crespo, S., Charvet, C., Silem, I., … &amp; Duteil, D. (2024). LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice. Nature Communications, 15(1), 3563.</a></p>
@@ -230,7 +240,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Published methods: one-way ANOVA with Tukey adjustment</p>
 <p>Design: Completely Randomized Design with subsampling (CRDS)</p>
 <p>Response: mRNA level</p>
-<p>Key learning concepts: not adjusting for multiple p-values</p>
+<p>Key learning concepts: not adjusting for multiple p-values, CIs that go below zero</p>
 <p>More info: <a href="https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm" target="_blank">Chapter 16 Models for non-independence – linear mixed models</a></p>
 </section>
 <section id="the-experiment" class="level2">
@@ -244,6 +254,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>CC (Dex-/CC+) Important negative control. We expect this to be similar to Vehicle. If it is not, we need the interaction.</li>
 <li>DEX+CC (Dex+/CC+) If LSD1 works with the GCR as expected, then we expect these levels to be lower than Dex+/CC- but how much depends on CC concentration.</li>
 </ol>
+<p>Analysis Flag: The data are two technical replicates per mouse, so all inference will be a little optimistic. The mouse ID was not archived so I cannot better-than-reproduce the results.</p>
 </section>
 <section id="setup" class="level2">
 <h2 class="anchored" data-anchor-id="setup">Setup</h2>
@@ -351,7 +362,7 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 </div>
 </section>
 <section id="the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not" class="level2">
-<h2 class="anchored" data-anchor-id="the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not">1. The reported p-values are conservative (a bit on the “multiple testing” problem), or not!</h2>
+<h2 class="anchored" data-anchor-id="the-reported-p-values-are-conservative-a-bit-on-the-multiple-testing-problem-or-not">The reported p-values are conservative (a bit on the “multiple testing” problem), or not!</h2>
 <p>The researchers reported Tukey-adjusted p-values. The Tukey method adjusts for the number of tests in a “family” of tests, where a family is the set of tests that answer one question. The researchers follow the norm in bench bio and choose the whole set of six contrasts as the family. This would answer a question such as: “if we were to create these combinations, would we find any difference between at least on pair?”, which isn’t a very interesting question.</p>
 <p>The researchers are focused on a much more specific question and at least two more questions, both related to controls:</p>
 <ol type="1">
@@ -372,15 +383,15 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"tukey"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># the analysis only comparing the three families of tests that we care about</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="co"># the analysis only comparing the families of tests that we care about</span></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>veh <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
 <span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>dex <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
 <span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>dex_cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="co"># note the wonky ordering in fig 7d</span></span>
 <span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span>
 <span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>focal_contrasts <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"dex"</span> <span class="ot">=</span> dex <span class="sc">-</span> veh,</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cc"</span> <span class="ot">=</span> cc <span class="sc">-</span> veh,</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"dex+cc - dex"</span> <span class="ot">=</span> dex_cc <span class="sc">-</span> dex,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"DEX - Vehicle"</span> <span class="ot">=</span> dex <span class="sc">-</span> veh,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"CC - Vehicle"</span> <span class="ot">=</span> cc <span class="sc">-</span> veh,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"DEX+CC - DEX"</span> <span class="ot">=</span> dex_cc <span class="sc">-</span> dex,</span>
 <span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"interaction"</span> <span class="ot">=</span> (dex_cc <span class="sc">-</span> dex) <span class="sc">-</span> (cc <span class="sc">-</span> veh)</span>
 <span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
@@ -399,8 +410,7 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 <span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"Non-adjusted"</span>, <span class="dv">7</span>, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div>
-<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
 <thead>
 <tr class="header">
 <th style="text-align: left;" data-quarto-table-cell-role="th">contrast</th>
@@ -481,7 +491,7 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 <td colspan="8" style="border-bottom: 1px solid"><strong>Non-adjusted</strong></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex</td>
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX - Vehicle</td>
 <td style="text-align: right;">5499807.1</td>
 <td style="text-align: right;">1053488</td>
 <td style="text-align: right;">35</td>
@@ -491,7 +501,7 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 <td style="text-align: right;">0.0000</td>
 </tr>
 <tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">cc</td>
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - Vehicle</td>
 <td style="text-align: right;">127648.4</td>
 <td style="text-align: right;">1082356</td>
 <td style="text-align: right;">35</td>
@@ -501,7 +511,7 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 <td style="text-align: right;">0.9068</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex+cc - dex</td>
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX+CC - DEX</td>
 <td style="text-align: right;">-3189762.9</td>
 <td style="text-align: right;">1053488</td>
 <td style="text-align: right;">35</td>
@@ -526,326 +536,199 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 
 </div>
 </div>
-</div>
 <p>The top table contains the six Tukey-adjusted p-values reported by the researchers. The bottom table contains the unadjusted values of only the contrasts of interest. The adjusted <em>p</em>-value for the focal contrast DEX+CC - DEX is 0.023 while the unadjusted value is 0.0046.</p>
 <p>The p-value of the interaction is 0.035 – note that it’s effect size is very similar to that of the DEX+CC - DEX but the p-value is bigger because the SE of an interaction is bigger than the SE of a main contrast (because the interaction is a function of 4 means and not just 2). Using the interaction p-value is not just statistically correct, it is more conservative.</p>
 </section>
-<section id="for-these-data-a-generalized-linear-model-will-have-more-power-than-the-linear-modelanova." class="level2">
-<h2 class="anchored" data-anchor-id="for-these-data-a-generalized-linear-model-will-have-more-power-than-the-linear-modelanova.">2. For these data, a Generalized Linear Model will have more power than the linear model/ANOVA.</h2>
-<p>Several simulation experiments have shown that <em>t</em>-tests and linear models/ANOVA generally work well for count data, where “work well” means that Type I errors aren’t too elevated and Power is relatively high. However, the simulations also show that negative-binomial Generalized Linear Models do better at controlling Type I error and have higher power, relative to <em>t</em>-tests/linear models/ANOVA models. For any one experiment, using a <em>t</em>-test/linear model/ANOVA model will have little consequence but over many, many experiments, we would expect to have fewer false negatives and positives if we use GLMs. That said, I prefer the GLM for two additional reasons: 1) The effect is a multiple of the reference, which is a really meaningful way of comparing responses (for example, looking at the table below, the effect is 6.5, meaning the expression level is 6.5 times larger than that of Vehicle), and 2) the CIs of the means are asymmetric, which reflects the skewed distribution of the data. This also avoids absurd CIs such as a negative lower bound (counts can’t be negative!).</p>
+<section id="fig7d-is-a-good-example-of-how-a-linearanova-model-for-count-data-often-implies-silly-confidence-intervals" class="level2">
+<h2 class="anchored" data-anchor-id="fig7d-is-a-good-example-of-how-a-linearanova-model-for-count-data-often-implies-silly-confidence-intervals">Fig7d is a good example of how a linear/ANOVA model for count data often implies silly confidence intervals</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the original analysis in m0, m0_emm, and m0_pairs are computed above</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>m2_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m2, <span class="fu">c</span>(<span class="st">"treatment"</span>), <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m2_emm,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">"revpairwise"</span>,</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"tukey"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> m2_pairs[, <span class="sc">-</span><span class="dv">7</span>]</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(m2_pairs) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(m0_pairs)</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="ot">&lt;-</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(m0_pairs, m2_pairs)</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="sc">|&gt;</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>() <span class="sc">|&gt;</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"LM/ANOVA"</span>, <span class="dv">1</span>, <span class="dv">6</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"GLM"</span>, <span class="dv">7</span>, <span class="dv">12</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>gg1 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(m1,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>              m1_emm,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>              m1_pairs[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,],</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#              x_axis_labels = c("DEX-\nCC-", "DEX+\nCC-", "DEX+\nCC+", "DEX-\nCC+"),</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>              <span class="cn">NULL</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>m2_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m2, <span class="fu">c</span>(<span class="st">"treatment"</span>), <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m2_emm,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> focal_contrasts,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> m2_pairs[, <span class="sc">-</span><span class="dv">7</span>]</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>gg2 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(m2,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>              m2_emm,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>              m2_pairs[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,],</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#              x_axis_labels = c("DEX-\nCC-", "DEX+\nCC-", "DEX+\nCC+", "DEX-\nCC+"),</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>              <span class="cn">NULL</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(gg1, gg2, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">labels =</span> <span class="st">"AUTO"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
-<table class="table table-sm table-striped small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">contrast</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">estimate</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">SE</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">df</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">lower.CL</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">upper.CL</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">t.ratio</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p.value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd" data-grouplength="6">
-<td colspan="8" style="border-bottom: 1px solid"><strong>LM/ANOVA</strong></td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX - Vehicle</td>
-<td style="text-align: right;">5499807.1000</td>
-<td style="text-align: right;">1053487.9480</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">2658652.5086</td>
-<td style="text-align: right;">8340961.6914</td>
-<td style="text-align: right;">5.2206</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - Vehicle</td>
-<td style="text-align: right;">2310044.2000</td>
-<td style="text-align: right;">1053487.9480</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">-531110.3914</td>
-<td style="text-align: right;">5151198.7914</td>
-<td style="text-align: right;">2.1928</td>
-<td style="text-align: right;">0.1452</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - DEX</td>
-<td style="text-align: right;">-3189762.9000</td>
-<td style="text-align: right;">1053487.9480</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">-6030917.4914</td>
-<td style="text-align: right;">-348608.3086</td>
-<td style="text-align: right;">-3.0278</td>
-<td style="text-align: right;">0.0228</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - Vehicle</td>
-<td style="text-align: right;">127648.3889</td>
-<td style="text-align: right;">1082355.9764</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">-2791360.4691</td>
-<td style="text-align: right;">3046657.2468</td>
-<td style="text-align: right;">0.1179</td>
-<td style="text-align: right;">0.9994</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - DEX</td>
-<td style="text-align: right;">-5372158.7111</td>
-<td style="text-align: right;">1082355.9764</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">-8291167.5691</td>
-<td style="text-align: right;">-2453149.8532</td>
-<td style="text-align: right;">-4.9634</td>
-<td style="text-align: right;">0.0001</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - (DEX+CC)</td>
-<td style="text-align: right;">-2182395.8111</td>
-<td style="text-align: right;">1082355.9764</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">-5101404.6691</td>
-<td style="text-align: right;">736613.0468</td>
-<td style="text-align: right;">-2.0163</td>
-<td style="text-align: right;">0.2015</td>
-</tr>
-<tr class="even" data-grouplength="6">
-<td colspan="8" style="border-bottom: 1px solid"><strong>GLM</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX / Vehicle</td>
-<td style="text-align: right;">6.4998</td>
-<td style="text-align: right;">1.6230</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">3.4222</td>
-<td style="text-align: right;">12.3452</td>
-<td style="text-align: right;">7.4960</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) / Vehicle</td>
-<td style="text-align: right;">3.3100</td>
-<td style="text-align: right;">0.8265</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">1.7428</td>
-<td style="text-align: right;">6.2868</td>
-<td style="text-align: right;">4.7935</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) / DEX</td>
-<td style="text-align: right;">0.5093</td>
-<td style="text-align: right;">0.1272</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">0.2681</td>
-<td style="text-align: right;">0.9672</td>
-<td style="text-align: right;">-2.7025</td>
-<td style="text-align: right;">0.0347</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC / Vehicle</td>
-<td style="text-align: right;">1.1276</td>
-<td style="text-align: right;">0.2893</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">0.5834</td>
-<td style="text-align: right;">2.1797</td>
-<td style="text-align: right;">0.4683</td>
-<td style="text-align: right;">0.9660</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC / DEX</td>
-<td style="text-align: right;">0.1735</td>
-<td style="text-align: right;">0.0445</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">0.0898</td>
-<td style="text-align: right;">0.3354</td>
-<td style="text-align: right;">-6.8278</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC / (DEX+CC)</td>
-<td style="text-align: right;">0.3407</td>
-<td style="text-align: right;">0.0874</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">0.1762</td>
-<td style="text-align: right;">0.6585</td>
-<td style="text-align: right;">-4.1974</td>
-<td style="text-align: right;">0.0002</td>
-</tr>
-</tbody>
-</table>
-
-
+<figure class="figure">
+<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>save_it <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(save_it){</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  out_fig <span class="ot">&lt;-</span> <span class="st">"fig7d_ggplot.png"</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  out_path <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"figs"</span>, data_from, out_fig)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggsave</span>(out_path)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
-<p>The top table contains the six Tukey-adjusted p-values reported by the researchers. The bottom table contains the six Tukey-adjusted p-values using a negative-binomial Generalized Linear Model (a useful model for count data). The focal-contrast <em>p</em>-value for the linear model/ANOVA and the GLM are similar (0.023 and 0.0347).</p>
+<p>The two plots above are the estimated means and 95% CIs from the linear/ANOVA model (A) and a negative-binomial Generalized Linear Model (B). The linear/ANOVA model implies two absurd things about the confidence of the means of the groups</p>
+<ol type="1">
+<li>Homogeneity of variances – remember, equal variance among treatment levels is an assumption of a linear/ANOVA model, so the model standard error of the mean of a group is a function only of the group sample size. The modeled SEs/CIs are too big for the groups with small mean counts and too small for the groups with large mean counts.</li>
+<li>Values below zero. A good way to think about a CI is, values within a confidence interval are reasonably plausible values for the group mean. The CIs of Vehicle and CC imply that negative means are “reasonably plausible” values, which is absurd, counts cannot be negative.</li>
+</ol>
+<p>By contrast, the CIs from the GLM more accurately model the data.</p>
+<ol type="1">
+<li>The modeled CIs vary among the groups and look much more like the sampled CIs. In a negative-binomial GLM, the model standard error of the mean of a group is a function of the sample size and the mean of the group – groups with larger means have larger variances/standard errors. It’s easy to see this phenomenon with these data; the spread of points for DEX is much more than that for Vehicle, but the linear/ANOVA model CIs do not model this.</li>
+<li>the CIs are asymmetric, the upper bound is further from the mean than the lower bound. Again, this reflects the skew of the data.</li>
+<li>the CIs do not (and cannot) dip below zero.</li>
+</ol>
+<p>We don’t see figures like Panel A above because researchers plot <strong>sample</strong> SEs and not modeled SEs – the SE actually used to compute the <em>p</em>-value. So “inference from the plot” is inconsistent with the <em>p</em>-value. This is why researchers should plot the model (modeled SE/CI) and not the data (sampled SE/CI).</p>
 </section>
-<section id="putting-1-and-2-together" class="level2">
-<h2 class="anchored" data-anchor-id="putting-1-and-2-together">Putting #1 and #2 together</h2>
+<section id="a-bit-more-about-generalized-linear-models-glm" class="level2">
+<h2 class="anchored" data-anchor-id="a-bit-more-about-generalized-linear-models-glm">A bit more about Generalized Linear Models (GLM)</h2>
+<p>Count data in biology often have a distribution that approximates a sample from a Negative Binomial distribution. Two features of this distribution that violate assumptions of a linear/ANOVA model are</p>
+<ol type="1">
+<li>Homeogeneity of variance – the variance of the response is proportional to the mean of the group, so groups with a higher mean count have higher variances</li>
+<li>Normal – counts are right skewed, that is, there is a high density of low counts and a low density of high counts</li>
+</ol>
+<p>Generalized Linear Models (GLM) were developed to compute confidence intervals and <em>p</em>-values for counts and other kinds of data with non-normal distributions.</p>
+</section>
+<section id="for-these-data-the-linearanova-model-has-more-power-than-a-negative-binomial-glm" class="level2">
+<h2 class="anchored" data-anchor-id="for-these-data-the-linearanova-model-has-more-power-than-a-negative-binomial-glm">For these data, the Linear/ANOVA model has more power than a Negative-Binomial GLM</h2>
+<p>Despite the violations, tests from linear/ANOVA models that give a <em>p</em>-value often have good long-run performance, that is, they have relatively high power and controlled type I error <a href="https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.12386" target="_blank">Ives 2015</a>. GLM models for count data can have higher power than a linear/ANOVA model, but this sometimes requires some more sophisticated methods such as bootstrap resampling <a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12552" target="_blank">Warton et al.&nbsp;2016</a>.</p>
+<p>Here I use a simulation to compare the Type I error and Power of the Linear/ANOVA model and for a Negative Binomial GLM for data that look like those in Figure 7d. I explicitly simulate the Trim63 response with the same unbalanced data as in the experiment (the CC group only has 9 measures and not 10).</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>m2_pairs_focal <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m2_emm,</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> focal_contrasts,</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>m2_pairs_focal <span class="ot">&lt;-</span> m2_pairs_focal[, <span class="sc">-</span><span class="dv">7</span>]</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(m2_pairs_focal) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(m0_pairs)</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="ot">&lt;-</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(m0_pairs, m2_pairs_focal)</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="sc">|&gt;</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>() <span class="sc">|&gt;</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"LM/ANOVA adjusted"</span>, <span class="dv">1</span>, <span class="dv">6</span>) <span class="sc">|&gt;</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"GLM not adjusted"</span>, <span class="dv">7</span>, <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get parameters</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>do_it <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(do_it){</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  data_params <span class="ot">&lt;-</span> fig7d[, .(<span class="at">mean =</span> <span class="fu">mean</span>(Trim63),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                           <span class="at">N =</span> .N), by <span class="ot">=</span> <span class="st">"treatment"</span>]</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> <span class="fu">rep</span>(data_params<span class="sc">$</span>mean, data_params<span class="sc">$</span>N)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  N <span class="ot">&lt;-</span> <span class="fu">sum</span>(data_params<span class="sc">$</span>N)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fig7d)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  theta_sim <span class="ot">&lt;-</span> m1<span class="sc">$</span>theta</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  n_sim <span class="ot">&lt;-</span> <span class="dv">2000</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  fd <span class="ot">&lt;-</span> <span class="fu">data.table</span>(</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">treatment =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"veh"</span>, <span class="st">"dex"</span>, <span class="st">"dex_cc"</span>, <span class="st">"cc"</span>), data_params<span class="sc">$</span>N),</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">dex =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"no_dex"</span>, <span class="st">"dex"</span>, <span class="st">"dex"</span>, <span class="st">"no_dex"</span>), data_params<span class="sc">$</span>N),</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">cc =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"no_cc"</span>, <span class="st">"no_cc"</span>, <span class="st">"cc"</span>, <span class="st">"cc"</span>), data_params<span class="sc">$</span>N),</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">Trim63 =</span> <span class="fu">as.numeric</span>(<span class="cn">NA</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># power</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  power_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow =</span> n_sim, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(power_matrix) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"lm_focal"</span>, <span class="st">"lm_ixn"</span>, <span class="st">"glm_focal"</span>, <span class="st">"glm_ixn"</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(sim_i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sim){</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fake data</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    fd[, Trim63 <span class="sc">:</span><span class="er">=</span> <span class="fu">rnegbin</span>(N, mu, theta_sim)]</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># lm/ANOVA</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    m_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fd)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"lm_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_lm))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    m_lm_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_lm, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"lm_focal"</span>] <span class="ot">&lt;-</span> m_lm_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># glm neg bin</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    m_glm <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fd)</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"glm_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_glm))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|z|)"</span>]</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    m_glm_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_glm, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"glm_focal"</span>] <span class="ot">&lt;-</span> m_glm_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>  <span class="co"># type I</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>  type1_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow =</span> n_sim, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(type1_matrix) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"lm_focal"</span>, <span class="st">"lm_ixn"</span>, <span class="st">"glm_focal"</span>, <span class="st">"glm_ixn"</span>)</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(sim_i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sim){</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fake data</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    fd[, Trim63 <span class="sc">:</span><span class="er">=</span> <span class="fu">rnegbin</span>(N, mu[<span class="dv">1</span>], theta_sim)]</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># lm/ANOVA</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>    m_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fd)</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"lm_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_lm))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>    m_lm_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_lm, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"lm_focal"</span>] <span class="ot">&lt;-</span> m_lm_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># glm neg bin</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>    m_glm <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fd)</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"glm_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_glm))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|z|)"</span>]</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>    m_glm_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_glm, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"glm_focal"</span>] <span class="ot">&lt;-</span> m_glm_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(power_matrix, <span class="st">"power_matrix.Rds"</span>)</span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(type1_matrix, <span class="st">"type1_matrix.Rds"</span>)</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>}<span class="cf">else</span>{</span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>  power_matrix <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"power_matrix.Rds"</span>)</span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>  type1_matrix <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"type1_matrix.Rds"</span>)</span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>pless <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>  stat <span class="ot">&lt;-</span> <span class="fu">sum</span>(x <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span><span class="fu">length</span>(x)</span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(stat)</span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">data.table</span>(</span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>  <span class="at">Test =</span> <span class="fu">c</span>(<span class="st">"LM: DEX+CC - DEX"</span>, <span class="st">"LM: Interaction"</span>, <span class="st">"GLM: DEX+CC - DEX"</span>, <span class="st">"GLM: Interaction"</span>),</span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a>  <span class="at">Power =</span> <span class="fu">apply</span>(power_matrix, <span class="dv">2</span>, pless),</span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Type I"</span> <span class="ot">=</span> <span class="fu">apply</span>(type1_matrix, <span class="dv">2</span>, pless)</span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>res <span class="sc">|&gt;</span></span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>() <span class="sc">|&gt;</span></span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div>
-<table class="table table-sm table-striped small" data-quarto-postprocess="true">
+<table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">contrast</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">estimate</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">SE</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">df</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">lower.CL</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">upper.CL</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">t.ratio</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p.value</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Test</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Power</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Type I</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd" data-grouplength="6">
-<td colspan="8" style="border-bottom: 1px solid"><strong>LM/ANOVA adjusted</strong></td>
+<tr class="odd">
+<td style="text-align: left;">LM: DEX+CC - DEX</td>
+<td style="text-align: right;">0.8005</td>
+<td style="text-align: right;">0.0540</td>
 </tr>
 <tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX - Vehicle</td>
-<td style="text-align: right;">5499807.1000</td>
-<td style="text-align: right;">1053487.9480</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">2658652.5086</td>
-<td style="text-align: right;">8340961.6914</td>
-<td style="text-align: right;">5.2206</td>
-<td style="text-align: right;">0.0000</td>
+<td style="text-align: left;">LM: Interaction</td>
+<td style="text-align: right;">0.6765</td>
+<td style="text-align: right;">0.0525</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - Vehicle</td>
-<td style="text-align: right;">2310044.2000</td>
-<td style="text-align: right;">1053487.9480</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">-531110.3914</td>
-<td style="text-align: right;">5151198.7914</td>
-<td style="text-align: right;">2.1928</td>
-<td style="text-align: right;">0.1452</td>
+<td style="text-align: left;">GLM: DEX+CC - DEX</td>
+<td style="text-align: right;">0.7245</td>
+<td style="text-align: right;">0.0745</td>
 </tr>
 <tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - DEX</td>
-<td style="text-align: right;">-3189762.9000</td>
-<td style="text-align: right;">1053487.9480</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">-6030917.4914</td>
-<td style="text-align: right;">-348608.3086</td>
-<td style="text-align: right;">-3.0278</td>
-<td style="text-align: right;">0.0228</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - Vehicle</td>
-<td style="text-align: right;">127648.3889</td>
-<td style="text-align: right;">1082355.9764</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">-2791360.4691</td>
-<td style="text-align: right;">3046657.2468</td>
-<td style="text-align: right;">0.1179</td>
-<td style="text-align: right;">0.9994</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - DEX</td>
-<td style="text-align: right;">-5372158.7111</td>
-<td style="text-align: right;">1082355.9764</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">-8291167.5691</td>
-<td style="text-align: right;">-2453149.8532</td>
-<td style="text-align: right;">-4.9634</td>
-<td style="text-align: right;">0.0001</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - (DEX+CC)</td>
-<td style="text-align: right;">-2182395.8111</td>
-<td style="text-align: right;">1082355.9764</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">-5101404.6691</td>
-<td style="text-align: right;">736613.0468</td>
-<td style="text-align: right;">-2.0163</td>
-<td style="text-align: right;">0.2015</td>
-</tr>
-<tr class="even" data-grouplength="4">
-<td colspan="8" style="border-bottom: 1px solid"><strong>GLM not adjusted</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex</td>
-<td style="text-align: right;">6.4998</td>
-<td style="text-align: right;">1.6230</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">3.9843</td>
-<td style="text-align: right;">10.6035</td>
-<td style="text-align: right;">7.4960</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">cc</td>
-<td style="text-align: right;">1.1276</td>
-<td style="text-align: right;">0.2893</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">0.6820</td>
-<td style="text-align: right;">1.8644</td>
-<td style="text-align: right;">0.4683</td>
-<td style="text-align: right;">0.6396</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex+cc / dex</td>
-<td style="text-align: right;">0.5093</td>
-<td style="text-align: right;">0.1272</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">0.3122</td>
-<td style="text-align: right;">0.8308</td>
-<td style="text-align: right;">-2.7025</td>
-<td style="text-align: right;">0.0069</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">interaction</td>
-<td style="text-align: right;">0.4516</td>
-<td style="text-align: right;">0.1617</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">0.2239</td>
-<td style="text-align: right;">0.9109</td>
-<td style="text-align: right;">-2.2205</td>
-<td style="text-align: right;">0.0264</td>
+<td style="text-align: left;">GLM: Interaction</td>
+<td style="text-align: right;">0.6675</td>
+<td style="text-align: right;">0.0705</td>
 </tr>
 </tbody>
 </table>
@@ -853,373 +736,63 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 
 </div>
 </div>
-</div>
-<p>The top table contains the six Tukey-adjusted p-values reported by the researchers. The bottom table contains the four unadjusted p-values using a negative-binomial Generalized Linear Model.</p>
+<p>Curious. The linear model with an untransformed response has better Type I control and slightly more power than a negative binomial GLM.</p>
+<p>That said, I really like the GLM for two reasons:</p>
+<ol type="1">
+<li>The effect is a multiple of the reference, which is a really meaningful way of comparing responses (for example, looking at the table below, the effect is 6.5, meaning the expression level is 6.5 times larger than that of Vehicle)</li>
+<li>The CIs of the means are asymmetric, which reflects the skewed distribution of the data. This also avoids absurd CIs such as a negative lower bound (counts can’t be negative!).</li>
+</ol>
 </section>
 <section id="lets-plot-the-model-for-all-genes" class="level2">
 <h2 class="anchored" data-anchor-id="lets-plot-the-model-for-all-genes">Let’s plot the model for all genes</h2>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>get_model_result <span class="ot">&lt;-</span> <span class="cf">function</span>(gene_i){</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  model_formula <span class="ot">&lt;-</span> <span class="fu">paste</span>(gene_i, <span class="st">"~ dex * cc"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.formula</span>()</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(model_formula, <span class="at">data =</span> fig7d)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  m1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m1, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>), <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  m1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1_emm,</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                       <span class="at">method =</span> <span class="st">"revpairwise"</span>,</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>                       <span class="at">simple =</span> <span class="st">"each"</span>,</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>                       <span class="at">combine =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>                       <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">m1 =</span> m1, <span class="at">m1_emm =</span> m1_emm, <span class="at">m1_pairs =</span> m1_pairs))</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>res1 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Fbxo32"</span>)</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>gg1 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res1<span class="sc">$</span>m1, res1<span class="sc">$</span>m1_emm, res1<span class="sc">$</span>m1_pairs, <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>res2 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Trim63"</span>)</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>gg2 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res2<span class="sc">$</span>m1, res2<span class="sc">$</span>m1_emm, res2<span class="sc">$</span>m1_pairs, <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>res3 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Atg7"</span>)</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>gg3 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res3<span class="sc">$</span>m1, res3<span class="sc">$</span>m1_emm, res3<span class="sc">$</span>m1_pairs, <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>res4 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Becn1"</span>)</span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>gg4 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res4<span class="sc">$</span>m1, res4<span class="sc">$</span>m1_emm, res4<span class="sc">$</span>m1_pairs, <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>res5 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Bnip3"</span>)</span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>gg5 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res5<span class="sc">$</span>m1, res5<span class="sc">$</span>m1_emm, res5<span class="sc">$</span>m1_pairs, <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(gg1, gg2, gg3, gg4, gg5, <span class="at">nrow =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>get_model_result <span class="ot">&lt;-</span> <span class="cf">function</span>(gene_i){</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  model_formula <span class="ot">&lt;-</span> <span class="fu">paste</span>(gene_i, <span class="st">"~ treatment"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.formula</span>()</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  m1 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(model_formula, <span class="at">data =</span> fig7d)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  m1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m1, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"treatment"</span>), <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  m1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1_emm,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                       <span class="at">method =</span> focal_contrasts,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>                       <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">m1 =</span> m1, <span class="at">m1_emm =</span> m1_emm, <span class="at">m1_pairs =</span> m1_pairs))</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>res1 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Fbxo32"</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>gg1 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res1<span class="sc">$</span>m1, res1<span class="sc">$</span>m1_emm, res1<span class="sc">$</span>m1_pairs[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">2</span>),], <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">x_axis_labels =</span> <span class="fu">c</span>(<span class="st">"DEX-</span><span class="sc">\n</span><span class="st">CC-"</span>, <span class="st">"DEX+</span><span class="sc">\n</span><span class="st">CC-"</span>, <span class="st">"DEX+</span><span class="sc">\n</span><span class="st">CC+"</span>, <span class="st">"DEX-</span><span class="sc">\n</span><span class="st">CC+"</span>))</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>res2 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Trim63"</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>gg2 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res2<span class="sc">$</span>m1, res2<span class="sc">$</span>m1_emm, res2<span class="sc">$</span>m1_pairs[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">2</span>),], <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>,</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>                     <span class="at">x_axis_labels =</span> <span class="fu">c</span>(<span class="st">"DEX-</span><span class="sc">\n</span><span class="st">CC-"</span>, <span class="st">"DEX+</span><span class="sc">\n</span><span class="st">CC-"</span>, <span class="st">"DEX+</span><span class="sc">\n</span><span class="st">CC+"</span>, <span class="st">"DEX-</span><span class="sc">\n</span><span class="st">CC+"</span>))</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>res3 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Atg7"</span>)</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>gg3 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res3<span class="sc">$</span>m1, res3<span class="sc">$</span>m1_emm, res3<span class="sc">$</span>m1_pairs[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">2</span>),], <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>,</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>                     <span class="at">x_axis_labels =</span> <span class="fu">c</span>(<span class="st">"DEX-</span><span class="sc">\n</span><span class="st">CC-"</span>, <span class="st">"DEX+</span><span class="sc">\n</span><span class="st">CC-"</span>, <span class="st">"DEX+</span><span class="sc">\n</span><span class="st">CC+"</span>, <span class="st">"DEX-</span><span class="sc">\n</span><span class="st">CC+"</span>))</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>res4 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Becn1"</span>)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>gg4 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res4<span class="sc">$</span>m1, res4<span class="sc">$</span>m1_emm, res4<span class="sc">$</span>m1_pairs[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">2</span>),], <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>,</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>                     <span class="at">x_axis_labels =</span> <span class="fu">c</span>(<span class="st">"DEX-</span><span class="sc">\n</span><span class="st">CC-"</span>, <span class="st">"DEX+</span><span class="sc">\n</span><span class="st">CC-"</span>, <span class="st">"DEX+</span><span class="sc">\n</span><span class="st">CC+"</span>, <span class="st">"DEX-</span><span class="sc">\n</span><span class="st">CC+"</span>))</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>res5 <span class="ot">&lt;-</span> <span class="fu">get_model_result</span>(<span class="st">"Bnip3"</span>)</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>gg5 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(res5<span class="sc">$</span>m1, res5<span class="sc">$</span>m1_emm, res5<span class="sc">$</span>m1_pairs[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">2</span>),], <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>,</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>                     <span class="at">x_axis_labels =</span> <span class="fu">c</span>(<span class="st">"DEX-</span><span class="sc">\n</span><span class="st">CC-"</span>, <span class="st">"DEX+</span><span class="sc">\n</span><span class="st">CC-"</span>, <span class="st">"DEX+</span><span class="sc">\n</span><span class="st">CC+"</span>, <span class="st">"DEX-</span><span class="sc">\n</span><span class="st">CC+"</span>))</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(gg1, gg2, gg3, gg4, gg5, <span class="at">nrow =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>gg1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># gg1</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># gg2</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># gg3</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># gg4</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># gg5</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gg2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-3.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>gg3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-4.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gg4</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-5.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>gg5</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="LSD1-inhibition-circumvents-glucocorticoid-induced-muscle-wasting-of-male-mice_files/figure-html/unnamed-chunk-5-6.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>veh <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>dex <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>)</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>dex_cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>) <span class="co"># note the wonky ordering in fig 7d</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>cc <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>)</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>focal_contrasts <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"dex"</span> <span class="ot">=</span> dex <span class="sc">-</span> veh,</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"cc"</span> <span class="ot">=</span> cc <span class="sc">-</span> veh,</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"dex+cc - dex"</span> <span class="ot">=</span> dex_cc <span class="sc">-</span> dex,</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"interaction"</span> <span class="ot">=</span> (dex_cc <span class="sc">-</span> dex) <span class="sc">-</span> (cc <span class="sc">-</span> veh)</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>m1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m1, <span class="fu">c</span>(<span class="st">"treatment"</span>))</span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>m1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1_emm,</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> focal_contrasts,</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>m1b_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1_emm,</span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">"revpairwise"</span>,</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>                      <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>m1c <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Fbxo32 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fig7d)</span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>m1c_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m1c, <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>))</span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>m1c_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m1c_emm,</span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">"revpairwise"</span>,</span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>                      <span class="at">simple =</span> <span class="st">"each"</span>,</span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>                      <span class="at">combine =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>                      <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>m1_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code> contrast     estimate    SE  df asymp.LCL asymp.UCL z.ratio p.value
- dex             1.872 0.250 Inf     1.382    2.3612   7.496  &lt;.0001
- cc              0.120 0.257 Inf    -0.383    0.6230   0.468  0.6396
- dex+cc - dex   -0.675 0.250 Inf    -1.164   -0.1854  -2.702  0.0069
- interaction    -0.795 0.358 Inf    -1.497   -0.0933  -2.220  0.0264
-
-Results are given on the log (not the response) scale. 
-Confidence level used: 0.95 </code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(<span class="fu">summary</span>(m1c))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>                      Estimate Std. Error    z value     Pr(&gt;|z|)
-(Intercept)         13.8155101  0.1765671 78.2451122 0.000000e+00
-dexDex_pos           1.8717729  0.2497034  7.4959857 6.580195e-14
-ccCC_pos             0.1201344  0.2565460  0.4682765 6.395869e-01
-dexDex_pos:ccCC_pos -0.7949455  0.3580049 -2.2204874 2.638570e-02</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="ot">&lt;-</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(m1_pairs, m1b_pairs, m1c_pairs)</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>contrast_table <span class="sc">|&gt;</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>() <span class="sc">|&gt;</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"manual"</span>, <span class="dv">1</span>, <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"flat"</span>, <span class="dv">5</span>, <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"2x2"</span>, <span class="dv">11</span>, <span class="dv">14</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div>
-<table class="table table-sm table-striped small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">contrast</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">cc</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">dex</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">estimate</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">SE</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">df</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">asymp.LCL</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">asymp.UCL</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">z.ratio</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p.value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd" data-grouplength="4">
-<td colspan="10" style="border-bottom: 1px solid"><strong>manual</strong></td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">1.8718</td>
-<td style="text-align: right;">0.2497</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">1.3824</td>
-<td style="text-align: right;">2.3612</td>
-<td style="text-align: right;">7.4960</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">cc</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">0.1201</td>
-<td style="text-align: right;">0.2565</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">-0.3827</td>
-<td style="text-align: right;">0.6230</td>
-<td style="text-align: right;">0.4683</td>
-<td style="text-align: right;">0.6396</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">dex+cc - dex</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">-0.6748</td>
-<td style="text-align: right;">0.2497</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">-1.1642</td>
-<td style="text-align: right;">-0.1854</td>
-<td style="text-align: right;">-2.7025</td>
-<td style="text-align: right;">0.0069</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">interaction</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">-0.7949</td>
-<td style="text-align: right;">0.3580</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">-1.4966</td>
-<td style="text-align: right;">-0.0933</td>
-<td style="text-align: right;">-2.2205</td>
-<td style="text-align: right;">0.0264</td>
-</tr>
-<tr class="even" data-grouplength="6">
-<td colspan="10" style="border-bottom: 1px solid"><strong>flat</strong></td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">DEX - Vehicle</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">1.8718</td>
-<td style="text-align: right;">0.2497</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">1.3824</td>
-<td style="text-align: right;">2.3612</td>
-<td style="text-align: right;">7.4960</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - Vehicle</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">1.1970</td>
-<td style="text-align: right;">0.2497</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">0.7076</td>
-<td style="text-align: right;">1.6864</td>
-<td style="text-align: right;">4.7935</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">(DEX+CC) - DEX</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">-0.6748</td>
-<td style="text-align: right;">0.2497</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">-1.1642</td>
-<td style="text-align: right;">-0.1854</td>
-<td style="text-align: right;">-2.7025</td>
-<td style="text-align: right;">0.0069</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - Vehicle</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">0.1201</td>
-<td style="text-align: right;">0.2565</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">-0.3827</td>
-<td style="text-align: right;">0.6230</td>
-<td style="text-align: right;">0.4683</td>
-<td style="text-align: right;">0.6396</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - DEX</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">-1.7516</td>
-<td style="text-align: right;">0.2565</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">-2.2545</td>
-<td style="text-align: right;">-1.2488</td>
-<td style="text-align: right;">-6.8278</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC - (DEX+CC)</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">-1.0768</td>
-<td style="text-align: right;">0.2565</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">-1.5796</td>
-<td style="text-align: right;">-0.5740</td>
-<td style="text-align: right;">-4.1974</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="odd" data-grouplength="4">
-<td colspan="10" style="border-bottom: 1px solid"><strong>2x2</strong></td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Dex_pos - Dex_neg</td>
-<td style="text-align: left;">CC_neg</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">1.8718</td>
-<td style="text-align: right;">0.2497</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">1.3824</td>
-<td style="text-align: right;">2.3612</td>
-<td style="text-align: right;">7.4960</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Dex_pos - Dex_neg</td>
-<td style="text-align: left;">CC_pos</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: right;">1.0768</td>
-<td style="text-align: right;">0.2565</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">0.5740</td>
-<td style="text-align: right;">1.5796</td>
-<td style="text-align: right;">4.1974</td>
-<td style="text-align: right;">0.0000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC_pos - CC_neg</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">Dex_neg</td>
-<td style="text-align: right;">0.1201</td>
-<td style="text-align: right;">0.2565</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">-0.3827</td>
-<td style="text-align: right;">0.6230</td>
-<td style="text-align: right;">0.4683</td>
-<td style="text-align: right;">0.6396</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">CC_pos - CC_neg</td>
-<td style="text-align: left;">.</td>
-<td style="text-align: left;">Dex_pos</td>
-<td style="text-align: right;">-0.6748</td>
-<td style="text-align: right;">0.2497</td>
-<td style="text-align: right;">Inf</td>
-<td style="text-align: right;">-1.1642</td>
-<td style="text-align: right;">-0.1854</td>
-<td style="text-align: right;">-2.7025</td>
-<td style="text-align: right;">0.0069</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-</div>
 </div>
 
 
@@ -1261,18 +834,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -1304,7 +866,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp('/' + window.location.host + '/');
@@ -1312,7 +896,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {
