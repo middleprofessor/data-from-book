@@ -8,9 +8,9 @@
 
 <meta name="author" content="Jeff Walker">
 <meta name="dcterms.date" content="2024-06-25">
-<meta name="description" content="Two interesting bits with Fig 7d: 1) The researchers analyzed figure 7b data using one-way ANOVA with Tukey adjustment. Post-hoc p-value adjusment is common but typically unjustified for bench biology data like these. The example is a good one to talk about p-value adjustment in bench biology. 2) The linear/ANOVA model implies absurd inference from the CI/SE error bars, including mean counts less than zero!">
+<meta name="description" content="Two interesting bits with Fig 7d: 1) The researchers analyzed figure 7b data using one-way ANOVA with Tukey adjustment. Post-hoc p-value adjustment is common but typically unjustified for bench biology data like these. The example is a good one to talk about p-value adjustment in bench biology. 2) The linear/ANOVA model implies absurd inference from the CI/SE error bars, including mean counts less than zero!">
 
-<title>Fig 7d – LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice – Data From</title>
+<title>Hot take: don’t adjust p-values – Data From</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -152,10 +152,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Fig 7d – LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice</h1>
+      <h1 class="title">Hot take: don’t adjust p-values</h1>
+            <p class="subtitle lead">Data From Fig 7d – LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice</p>
                   <div>
         <div class="description">
-          Two interesting bits with Fig 7d: 1) The researchers analyzed figure 7b data using one-way ANOVA with Tukey adjustment. Post-hoc p-value adjusment is common but typically unjustified for bench biology data like these. The example is a good one to talk about p-value adjustment in bench biology. 2) The linear/ANOVA model implies absurd inference from the CI/SE error bars, including mean counts less than zero!
+          Two interesting bits with Fig 7d: 1) The researchers analyzed figure 7b data using one-way ANOVA with Tukey adjustment. Post-hoc p-value adjustment is common but typically unjustified for bench biology data like these. The example is a good one to talk about p-value adjustment in bench biology. 2) The linear/ANOVA model implies absurd inference from the CI/SE error bars, including mean counts less than zero!
         </div>
       </div>
                           <div class="quarto-categories">
@@ -191,7 +192,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">June 29, 2024</p>
+        <p class="date-modified">July 11, 2024</p>
       </div>
     </div>
       
@@ -599,7 +600,7 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 </section>
 <section id="a-bit-more-about-generalized-linear-models-glm" class="level2">
 <h2 class="anchored" data-anchor-id="a-bit-more-about-generalized-linear-models-glm">A bit more about Generalized Linear Models (GLM)</h2>
-<p>Count data in biology often have a distribution that approximates a sample from a Negative Binomial distribution. Two features of this distribution that violate assumptions of a linear/ANOVA model are</p>
+<p>Count data in biology often have a distribution that nicely approximates a sample from a Negative Binomial or a Quasipoisson distribution. Two features of count data that violate assumptions of a linear/ANOVA model are</p>
 <ol type="1">
 <li>Homeogeneity of variance – the variance of the response is proportional to the mean of the group, so groups with a higher mean count have higher variances</li>
 <li>Normal – counts are right skewed, that is, there is a high density of low counts and a low density of high counts</li>
@@ -609,7 +610,7 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 <section id="for-these-data-the-linearanova-model-has-more-power-than-a-negative-binomial-glm" class="level2">
 <h2 class="anchored" data-anchor-id="for-these-data-the-linearanova-model-has-more-power-than-a-negative-binomial-glm">For these data, the Linear/ANOVA model has more power than a Negative-Binomial GLM</h2>
 <p>Despite the violations, tests from linear/ANOVA models that give a <em>p</em>-value often have good long-run performance, that is, they have relatively high power and controlled type I error <a href="https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.12386" target="_blank">Ives 2015</a>. GLM models for count data can have higher power than a linear/ANOVA model, but this sometimes requires some more sophisticated methods such as bootstrap resampling <a href="https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12552" target="_blank">Warton et al.&nbsp;2016</a>.</p>
-<p>Here I use a simulation to compare the Type I error and Power of the Linear/ANOVA model and for a Negative Binomial GLM for data that look like those in Figure 7d. I explicitly simulate the Trim63 response with the same unbalanced data as in the experiment (the CC group only has 9 measures and not 10).</p>
+<p>Here I use a simulation to compare the Type I error and Power of the 1) Linear/ANOVA model, 2) a Negative Binomial GLM, and 3) a quasipoisson GLM for data that look like those in Figure 7d. I explicitly simulate the Trim63 response with the same unbalanced data as in the experiment (the CC group only has 9 measures and not 10).</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -632,8 +633,8 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># power</span></span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  power_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow =</span> n_sim, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(power_matrix) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"lm_focal"</span>, <span class="st">"lm_ixn"</span>, <span class="st">"glm_focal"</span>, <span class="st">"glm_ixn"</span>)</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  power_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow =</span> n_sim, <span class="at">ncol =</span> <span class="dv">6</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(power_matrix) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"lm_focal"</span>, <span class="st">"lm_ixn"</span>, <span class="st">"nb_focal"</span>, <span class="st">"nb_ixn"</span>, <span class="st">"qp_focal"</span>, <span class="st">"qp_ixn"</span>)</span>
 <span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(sim_i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sim){</span>
 <span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fake data</span></span>
 <span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    fd[, Trim63 <span class="sc">:</span><span class="er">=</span> <span class="fu">rnegbin</span>(N, mu, theta_sim)]</span>
@@ -647,58 +648,82 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 <span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"lm_focal"</span>] <span class="ot">&lt;-</span> m_lm_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
 <span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># glm neg bin</span></span>
-<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    m_glm <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fd)</span>
-<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"glm_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_glm))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|z|)"</span>]</span>
-<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    m_glm_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_glm, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    m_nb <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fd)</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"nb_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_nb))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|z|)"</span>]</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    m_nb_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_nb, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"glm_focal"</span>] <span class="ot">&lt;-</span> m_glm_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
-<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>  <span class="co"># type I</span></span>
-<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>  type1_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow =</span> n_sim, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
-<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(type1_matrix) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"lm_focal"</span>, <span class="st">"lm_ixn"</span>, <span class="st">"glm_focal"</span>, <span class="st">"glm_ixn"</span>)</span>
-<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(sim_i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sim){</span>
-<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fake data</span></span>
-<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    fd[, Trim63 <span class="sc">:</span><span class="er">=</span> <span class="fu">rnegbin</span>(N, mu[<span class="dv">1</span>], theta_sim)]</span>
-<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    <span class="co"># lm/ANOVA</span></span>
-<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>    m_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fd)</span>
-<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"lm_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_lm))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
-<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>    m_lm_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_lm, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"lm_focal"</span>] <span class="ot">&lt;-</span> m_lm_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
-<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>    <span class="co"># glm neg bin</span></span>
-<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>    m_glm <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fd)</span>
-<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"glm_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_glm))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|z|)"</span>]</span>
-<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>    m_glm_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_glm, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"glm_focal"</span>] <span class="ot">&lt;-</span> m_glm_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
-<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(power_matrix, <span class="st">"power_matrix.Rds"</span>)</span>
-<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(type1_matrix, <span class="st">"type1_matrix.Rds"</span>)</span>
-<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>}<span class="cf">else</span>{</span>
-<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>  power_matrix <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"power_matrix.Rds"</span>)</span>
-<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>  type1_matrix <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"type1_matrix.Rds"</span>)</span>
-<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>pless <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
-<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>  stat <span class="ot">&lt;-</span> <span class="fu">sum</span>(x <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span><span class="fu">length</span>(x)</span>
-<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(stat)</span>
-<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">data.table</span>(</span>
-<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>  <span class="at">Test =</span> <span class="fu">c</span>(<span class="st">"LM: DEX+CC - DEX"</span>, <span class="st">"LM: Interaction"</span>, <span class="st">"GLM: DEX+CC - DEX"</span>, <span class="st">"GLM: Interaction"</span>),</span>
-<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a>  <span class="at">Power =</span> <span class="fu">apply</span>(power_matrix, <span class="dv">2</span>, pless),</span>
-<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Type I"</span> <span class="ot">=</span> <span class="fu">apply</span>(type1_matrix, <span class="dv">2</span>, pless)</span>
-<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>res <span class="sc">|&gt;</span></span>
-<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>() <span class="sc">|&gt;</span></span>
-<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"nb_focal"</span>] <span class="ot">&lt;-</span> m_nb_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># glm quasipoisson</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>    m_qp <span class="ot">&lt;-</span> <span class="fu">glm</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc,</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>                <span class="at">family =</span> <span class="fu">quasipoisson</span>(<span class="at">link =</span> <span class="st">"log"</span>),</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> fd)</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"qp_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_qp))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    m_qp_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_qp, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    power_matrix[sim_i, <span class="st">"qp_focal"</span>] <span class="ot">&lt;-</span> m_qp_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>  <span class="co"># type I</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>  type1_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow =</span> n_sim, <span class="at">ncol =</span> <span class="dv">6</span>)</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(type1_matrix) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"lm_focal"</span>, <span class="st">"lm_ixn"</span>, <span class="st">"nb_focal"</span>, <span class="st">"nb_ixn"</span>, <span class="st">"qp_focal"</span>, <span class="st">"qp_ixn"</span>)</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(sim_i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sim){</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>    <span class="co"># fake data</span></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>    fd[, Trim63 <span class="sc">:</span><span class="er">=</span> <span class="fu">rnegbin</span>(N, mu[<span class="dv">1</span>], theta_sim)]</span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>    <span class="co"># lm/ANOVA</span></span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>    m_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fd)</span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"lm_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_lm))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>    m_lm_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_lm, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"lm_focal"</span>] <span class="ot">&lt;-</span> m_lm_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>    <span class="co"># glm neg bin</span></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>    m_nb <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc, <span class="at">data =</span> fd)</span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"nb_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_nb))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|z|)"</span>]</span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>    m_nb_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_nb, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"nb_focal"</span>] <span class="ot">&lt;-</span> m_nb_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>    <span class="co"># glm quasipoisson</span></span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>    m_qp <span class="ot">&lt;-</span> <span class="fu">glm</span>(Trim63 <span class="sc">~</span> dex <span class="sc">*</span> cc,</span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a>                <span class="at">family =</span> <span class="fu">quasipoisson</span>(<span class="at">link =</span> <span class="st">"log"</span>),</span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> fd)</span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"qp_ixn"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_qp))[<span class="st">"dexno_dex:ccno_cc"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>    m_qp_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m_qp, <span class="at">specs =</span> <span class="fu">c</span>(<span class="st">"dex"</span>, <span class="st">"cc"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>      <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">simple =</span> <span class="st">"each"</span>, <span class="at">combine =</span> <span class="cn">TRUE</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>      <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a>    type1_matrix[sim_i, <span class="st">"qp_focal"</span>] <span class="ot">&lt;-</span> m_qp_pairs[<span class="dv">3</span>, <span class="st">"p.value"</span>] <span class="co"># effect of CC when dex is present</span></span>
+<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(power_matrix, <span class="st">"power_matrix.Rds"</span>)</span>
+<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(type1_matrix, <span class="st">"type1_matrix.Rds"</span>)</span>
+<span id="cb10-91"><a href="#cb10-91" aria-hidden="true" tabindex="-1"></a>}<span class="cf">else</span>{</span>
+<span id="cb10-92"><a href="#cb10-92" aria-hidden="true" tabindex="-1"></a>  power_matrix <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"power_matrix.Rds"</span>)</span>
+<span id="cb10-93"><a href="#cb10-93" aria-hidden="true" tabindex="-1"></a>  type1_matrix <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"type1_matrix.Rds"</span>)</span>
+<span id="cb10-94"><a href="#cb10-94" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-95"><a href="#cb10-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-96"><a href="#cb10-96" aria-hidden="true" tabindex="-1"></a>pless <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb10-97"><a href="#cb10-97" aria-hidden="true" tabindex="-1"></a>  stat <span class="ot">&lt;-</span> <span class="fu">sum</span>(x <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span><span class="fu">length</span>(x)</span>
+<span id="cb10-98"><a href="#cb10-98" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(stat)</span>
+<span id="cb10-99"><a href="#cb10-99" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-100"><a href="#cb10-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-101"><a href="#cb10-101" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">data.table</span>(</span>
+<span id="cb10-102"><a href="#cb10-102" aria-hidden="true" tabindex="-1"></a>  <span class="at">Test =</span> <span class="fu">c</span>(<span class="st">"LM: DEX+CC - DEX"</span>, <span class="st">"LM: Interaction"</span>,</span>
+<span id="cb10-103"><a href="#cb10-103" aria-hidden="true" tabindex="-1"></a>           <span class="st">"GLM-NB: DEX+CC - DEX"</span>, <span class="st">"GLM-NB: Interaction"</span>,</span>
+<span id="cb10-104"><a href="#cb10-104" aria-hidden="true" tabindex="-1"></a>           <span class="st">"GLM-QP: DEX+CC - DEX"</span>, <span class="st">"GLM-QP: Interaction"</span>),</span>
+<span id="cb10-105"><a href="#cb10-105" aria-hidden="true" tabindex="-1"></a>  <span class="at">Power =</span> <span class="fu">apply</span>(power_matrix, <span class="dv">2</span>, pless),</span>
+<span id="cb10-106"><a href="#cb10-106" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Type I"</span> <span class="ot">=</span> <span class="fu">apply</span>(type1_matrix, <span class="dv">2</span>, pless)</span>
+<span id="cb10-107"><a href="#cb10-107" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-108"><a href="#cb10-108" aria-hidden="true" tabindex="-1"></a>res <span class="sc">|&gt;</span></span>
+<span id="cb10-109"><a href="#cb10-109" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>() <span class="sc">|&gt;</span></span>
+<span id="cb10-110"><a href="#cb10-110" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
@@ -712,23 +737,33 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">LM: DEX+CC - DEX</td>
-<td style="text-align: right;">0.8005</td>
-<td style="text-align: right;">0.0540</td>
+<td style="text-align: right;">0.8120</td>
+<td style="text-align: right;">0.0520</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">LM: Interaction</td>
-<td style="text-align: right;">0.6765</td>
-<td style="text-align: right;">0.0525</td>
+<td style="text-align: right;">0.6930</td>
+<td style="text-align: right;">0.0475</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">GLM: DEX+CC - DEX</td>
-<td style="text-align: right;">0.7245</td>
+<td style="text-align: left;">GLM-NB: DEX+CC - DEX</td>
+<td style="text-align: right;">0.7340</td>
 <td style="text-align: right;">0.0745</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">GLM: Interaction</td>
-<td style="text-align: right;">0.6675</td>
-<td style="text-align: right;">0.0705</td>
+<td style="text-align: left;">GLM-NB: Interaction</td>
+<td style="text-align: right;">0.6970</td>
+<td style="text-align: right;">0.0685</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GLM-QP: DEX+CC - DEX</td>
+<td style="text-align: right;">0.7935</td>
+<td style="text-align: right;">0.0575</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GLM-QP: Interaction</td>
+<td style="text-align: right;">0.5595</td>
+<td style="text-align: right;">0.0490</td>
 </tr>
 </tbody>
 </table>

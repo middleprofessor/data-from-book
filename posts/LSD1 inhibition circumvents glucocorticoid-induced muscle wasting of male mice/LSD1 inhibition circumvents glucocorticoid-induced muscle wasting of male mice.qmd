@@ -1,10 +1,11 @@
 ---
-title: "Fig 7d -- LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice"
+title: "Hot take: don't adjust p-values"
+subtitle: "Data From Fig 7d -- LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice"
 author: "Jeff Walker"
 date: '25 June 2024'
 date-modified: "`r Sys.Date()`"
 categories: ["p-values", "multiple testing", "generalized linear model", "absurd CI", "power", "simulation", "pseudoreplication", "analysis flag"]
-description: "Two interesting bits with Fig 7d: 1) The researchers analyzed figure 7b data using one-way ANOVA with Tukey adjustment. Post-hoc p-value adjusment is common but typically unjustified for bench biology data like these. The example is a good one to talk about p-value adjustment in bench biology. 2) The linear/ANOVA model implies absurd inference from the CI/SE error bars, including mean counts less than zero!"
+description: "Two interesting bits with Fig 7d: 1) The researchers analyzed figure 7b data using one-way ANOVA with Tukey adjustment. Post-hoc p-value adjustment is common but typically unjustified for bench biology data like these. The example is a good one to talk about p-value adjustment in bench biology. 2) The linear/ANOVA model implies absurd inference from the CI/SE error bars, including mean counts less than zero!"
 draft: false
 format: 
   html: 
@@ -299,7 +300,7 @@ We don't see figures like Panel A above because researchers plot **sample** SEs 
 
 ## A bit more about Generalized Linear Models (GLM)
 
-Count data in biology often have a distribution that approximates a sample from a Negative Binomial distribution. Two features of this distribution that violate assumptions of a linear/ANOVA model are
+Count data in biology often have a distribution that nicely approximates a sample from a Negative Binomial or a Quasipoisson distribution. Two features of count data that violate assumptions of a linear/ANOVA model are
 
 1) Homeogeneity of variance -- the variance of the response is proportional to the mean of the group, so groups with a higher mean count have higher variances
 2) Normal -- counts are right skewed, that is, there is a high density of low counts and a low density of high counts
@@ -310,7 +311,7 @@ Generalized Linear Models (GLM) were developed to compute confidence intervals a
 
 Despite the violations, tests from linear/ANOVA models that give a *p*-value often have good long-run performance, that is, they have relatively high power and controlled type I error [Ives 2015](https://besjournals.onlinelibrary.wiley.com/doi/abs/10.1111/2041-210X.12386){target="_blank"}. GLM models for count data can have higher power than a linear/ANOVA model, but this sometimes requires some more sophisticated methods such as bootstrap resampling [Warton et al. 2016](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/2041-210X.12552){target="_blank"}.
 
-Here I use a simulation to compare the Type I error and Power of the Linear/ANOVA model and for a Negative Binomial GLM for data that look like those in Figure 7d. I explicitly simulate the Trim63 response with the same unbalanced data as in the experiment (the CC group only has 9 measures and not 10).
+Here I use a simulation to compare the Type I error and Power of the 1) Linear/ANOVA model, 2) a Negative Binomial GLM, and 3) a quasipoisson GLM for data that look like those in Figure 7d. I explicitly simulate the Trim63 response with the same unbalanced data as in the experiment (the CC group only has 9 measures and not 10).
 
 ```{r, eval = TRUE}
 # get parameters
@@ -332,8 +333,8 @@ if(do_it){
   )
   
   # power
-  power_matrix <- matrix(nrow = n_sim, ncol = 4)
-  colnames(power_matrix) <- c("lm_focal", "lm_ixn", "glm_focal", "glm_ixn")
+  power_matrix <- matrix(nrow = n_sim, ncol = 6)
+  colnames(power_matrix) <- c("lm_focal", "lm_ixn", "nb_focal", "nb_ixn", "qp_focal", "qp_ixn")
   for(sim_i in 1:n_sim){
     # fake data
     fd[, Trim63 := rnegbin(N, mu, theta_sim)]
@@ -347,18 +348,30 @@ if(do_it){
     power_matrix[sim_i, "lm_focal"] <- m_lm_pairs[3, "p.value"] # effect of CC when dex is present
     
     # glm neg bin
-    m_glm <- glm.nb(Trim63 ~ dex * cc, data = fd)
-    power_matrix[sim_i, "glm_ixn"] <- coef(summary(m_glm))["dexno_dex:ccno_cc", "Pr(>|z|)"]
-    m_glm_pairs <- emmeans(m_glm, specs = c("dex", "cc")) |>
+    m_nb <- glm.nb(Trim63 ~ dex * cc, data = fd)
+    power_matrix[sim_i, "nb_ixn"] <- coef(summary(m_nb))["dexno_dex:ccno_cc", "Pr(>|z|)"]
+    m_nb_pairs <- emmeans(m_nb, specs = c("dex", "cc")) |>
       contrast(method = "revpairwise", simple = "each", combine = TRUE, adjust = "none") |>
       summary(infer = TRUE)
-    power_matrix[sim_i, "glm_focal"] <- m_glm_pairs[3, "p.value"] # effect of CC when dex is present
+    power_matrix[sim_i, "nb_focal"] <- m_nb_pairs[3, "p.value"] # effect of CC when dex is present
+    
+    # glm quasipoisson
+    m_qp <- glm(Trim63 ~ dex * cc,
+                family = quasipoisson(link = "log"),
+                data = fd)
+    power_matrix[sim_i, "qp_ixn"] <- coef(summary(m_qp))["dexno_dex:ccno_cc", "Pr(>|t|)"]
+    m_qp_pairs <- emmeans(m_qp, specs = c("dex", "cc")) |>
+      contrast(method = "revpairwise", simple = "each", combine = TRUE, adjust = "none") |>
+      summary(infer = TRUE)
+    power_matrix[sim_i, "qp_focal"] <- m_qp_pairs[3, "p.value"] # effect of CC when dex is present
+
   }
   
   
   # type I
-  type1_matrix <- matrix(nrow = n_sim, ncol = 4)
-  colnames(type1_matrix) <- c("lm_focal", "lm_ixn", "glm_focal", "glm_ixn")
+  type1_matrix <- matrix(nrow = n_sim, ncol = 6)
+  colnames(type1_matrix) <- c("lm_focal", "lm_ixn", "nb_focal", "nb_ixn", "qp_focal", "qp_ixn")
+
   for(sim_i in 1:n_sim){
     # fake data
     fd[, Trim63 := rnegbin(N, mu[1], theta_sim)]
@@ -372,12 +385,22 @@ if(do_it){
     type1_matrix[sim_i, "lm_focal"] <- m_lm_pairs[3, "p.value"] # effect of CC when dex is present
     
     # glm neg bin
-    m_glm <- glm.nb(Trim63 ~ dex * cc, data = fd)
-    type1_matrix[sim_i, "glm_ixn"] <- coef(summary(m_glm))["dexno_dex:ccno_cc", "Pr(>|z|)"]
-    m_glm_pairs <- emmeans(m_glm, specs = c("dex", "cc")) |>
+    m_nb <- glm.nb(Trim63 ~ dex * cc, data = fd)
+    type1_matrix[sim_i, "nb_ixn"] <- coef(summary(m_nb))["dexno_dex:ccno_cc", "Pr(>|z|)"]
+    m_nb_pairs <- emmeans(m_nb, specs = c("dex", "cc")) |>
       contrast(method = "revpairwise", simple = "each", combine = TRUE, adjust = "none") |>
       summary(infer = TRUE)
-    type1_matrix[sim_i, "glm_focal"] <- m_glm_pairs[3, "p.value"] # effect of CC when dex is present
+    type1_matrix[sim_i, "nb_focal"] <- m_nb_pairs[3, "p.value"] # effect of CC when dex is present
+    
+    # glm quasipoisson
+    m_qp <- glm(Trim63 ~ dex * cc,
+                family = quasipoisson(link = "log"),
+                data = fd)
+    type1_matrix[sim_i, "qp_ixn"] <- coef(summary(m_qp))["dexno_dex:ccno_cc", "Pr(>|t|)"]
+    m_qp_pairs <- emmeans(m_qp, specs = c("dex", "cc")) |>
+      contrast(method = "revpairwise", simple = "each", combine = TRUE, adjust = "none") |>
+      summary(infer = TRUE)
+    type1_matrix[sim_i, "qp_focal"] <- m_qp_pairs[3, "p.value"] # effect of CC when dex is present
   }
   saveRDS(power_matrix, "power_matrix.Rds")
   saveRDS(type1_matrix, "type1_matrix.Rds")
@@ -392,7 +415,9 @@ pless <- function(x){
 }
 
 res <- data.table(
-  Test = c("LM: DEX+CC - DEX", "LM: Interaction", "GLM: DEX+CC - DEX", "GLM: Interaction"),
+  Test = c("LM: DEX+CC - DEX", "LM: Interaction",
+           "GLM-NB: DEX+CC - DEX", "GLM-NB: Interaction",
+           "GLM-QP: DEX+CC - DEX", "GLM-QP: Interaction"),
   Power = apply(power_matrix, 2, pless),
   "Type I" = apply(type1_matrix, 2, pless)
 )

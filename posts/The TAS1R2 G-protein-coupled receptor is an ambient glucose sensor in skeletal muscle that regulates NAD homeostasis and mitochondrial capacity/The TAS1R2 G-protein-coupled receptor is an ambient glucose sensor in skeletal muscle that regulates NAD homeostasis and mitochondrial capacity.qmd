@@ -1,10 +1,11 @@
 ---
-title: "Fig 3b -- The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity"
+title: "A LMM or GLMM alternative to ratio paired t-test is the best practice to plot the model"
+subtitle: "Data From Fig 3b -- The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity"
 author: "Jeff Walker"
 date: '8 June 2024'
 date-modified: "`r Sys.Date()`"
 categories: ["linear mixed model", "ratio paired t-test", "generalized linear mixed model", "ggplot"]
-description: "The researchers analyzed figure 3b with a ratio paired t-test, which is a special case of a linear mixed model with a log-transformed response or a generalized linear mixed model with a Gamma distribution and log link. An advantage to fitting the LMM or GLMM is asymmetric confidence intervals of the group means that reflect the skew of the data. Plot the model!"
+description: "The researchers analyzed figure 3b with a ratio paired t-test, which is a special case of a linear mixed model with a log-transformed response. A generalized linear mixed model with a Gamma distribution and log link is an alternative. An advantage to fitting the LMM or GLMM is asymmetric confidence intervals of the group means that reflect the skew of the data. Plot the model!"
 draft: false
 format: 
   html: 
