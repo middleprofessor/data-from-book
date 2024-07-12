@@ -164,13 +164,13 @@ m2_pairs |>
 ```
 
 
-## Should I use Mann-Whitney, a Linear Model, or a Quasibinomial GLM for propotion data?
+## Should I use Mann-Whitney, a Linear Model, or a Quasibinomial GLM for proportion data?
 
 Answer: None of the Above
 
 Proportions have strange, non-normal distributions. Samples tend to be right skewed if the mean is closer to zero but left skewed if the mean is closer to 1. And, samples with means closer to 0.5 tend to have more variance than samples closer to 0 or 1. This is probably why the authors used a non-parametric test (Mann-Whitney U). A Mann-Whitney test has higher power than a linear model / *t*-test but other than the *p*-value, there are no statistics to plot with the data. There is no effect in a a Mann-Whitney -- it is not a test of the differences in the means (or medians!). And, we can't compute a confidence interval for the group means.
 
-A proportion is a ratio of a part to the whole. A modern statistical method for analyzing proportion data is to use a log-link generalized linear model with the part as the response and the whole as **an offset** variable. An offset variable is a covariate but the coefficient is forced to be one. By forcing the coefficient to be one, the effect is the ratio of the means of the two proportions (or the difference of the means of the propotions in log space).
+A proportion is a ratio of a part to the whole. A modern statistical method for analyzing proportion data is to use a log-link generalized linear model with the part as the response and the whole as **an offset** variable. An offset variable is a covariate but the coefficient is forced to be one. By forcing the coefficient to be one, the effect is the ratio of the means of the two proportions (or the difference of the means of the proportions in log space).
 
 ## GLM for percent (proportion of whole) data when both part and whole are known
 
@@ -197,7 +197,7 @@ m3_pairs |>
 mean(fig5c[health == "IBD", ctla4_pos])/mean(fig5c[health == "Healthy", ctla4_pos])
 ```
 
-## A simulation comparing Mann-Whitney, a linear model/t-test, a quasibinomial GLM for proportions, and a quasibinomial offset GLM for proportions
+## A simulation comparing Mann-Whitney, a linear model/t-test, a quasibinomial GLM for proportions, and a quasipoisson GLM with offset
 
 ```{r get-clean-data}
 get_clean_proportion_data <- function(n_sample, # sample size

@@ -1,0 +1,631 @@
+---
+title: "Models for proportion (part to whole percent) data"
+subtitle: "Data From Fig 2d -- Inhibition of fatty acid oxidation enables heart regeneration in adult mice"
+author: "Jeff Walker"
+date: '5 July 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["percents", "proportions", "generalized linear model", "offset", "power", "simulation"]
+description: "The data in fig 2d are the percent of a cell subtype relative to all cells of a type, which is a common response variable in bench biology. "
+draft: true
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+freeze: false
+---
+
+![Better than Reproducibility of Fig 5c. The CIs and p-values are from a quasipoisson GLM model with offset](../../figs/Inhibition of fatty acid oxidation enables heart regeneration in adult mice/fig5c_ggplot.png){width=6in fig-align="left"}  
+
+## Vital info
+
+Data From: [Ahmed, A., Joseph, A. M., Zhou, J., Horn, V., Uddin, J., Lyu, M., ... & Sonnenberg, G. F. (2024). CTLA-4-expressing ILC3s restrain interleukin-23-mediated inflammation. Nature, 1-8.](https://www.nature.com/articles/s41586-024-07537-3){target="_blank"}
+
+Fig: 3k [download data](../../data from/CTLA-4-expressing ILC3s restrain interleukin-23-mediated inflammation/41586_2024_7537_MOESM6_ESM.xlsx){target="_blank"}
+
+Fig: 5c [download data](../../data from/CTLA-4-expressing ILC3s restrain interleukin-23-mediated inflammation/41586_2024_7537_MOESM8_ESM.xlsx){target="_blank"}
+
+key words: 
+
+Published methods: t-test on both raw and proportion data.
+
+Design: Completely Randomized Design (CRD)
+
+Response: fibrotic_area (the area of the injured tissue in the heart), both raw and as a proportion of total heart area.
+
+Key learning concepts: proportions and offsets
+
+More info: [18.4 Example 2 – Use a GLM with an offset instead of a ratio of some measurement per total (“dna damage” data fig3b)](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/counts#example-2-use-a-glm-with-an-offset-instead-of-a-ratio-of-some-measurement-per-total-dna-damage-data-fig3b-glm_offset){target="_blank"}
+
+## The Experiment
+
+Background: Postnatal maturation of cardiomyocytes is characterized by a metabolic switch from glycolysis to fatty acid oxidation, chromatin reconfiguration and exit from the cell cycle, instating a barrier for adult heart regeneration1,2. Here, to explore whether metabolic reprogramming can overcome this barrier and enable heart regeneration, we abrogate fatty acid oxidation in cardiomyocytes by inactivation of Cpt1b.
+
+Analysis of RNA-sequencing (RNA-seq) datasets revealed reduced expression levels of several key genes of glycolysis and cell cycle progression in the course of CM maturation during the first week after birth, whereas genes related to fatty acid oxidation (FAO) and the Krebs cycle were upregulated (Extended Data Fig. 1a). FAO-related genes that were upregulated included the muscle-specific isoform of carnitine palmitoyltransferase Cpt1b but not the ubiquitously expressed Cpt1a isoform, which are required for mitochondrial uptake of fatty acids and subsequent FAO (Extended Data Fig. 1b). 
+
+Motivation: To investigate whether Cpt1b inactivation and the ensuing proliferation of CMs enables heart regeneration, we subjected Cpt1bcKO and Cpt1biKO mice to ischaemia–reperfusion (I–R) injury, a model that closely mimics the situation in human patients receiving a stent for revascularization of an obstructed coronary artery. I–R-induced scars were virtually absent in Cpt1bcKO and Cpt1biKO mice after 3 weeks compared to control animals, although the area at risk (AAR) was similar in both mutant hearts 24 h after I–R surgery (Fig. 2a–f, Extended Data Fig. 5a,b and Supplementary Information). 
+
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(stringr) # string functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# packages specific to this code
+library(SimMultiCorrData) # correlated random negbin variables
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+source_path <- here("R", "ggptm.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+## Import and Wrangle
+
+```{r fig-2d-import, message=FALSE, warning=FALSE}
+data_from <- "Inhibition of fatty acid oxidation enables heart regeneration in adult mice"
+file_name <- "41586_2023_6585_MOESM6_ESM.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+genotype_levels <- c("Ctrl", "Cpt1biKO")
+fig2d <- read_excel(file_path,
+                    sheet = "Fig2.d",
+                    range = "B1:C10") |>
+  data.table() |>
+  melt(measure.vars = genotype_levels,
+       variable.name = "genotype",
+       value.name = "fibrotic_area") |>
+  na.omit()
+fig2d[, genotype := factor(genotype, levels = genotype_levels)]
+
+fig2d_percent <- read_excel(file_path,
+                    sheet = "Fig2.d",
+                    range = "B12:C21") |>
+  data.table() |>
+  melt(measure.vars = genotype_levels,
+       variable.name = "genotype",
+       value.name = "percent") |>
+  na.omit()
+fig2d[, fibrotic_area_percent := fig2d_percent[, percent]]
+fig2d[, fibrotic_area_proportion := fibrotic_area_percent/100]
+fig2d[, heart_area := fibrotic_area/fibrotic_area_proportion]
+
+
+fileout_name <- "Fig2d-proportion - Inhibition of fatty acid oxidation enables heart regeneration in adult mice.xlsx"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig2d, fileout_path)
+
+```
+
+## Reproducibility -- linear model / t-test
+
+
+```{r warning = FALSE}
+lm1 <- lm(fibrotic_area ~ genotype, data = fig2d)
+lm1_emm <- emmeans(lm1, specs = "genotype")
+lm1_pairs <- contrast(lm1_emm, method = "revpairwise") |>
+  summary(infer = TRUE)
+lm1_pairs |>
+  kable() |>
+  kable_styling(full_width = FALSE)
+
+lm2 <- lm(fibrotic_area_percent ~ genotype, data = fig2d)
+lm2_emm <- emmeans(lm2, specs = "genotype")
+lm2_pairs <- contrast(lm2_emm, method = "revpairwise") |>
+  summary(infer = TRUE)
+lm2_pairs |>
+  kable() |>
+  kable_styling(full_width = FALSE)
+
+contrast_table <- rbind(lm1_pairs, lm2_pairs)
+contrast_table |>
+  kable(digits = 4) |>
+  kable_styling() |>
+  pack_rows("linear model/t-test of fibrotic area", 1, 1) |>
+  pack_rows("linear model/t-test of fibrotic area as percent of total area", 2, 2)
+
+```
+
+## Notes on what the researchers did
+
+1. The researchers report a t-test of fibrotic area. The effect size (the difference in mean fibrotic area between genotypes) is confounded by differences in heart size between genotypes. So this comparison is not very meaninful as is.
+2. The researchers report a t-test of relative fibrotic area (the percent of total heart area that is fibrotic). Relative fibrotic area is a meaningful response but presenting this as a difference is weird because of how the variance is related to a propotion.
+
+## A GLM with fibrotic area using log(heart area) as an offset variable combines the two analyses above into a single analysis!
+
+A common way to test for the effect of a treatment when the effect is confounded by a covariate is ANCOVA. For example, many researchers test for the effect of a treatment on O2 consumption and use body weight as a covariate, since O2 consupmption increases with body weight. A linear model with an offset is exactly like an a linear model with a continuous covariate (ANCOVA model) except the coefficient (slope) of the covariate is forced to be 1.
+
+Here is a covariate (ANCOVA) model:
+
+$$\texttt{log}(\texttt{fibrotic_area}) = b_0 + b_1 \texttt{log}(\texttt{heart_area}) + b_2 \texttt{genotype}$$
+where $b_1$ is the pooled slope of fibrotic area on heart area. If we don't expect larger hearts to have relative more (or less) fibrotic area, the we would expect $b_1 = 1$. An offset forces this expectation.
+
+Importantly, if we use a GLM with log link, the model only models the log-transformed group means -- not the means of the log transformed data, as in the ANCOVA model above.
+
+By forcing the coefficient to be one, the effect is the ratio of the means of the two proportions (or the difference of the means of the propotions in log space).
+
+## GLM for percent (proportion of whole) data when both part and whole are known
+
+The effect (0.23) is the ratio of the mean proportion of the IBD group to the mean proportion of the Health group.
+
+```{r}
+
+m3 <- glm(fibrotic_area ~ genotype + offset(log(heart_area)),
+          family = Gamma(link = "log"),
+          data = fig2d)
+m3_emm <- emmeans(m3, specs = "genotype", type = "response")
+m3_pairs <- contrast(m3_emm, method = "revpairwise") |>
+  summary(infer = TRUE)
+m3_pairs |>
+  kable(digits = c(1,7,3,1,2,2,1,2,6)) |>
+  kable_styling(full_width = FALSE)
+```
+
+Here is the ratio computed manually
+
+```{r}
+mean(fig2d[genotype == "Cpt1biKO", fibrotic_area_proportion])/mean(fig2d[genotype == "Ctrl", fibrotic_area_proportion])
+```
+
+## A simulation comparing Mann-Whitney, a linear model/t-test, a quasibinomial GLM for proportions, and a Gamma offset GLM for proportions
+
+```{r}
+
+n_cols_extra <- 10
+
+# sample size
+fig2d_summary <- fig2d[, .(N = .N), by = .(genotype)]
+
+# correlation between fibrotic area and heart area
+fig2d[, fibrotic_area_resid := residuals(lm(fibrotic_area ~ genotype, data = fig2d))]
+fig2d[, heart_area_resid := residuals(lm(heart_area ~ genotype, data = fig2d))]
+r_obs <- cor(fig2d$fibrotic_area_resid, fig2d$heart_area_resid)
+# the correlation is low-ish: 0.367
+rho_matrix = matrix(c(1, r_obs, r_obs, 1), nrow = 2, ncol = 2)
+
+# gamma parameters
+glm1 <- glm(fibrotic_area ~ genotype,
+            family = Gamma(link = "log"),
+            data = fig2d)
+glm1_emm <- emmeans(glm1, specs = "genotype", type = "response") |>
+  summary() |>
+  data.table()
+glm1_mu <- glm1_emm[, response]
+glm1_alpha <- gamma.shape(glm1)[[1]]
+glm1_beta <- glm1_alpha/glm1_mu # = rate or 1/scale
+  
+glm2 <- glm(heart_area ~ genotype,
+            family = Gamma(link = "log"),
+            data = fig2d)
+glm2_emm <- emmeans(glm2, specs = "genotype", type = "response") |>
+  summary() |>
+  data.table()
+glm2_mu <- glm2_emm[, response]
+glm2_alpha <- gamma.shape(glm2)[[1]]
+glm2_beta <- glm2_alpha/glm2_mu # = rate or 1/scale
+
+
+# fake control
+params1 <- calc_theory(Dist = "Gamma", params = c(glm1_alpha, glm1_beta[1])) # fibrotic area
+params2<- calc_theory(Dist = "Gamma", params = c(glm2_alpha, glm2_beta[1])) # heart area
+fake_y <- rcorrvar(n = fig2d_summary[1, N] * n_cols_extra,
+                   k_cont = 2,
+                   method = "Polynomial",
+                   means = c(params1[1], params2[1]), # mean
+                   vars = c(params1[2]^2, params2[2]^2),
+                   skews = c(params1[3], params2[3]),
+                   skurts = c(params1[4], params2[4]),
+                   fifths = c(params1[5], params2[5]),
+                   sixths = c(params1[6], params2[6]),
+                   rho = rho_matrix,
+                   seed = 1)$continuous_variables
+num_mat <- matrix(fake_y[,"V1"], nrow = fig2d_summary[1, N], ncol = n_cols_extra)
+denom_mat <- matrix(fake_y[,"V2"], nrow = fig2d_summary[1, N], ncol = n_cols_extra)
+
+# fake KO
+params1 <- calc_theory(Dist = "Gamma", params = c(glm1_alpha, glm1_beta[2])) # fibrotic area
+params2 <- calc_theory(Dist = "Gamma", params = c(glm2_alpha, glm2_beta[2])) # heart area
+fake_y <- rcorrvar(n = fig2d_summary[2, N] * n_cols_extra,
+                   k_cont = 2,
+                   method = "Polynomial",
+                   means = c(params1[1], params2[1]), # mean
+                   vars = c(params1[2]^2, params2[2]^2),
+                   skews = c(params1[3], params2[3]),
+                   skurts = c(params1[4], params2[4]),
+                   fifths = c(params1[5], params2[5]),
+                   sixths = c(params1[6], params2[6]),
+                   rho = rho_matrix,
+                   seed = 1)$continuous_variables
+
+num_mat <- rbind(num_mat,
+                 matrix(fake_y[,"V1"], nrow = fig2d_summary[2, N], ncol = n_cols_extra))
+denom_mat <- rbind(denom_mat,
+                   matrix(fake_y[,"V2"], nrow = fig2d_summary[2, N], ncol = n_cols_extra))
+prop_mat <- num_mat/denom_mat
+
+```
+
+```{r}
+get_clean_proportion_data <- function(
+    n_sample,
+    n_cols,
+    alpha_num,
+    beta_num,
+    alpha_denom,
+    beta_denom,
+    rho_obs,
+    seed_starter){
+  rho_matrix = matrix(c(1, r_obs, r_obs, 1), nrow = 2, ncol = 2)
+  params_num <- calc_theory(Dist = "Gamma", params = c(alpha_num, beta_num)) # fibrotic area
+  params_denom <- calc_theory(Dist = "Gamma", params = c(alpha_denom, beta_denom)) # heart area
+  fake_y <- rcorrvar(n = fig2d_summary[1, N] * n_cols_extra,
+                     k_cont = 2,
+                     method = "Polynomial",
+                     means = c(params_num[1], params_denom[1]), # mean
+                     vars = c(params_num[2]^2, params_denom[2]^2),
+                     skews = c(params_num[3], params_denom[3]),
+                     skurts = c(params_num[4], params_denom[4]),
+                     fifths = c(params_num[5], params_denom[5]),
+                     sixths = c(params_num[6], params_denom[6]),
+                     rho = rho_matrix,
+                     seed = seed_starter)$continuous_variables
+  num_mat <- matrix(fake_y[,"V1"], nrow = n_sample, ncol = n_cols)
+  denom_mat <- matrix(fake_y[,"V2"], nrow = n_sample, ncol = n_cols)
+  prop_mat <- num_mat/denom_mat
+  
+  return(list(
+    numerator = num_mat,
+    denominator = denom_mat,
+    proportion = prop_mat
+  ))
+}
+```
+
+
+```{r, eval = TRUE, warning = FALSE}
+# get parameters
+do_it <- TRUE
+if(do_it){
+  iter_sets <- 4
+  n_iter <- 2500
+  total_iter <- n_iter * iter_sets
+  # parameters
+  # sample size
+  fig2d_summary <- fig2d[, .(N = .N), by = .(genotype)]
+  
+  # correlation between fibrotic area and heart area
+  fig2d[, fibrotic_area_resid := residuals(lm(fibrotic_area ~ genotype, data = fig2d))]
+  fig2d[, heart_area_resid := residuals(lm(heart_area ~ genotype, data = fig2d))]
+  r_obs <- cor(fig2d$fibrotic_area_resid, fig2d$heart_area_resid)
+  # the correlation is low-ish: 0.367
+  rho_matrix = matrix(c(1, r_obs, r_obs, 1), nrow = 2, ncol = 2)
+  
+  # gamma parameters
+  # numerator -- fibrotic area
+  glm1 <- glm(fibrotic_area ~ genotype,
+              family = Gamma(link = "log"),
+              data = fig2d)
+  glm1_emm <- emmeans(glm1, specs = "genotype", type = "response") |>
+    summary() |>
+    data.table()
+  glm1_mu <- glm1_emm[, response]
+  # make effect smaller for power
+  effect <- 0.5
+  glm1_mu[2] <- glm1_mu[1]*effect
+  glm1_alpha <- gamma.shape(glm1)[[1]]
+  glm1_beta <- glm1_alpha/glm1_mu # = rate or 1/scale
+  
+  # denominator -- heart area
+  glm2 <- glm(heart_area ~ genotype,
+              family = Gamma(link = "log"),
+              data = fig2d)
+  glm2_emm <- emmeans(glm2, specs = "genotype", type = "response") |>
+    summary() |>
+    data.table()
+  glm2_mu <- glm2_emm[, response]
+  glm2_alpha <- gamma.shape(glm2)[[1]]
+  glm2_beta <- glm2_alpha/glm2_mu # = rate or 1/scale
+  
+  num_params_cn <- calc_theory(Dist = "Gamma", params = c(glm1_alpha, glm1_beta[1])) # fibrotic area
+  denom_params_cn <- calc_theory(Dist = "Gamma", params = c(glm2_alpha, glm2_beta[1])) # heart area
+  num_params_ko <- calc_theory(Dist = "Gamma", params = c(glm1_alpha, glm1_beta[2])) # fibrotic area
+  denom_params_ko <- calc_theory(Dist = "Gamma", params = c(glm2_alpha, glm2_beta[2])) # heart area
+  
+
+  fd <- data.table(
+    genotype = rep(c("Ctrl", "Cpt1biKO"), fig2d_summary$N),
+    fibrotic_area = as.numeric(NA),
+    heart_area = as.numeric(NA)
+  )
+  
+  power_matrix <- matrix(nrow = total_iter, ncol = 4)
+  colnames(power_matrix) <- c("mwu","lm", "qb", "gamma")
+  type1_matrix <- matrix(nrow = total_iter, ncol = 4)
+  colnames(type1_matrix) <- c("mwu","lm", "qb", "gamma")
+
+  seed_starter_sim <- 0
+  for(iter_set in 1:iter_sets){
+    # power
+    # make effect size smaller so power < 1
+    seed_starter_sim <- seed_starter_sim + 1
+    fake_cn <- get_clean_proportion_data(
+      n_sample = fig2d_summary[1, N],
+      n_cols = n_iter,
+      alpha_num = glm1_alpha,
+      beta_num = glm1_beta[1],
+      alpha_denom = glm2_alpha,
+      beta_denom = glm2_beta[1],
+      rho_obs = r_obs,
+      seed_start = seed_starter_sim)
+
+    seed_starter_sim <- seed_starter_sim + 1
+    fake_ko <- get_clean_proportion_data(
+      n_sample = fig2d_summary[2, N],
+      n_cols = n_iter,
+      alpha_num = glm1_alpha,
+      beta_num = glm1_beta[2],
+      alpha_denom = glm2_alpha,
+      beta_denom = glm2_beta[2],
+      rho_obs = r_obs,
+      seed_start = seed_starter_sim)
+    
+    fibrotic_area_mat <- rbind(fake_cn[["numerator"]],
+                               fake_ko[["numerator"]])
+    heart_area_mat <- rbind(fake_cn[["denominator"]],
+                            fake_ko[["denominator"]])
+    fibrotic_prop_mat <- rbind(fake_cn[["proportion"]],
+                               fake_ko[["proportion"]])
+    
+    for(iter in 1:n_iter){
+      sim_i <- n_iter*(iter_set - 1) + iter
+      # fake data
+      fd[, fibrotic_area := fibrotic_area_mat[, iter]]
+      fd[, heart_area := heart_area_mat[, iter]]
+      fd[, fibrotic_prop := fibrotic_prop_mat[, iter]]
+      
+      # Mann Whitney
+      power_matrix[sim_i, "mwu"] <- wilcox.test(fibrotic_prop ~ genotype, data = fd)$p.value
+      
+      # lm
+      m_lm <- lm(fibrotic_prop ~ genotype, data = fd)
+      power_matrix[sim_i, "lm"] <- coef(summary(m_lm))["genotypeCtrl", "Pr(>|t|)"]
+      
+      # glm bin
+      m_qb <- glm(fibrotic_prop ~ genotype,
+                  family = quasibinomial,
+                  data = fd)
+      power_matrix[sim_i, "qb"] <- coef(summary(m_qb))["genotypeCtrl", "Pr(>|t|)"]
+      
+      # glm qp
+      m_gamma <- glm(fibrotic_area ~ genotype + offset(log(heart_area)),
+                  family = Gamma(link = "log"),
+                  data = fd)
+      power_matrix[sim_i, "gamma"] <- coef(summary(m_gamma))["genotypeCtrl", "Pr(>|t|)"]
+      
+      #       do_plot <- FALSE
+      #       if(do_plot){
+      # m_gamma_emm <- emmeans(m_gamma, specs = "genotype", type = "response")
+      # m_gamma_pairs <- contrast(m_gamma_emm, method = "revpairwise") |>
+      #   summary(infer = TRUE)
+      #        plot_response(m_qb, m_qb_emm, m_qb_pairs)
+              # ggplot(data = fd,
+              #        aes(x = genotype,
+              #            y = fibrotic_prop,
+              #            color = genotype)) +
+              #   geom_point()
+      #       }
+      
+    }
+    
+    # type I
+    seed_starter_sim <- seed_starter_sim + 1
+    fake_cn <- get_clean_proportion_data(
+      n_sample = fig2d_summary[1, N],
+      n_cols = n_iter,
+      alpha_num = glm1_alpha,
+      beta_num = glm1_beta[1],
+      alpha_denom = glm2_alpha,
+      beta_denom = glm2_beta[1],
+      rho_obs = r_obs,
+      seed_start = seed_starter_sim)
+
+    seed_starter_sim <- seed_starter_sim + 1
+    fake_ko <- get_clean_proportion_data(
+      n_sample = fig2d_summary[2, N],
+      n_cols = n_iter,
+      alpha_num = glm1_alpha,
+      beta_num = glm1_beta[1],
+      alpha_denom = glm2_alpha,
+      beta_denom = glm2_beta[1],
+      rho_obs = r_obs,
+      seed_start = seed_starter_sim)
+    
+    fibrotic_area_mat <- rbind(fake_cn[["numerator"]],
+                               fake_ko[["numerator"]])
+    heart_area_mat <- rbind(fake_cn[["denominator"]],
+                            fake_ko[["denominator"]])
+    fibrotic_prop_mat <- rbind(fake_cn[["proportion"]],
+                               fake_ko[["proportion"]])
+    
+    for(iter in 1:n_iter){
+      sim_i <- n_iter*(iter_set - 1) + iter
+      # fake data
+      fd[, fibrotic_area := fibrotic_area_mat[, iter]]
+      fd[, heart_area := heart_area_mat[, iter]]
+      fd[, fibrotic_prop := fibrotic_prop_mat[, iter]]
+      
+      # Mann Whitney
+      type1_matrix[sim_i, "mwu"] <- wilcox.test(fibrotic_prop ~ genotype, data = fd)$p.value
+      
+      # lm
+      m_lm <- lm(fibrotic_prop ~ genotype, data = fd)
+      type1_matrix[sim_i, "lm"] <- coef(summary(m_lm))["genotypeCtrl", "Pr(>|t|)"]
+      
+      # glm bin
+      m_qb <- glm(fibrotic_prop ~ genotype,
+                  family = quasibinomial,
+                  data = fd)
+      type1_matrix[sim_i, "qb"] <- coef(summary(m_qb))["genotypeCtrl", "Pr(>|t|)"]
+      
+      # glm qp
+      m_gamma <- glm(fibrotic_area ~ genotype + offset(log(heart_area)),
+                  family = Gamma(link = "log"),
+                  data = fd)
+      type1_matrix[sim_i, "gamma"] <- coef(summary(m_gamma))["genotypeCtrl", "Pr(>|t|)"]
+
+    }    
+  }
+
+  saveRDS(power_matrix, "power_matrix.Rds")
+  saveRDS(type1_matrix, "type1_matrix.Rds")
+}else{
+  power_matrix <- readRDS("power_matrix.Rds")
+  type1_matrix <- readRDS("type1_matrix.Rds")
+}
+
+pless <- function(x, alpha = 0.05){
+  stat <- sum(x <= alpha)/length(x)
+  return(stat)
+}
+```
+
+
+```{r, eval = TRUE, warning = FALSE}
+res <- data.table(
+  Test = c("Mann-Whitney", "Linear Model/T-test", "Quasibinomial", "Gamma offset"),
+  Power = apply(power_matrix, 2, pless, alpha = 0.05),
+  "Type I" = apply(type1_matrix, 2, pless, alpha = 0.05)
+)
+res |>
+  kable(digits = c(1,2,3)) |>
+  kable_styling(full_width = FALSE)
+```
+
+For data that look like those in fig. 5c, the Mann-Whitney has good Type I control and high power relative to the linear model/*t*-test and compared to the quasibinomial GLM model. But the quasipoisson GLM offset model for the original counts has 20% higher power than the Mann-Whitney, but slightly elevated Type 1. And the beauty of the quasipoisson GLM is we get model statistics to plot with the data (see the plot below).
+
+
+The table below shows the Power and Type I error when alpha is set to 0.03. The power for the quasipoisson model with alpha = 0.03 has good Type I control and is 13% higher than the power for the Mann-Whitney with alpha = 0.05.
+
+
+
+## Plot the model
+
+A good question is, how do we Plot the Model? A proportion response makes sense for communication but the emmeans table has whole-count adjusted counts as the mean response. But these adjusted counts are proportions, just unscaled by the denominator. So we can rescale the mean and CIs as proportions (or percents) by dividing by the mean counts of the whole (ilc3 count).
+
+```{r}
+m3_emm_dt <- m3_emm |>
+  summary() |>
+  data.table()
+m3_pairs_dt <- data.table(m3_pairs)
+
+common_factor <- mean(fig2d$heart_area)
+m3_emm_dt[, mean := response/common_factor * 100]
+m3_emm_dt[, lo := lower.CL/common_factor * 100]
+m3_emm_dt[, hi := upper.CL/common_factor * 100]
+# check to make sure that scaled mean is equal to the mean fibrotic_area_proportions
+# m3_emm_dt
+# means_table
+```
+
+```{r}
+
+gg <- ggplot(data = fig2d,
+             aes(x = genotype,
+                 y = fibrotic_area_percent,
+                 color = genotype)) +
+  geom_sina(size = 2,
+            maxwidth = 0.5,
+            show.legend = FALSE) +
+  geom_errorbar(data = m3_emm_dt,
+                aes(x = genotype,
+                    y = mean,
+                    ymin = lo,
+                    ymax = hi),
+                width = 0.05,
+                color = "black") +
+  geom_point(data = m3_emm_dt,
+             aes(x = genotype,
+                 y = mean),
+             size = 3,
+             color = "black") +
+  ylab("Fibrotic Area (% of Heart Area)") +
+  scale_color_manual(values = pal_okabe_ito_2) +
+  theme_pubr() +
+  theme(axis.title.x = element_blank()) +
+  NULL
+
+  # add p-values
+m3_pairs_dt[, group1 := "Ctrl"]
+m3_pairs_dt[, group2 := "Cpt1biKO"]
+m3_pairs_dt[, p := p.value |>
+              p_round(digits = 2) |>
+              p_format(digits = 2, accuracy = 1e-03, add.p = TRUE)]
+maxy <- fig2d[, max(fibrotic_area_percent)]
+miny <- fig2d[, min(fibrotic_area_percent)]
+m3_pairs_dt[, y.position := maxy + 0.05*(maxy - miny)]
+
+gg <- gg +
+  stat_pvalue_manual(
+    data = m3_pairs_dt,
+    label = "p",
+    tip.length = 0.001)
+
+gg
+
+save_it <- FALSE
+if(save_it){
+out_fig <- "fig5c_ggplot.png"
+out_path <- here("figs", data_from, out_fig)
+ggsave(out_path)
+}
+
+```
+
