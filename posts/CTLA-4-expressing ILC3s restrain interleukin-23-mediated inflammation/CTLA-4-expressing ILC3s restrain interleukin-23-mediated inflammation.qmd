@@ -552,7 +552,7 @@ m3_pairs_dt <- data.table(m3_pairs)
 means_table <- fig5c[, .(ctla4 = mean(ctla4_count),
                          ilc3 = mean(ilc3_count),
                          ctla4_per = mean(ctla4_pos)), by = health]
-scale_factor <- means_table[, ilc3]
+scale_factor <- mean(fig5c$ilc3)
 m3_emm_dt[, mean :=rate/scale_factor]
 m3_emm_dt[, lo :=asymp.LCL/scale_factor]
 m3_emm_dt[, hi :=asymp.UCL/scale_factor]

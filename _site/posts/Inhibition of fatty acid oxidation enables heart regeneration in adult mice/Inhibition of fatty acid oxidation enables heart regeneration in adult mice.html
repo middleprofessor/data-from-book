@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.52">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Jeff Walker">
+<meta name="dcterms.date" content="2024-07-05">
+<meta name="description" content="The researchers present two tests/plots: the effect of genotype on fibrotic area and the effect on the percent of fibrotic area, relative to total heart area. A GLM with offset combines these into a single analysis/plot and has more power than the linear model/t-test or Mann-Whitney U.">
+
+<title>Models for proportion (part to whole percent) data – Data From</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Data From</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Models for proportion (part to whole percent) data</h1>
+            <p class="subtitle lead">Data From Fig 2d – Inhibition of fatty acid oxidation enables heart regeneration in adult mice</p>
+                  <div>
+        <div class="description">
+          The researchers present two tests/plots: the effect of genotype on fibrotic area and the effect on the percent of fibrotic area, relative to total heart area. A GLM with offset combines these into a single analysis/plot and has more power than the linear model/t-test or Mann-Whitney U.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">percents</div>
+                <div class="quarto-category">proportions</div>
+                <div class="quarto-category">generalized linear model</div>
+                <div class="quarto-category">offset</div>
+                <div class="quarto-category">power</div>
+                <div class="quarto-category">simulation</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Jeff Walker </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 5, 2024</p>
+      </div>
+    </div>
+    
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">July 12, 2024</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#vital-info" id="toc-vital-info" class="nav-link active" data-scroll-target="#vital-info">Vital info</a></li>
+  <li><a href="#the-experiment" id="toc-the-experiment" class="nav-link" data-scroll-target="#the-experiment">The Experiment</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#import-and-wrangle" id="toc-import-and-wrangle" class="nav-link" data-scroll-target="#import-and-wrangle">Import and Wrangle</a></li>
+  <li><a href="#reproducibility-linear-model-t-test" id="toc-reproducibility-linear-model-t-test" class="nav-link" data-scroll-target="#reproducibility-linear-model-t-test">Reproducibility – linear model / t-test</a></li>
+  <li><a href="#notes-on-what-the-researchers-did" id="toc-notes-on-what-the-researchers-did" class="nav-link" data-scroll-target="#notes-on-what-the-researchers-did">Notes on what the researchers did</a></li>
+  <li><a href="#a-glm-with-fibrotic-area-using-logheart-area-as-an-offset-variable-combines-the-two-analyses-above-into-a-single-analysis" id="toc-a-glm-with-fibrotic-area-using-logheart-area-as-an-offset-variable-combines-the-two-analyses-above-into-a-single-analysis" class="nav-link" data-scroll-target="#a-glm-with-fibrotic-area-using-logheart-area-as-an-offset-variable-combines-the-two-analyses-above-into-a-single-analysis">A GLM with fibrotic area using log(heart area) as an offset variable combines the two analyses above into a single analysis!</a></li>
+  <li><a href="#what-is-the-effect-in-the-glm-model-with-offset" id="toc-what-is-the-effect-in-the-glm-model-with-offset" class="nav-link" data-scroll-target="#what-is-the-effect-in-the-glm-model-with-offset">What is the effect in the GLM model with offset?</a></li>
+  <li><a href="#plot-the-model-with-the-percent-data" id="toc-plot-the-model-with-the-percent-data" class="nav-link" data-scroll-target="#plot-the-model-with-the-percent-data">Plot the model! With the percent data!</a></li>
+  <li><a href="#but-is-the-glm-with-offset-any-good-a-simulation-comparing-it-to-what-the-researchers-did-or-might-have-done." id="toc-but-is-the-glm-with-offset-any-good-a-simulation-comparing-it-to-what-the-researchers-did-or-might-have-done." class="nav-link" data-scroll-target="#but-is-the-glm-with-offset-any-good-a-simulation-comparing-it-to-what-the-researchers-did-or-might-have-done.">But is the GLM with offset any good? – A simulation comparing it to what the researchers did, or might have done.</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="../../figs/Inhibition of fatty acid oxidation enables heart regeneration in adult mice/fig2d_ggplot.png" class="img-fluid figure-img" style="width:6in"></p>
+<figcaption>Better than Reproducibility of Fig 5c. The CIs and p-values are from a quasipoisson GLM model with offset</figcaption>
+</figure>
+</div>
+<section id="vital-info" class="level2">
+<h2 class="anchored" data-anchor-id="vital-info">Vital info</h2>
+<p>Data From: <a href="https://www.nature.com/articles/s41586-023-06585-5" target="_blank">Li, X., Wu, F., Günther, S., Looso, M., Kuenne, C., Zhang, T., … &amp; Braun, T. (2023). Inhibition of fatty acid oxidation enables heart regeneration in adult mice. Nature, 622(7983), 619-626.</a></p>
+<p>Fig: 2d <a href="../../data from/Inhibition of fatty acid oxidation enables heart regeneration in adult mice/41586_2023_6585_MOESM6_ESM.xlsx" target="_blank">download data</a></p>
+<p>key words:</p>
+<p>Published methods: t-test on both raw and proportion data.</p>
+<p>Design: Completely Randomized Design (CRD)</p>
+<p>Response: fibrotic_area (the area of the injured tissue in the heart), both raw and as a proportion of total heart area.</p>
+<p>Key learning concepts: proportions and offsets</p>
+<p>More info: <a href="https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/counts#example-2-use-a-glm-with-an-offset-instead-of-a-ratio-of-some-measurement-per-total-dna-damage-data-fig3b-glm_offset" target="_blank">18.4 Example 2 – Use a GLM with an offset instead of a ratio of some measurement per total (“dna damage” data fig3b)</a></p>
+</section>
+<section id="the-experiment" class="level2">
+<h2 class="anchored" data-anchor-id="the-experiment">The Experiment</h2>
+<p>Background: Postnatal maturation of cardiomyocytes is characterized by a metabolic switch from glycolysis to fatty acid oxidation, chromatin reconfiguration and exit from the cell cycle, instating a barrier for adult heart regeneration1,2. Here, to explore whether metabolic reprogramming can overcome this barrier and enable heart regeneration, we abrogate fatty acid oxidation in cardiomyocytes by inactivation of Cpt1b.</p>
+<p>Analysis of RNA-sequencing (RNA-seq) datasets revealed reduced expression levels of several key genes of glycolysis and cell cycle progression in the course of CM maturation during the first week after birth, whereas genes related to fatty acid oxidation (FAO) and the Krebs cycle were upregulated (Extended Data Fig. 1a). FAO-related genes that were upregulated included the muscle-specific isoform of carnitine palmitoyltransferase Cpt1b but not the ubiquitously expressed Cpt1a isoform, which are required for mitochondrial uptake of fatty acids and subsequent FAO (Extended Data Fig. 1b).</p>
+<p>Motivation: To investigate whether Cpt1b inactivation and the ensuing proliferation of CMs enables heart regeneration, we subjected Cpt1bcKO and Cpt1biKO mice to ischaemia–reperfusion (I–R) injury, a model that closely mimics the situation in human patients receiving a stent for revascularization of an obstructed coronary artery. I–R-induced scars were virtually absent in Cpt1bcKO and Cpt1biKO mice after 3 weeks compared to control animals, although the area at risk (AAR) was similar in both mutant hearts 24 h after I–R surgery (Fig. 2a–f, Extended Data Fig. 5a,b and Supplementary Information).</p>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+</section>
+<section id="import-and-wrangle" class="level2">
+<h2 class="anchored" data-anchor-id="import-and-wrangle">Import and Wrangle</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data_from <span class="ot">&lt;-</span> <span class="st">"Inhibition of fatty acid oxidation enables heart regeneration in adult mice"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>file_name <span class="ot">&lt;-</span> <span class="st">"41586_2023_6585_MOESM6_ESM.xlsx"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, file_name)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>genotype_levels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Ctrl"</span>, <span class="st">"Cpt1biKO"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>fig2d <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(file_path,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sheet =</span> <span class="st">"Fig2.d"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">range =</span> <span class="st">"B1:C10"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">melt</span>(<span class="at">measure.vars =</span> genotype_levels,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">variable.name =</span> <span class="st">"genotype"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">value.name =</span> <span class="st">"fibrotic_area"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>fig2d[, genotype <span class="sc">:</span><span class="er">=</span> <span class="fu">factor</span>(genotype, <span class="at">levels =</span> genotype_levels)]</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>fig2d_percent <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(file_path,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sheet =</span> <span class="st">"Fig2.d"</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                    <span class="at">range =</span> <span class="st">"B12:C21"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">melt</span>(<span class="at">measure.vars =</span> genotype_levels,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">variable.name =</span> <span class="st">"genotype"</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">value.name =</span> <span class="st">"percent"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>fig2d[, fibrotic_area_percent <span class="sc">:</span><span class="er">=</span> fig2d_percent[, percent]]</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>fig2d[, fibrotic_area_proportion <span class="sc">:</span><span class="er">=</span> fibrotic_area_percent<span class="sc">/</span><span class="dv">100</span>]</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>fig2d[, heart_area <span class="sc">:</span><span class="er">=</span> fibrotic_area<span class="sc">/</span>fibrotic_area_proportion]</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>fileout_name <span class="ot">&lt;-</span> <span class="st">"Fig2d-proportion - Inhibition of fatty acid oxidation enables heart regeneration in adult mice.xlsx"</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>fileout_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, fileout_name)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(fig2d, fileout_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="reproducibility-linear-model-t-test" class="level2">
+<h2 class="anchored" data-anchor-id="reproducibility-linear-model-t-test">Reproducibility – linear model / t-test</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>lm1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(fibrotic_area <span class="sc">~</span> genotype, <span class="at">data =</span> fig2d)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>lm1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm1, <span class="at">specs =</span> <span class="st">"genotype"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>lm1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lm1_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>gg1 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(lm1, lm1_emm, lm1_pairs,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">y_label =</span> <span class="st">"Fibrotic Area"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                     <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>lm2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(fibrotic_area_percent <span class="sc">~</span> genotype, <span class="at">data =</span> fig2d)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>lm2_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm2, <span class="at">specs =</span> <span class="st">"genotype"</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>lm2_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lm2_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>gg2 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(lm2, lm2_emm, lm2_pairs,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">y_label =</span> <span class="st">"Percent Fibrotic Area"</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>                     <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># contrast_table &lt;- rbind(lm1_pairs, lm2_pairs)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># contrast_table |&gt;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co">#   kable(digits = 4) |&gt;</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   kable_styling() |&gt;</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co">#   pack_rows("linear model/t-test of fibrotic area", 1, 1) |&gt;</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co">#   pack_rows("linear model/t-test of fibrotic area as percent of total area", 2, 2)</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(gg1, gg2, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Inhibition-of-fatty-acid-oxidation-enables-heart-regeneration-in-adult-mice_files/figure-html/linear-model-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="notes-on-what-the-researchers-did" class="level2">
+<h2 class="anchored" data-anchor-id="notes-on-what-the-researchers-did">Notes on what the researchers did</h2>
+<ol type="1">
+<li>The researchers report a t-test of fibrotic area (left panel above). The effect size (the difference in mean fibrotic area between genotypes) is confounded by differences in heart size between genotypes. So this comparison is not very meaninful as is.</li>
+<li>The researchers report a t-test of relative fibrotic area (the percent of total heart area that is fibrotic)(right panel above). Relative fibrotic area is a meaningful response but presenting this as a difference is weird as we move from near zero to near 0.5 to near 1.</li>
+<li>look what the researcher’s t-tests implies about inference. Both t-tests imply the 95% CIs shown in the plots. These CIs imply mean fibrotic areas that are less then zero are consistent with the data!</li>
+</ol>
+</section>
+<section id="a-glm-with-fibrotic-area-using-logheart-area-as-an-offset-variable-combines-the-two-analyses-above-into-a-single-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="a-glm-with-fibrotic-area-using-logheart-area-as-an-offset-variable-combines-the-two-analyses-above-into-a-single-analysis">A GLM with fibrotic area using log(heart area) as an offset variable combines the two analyses above into a single analysis!</h2>
+<p>A common way to test for the effect of a treatment when the effect is confounded by a covariate is ANCOVA. For example, many researchers test for the effect of a treatment on O2 consumption and use body weight as a covariate, since O2 consupmption increases with body weight. A linear model with an offset is exactly like an a linear model with a continuous covariate (ANCOVA model) except the coefficient (slope) of the covariate is forced to be 1.</p>
+<p>Here is a covariate (ANCOVA) model:</p>
+<p><span class="math display">\[
+\texttt{log}(\texttt{fibrotic_area}) = b_0 + b_1 \texttt{log}(\texttt{heart_area}) + b_2 \texttt{genotype}
+\]</span></p>
+<p>where <span class="math inline">\(b_1\)</span> is the pooled slope of fibrotic area on heart area. If we don’t expect larger hearts to have relative more (or less) fibrotic area, the we would expect <span class="math inline">\(b_1 = 1\)</span>. An offset forces this expectation.</p>
+<p>Importantly, if we use a GLM with log link, the model only models the log-transformed group means – not the means of the log transformed data, as in the ANCOVA model above.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>m3 <span class="ot">&lt;-</span> <span class="fu">glm</span>(fibrotic_area <span class="sc">~</span> genotype <span class="sc">+</span> <span class="fu">offset</span>(<span class="fu">log</span>(heart_area)),</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"log"</span>),</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> fig2d)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>m3_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m3, <span class="at">specs =</span> <span class="st">"genotype"</span>, <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>m3_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m3_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="what-is-the-effect-in-the-glm-model-with-offset" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-the-effect-in-the-glm-model-with-offset">What is the effect in the GLM model with offset?</h2>
+<p>By forcing the coefficient to be one, the effect is the ratio of the means of the two proportions (or the difference of the means of the propotions in log space).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>m3_pairs <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">7</span>,<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">6</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">contrast</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">ratio</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">SE</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">df</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">lower.CL</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">upper.CL</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">null</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">t.ratio</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Cpt1biKO / Ctrl</td>
+<td style="text-align: right;">0.2312978</td>
+<td style="text-align: right;">0.075</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0.12</td>
+<td style="text-align: right;">0.46</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">-4.51</td>
+<td style="text-align: right;">0.000486</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>The effect (0.23) is the ratio of the mean proportion of the KO group to the mean proportion of the Cn group.</p>
+<p>Here is the ratio computed manually</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(fig2d[genotype <span class="sc">==</span> <span class="st">"Cpt1biKO"</span>, fibrotic_area_proportion])<span class="sc">/</span><span class="fu">mean</span>(fig2d[genotype <span class="sc">==</span> <span class="st">"Ctrl"</span>, fibrotic_area_proportion])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.2312978</code></pre>
+</div>
+</div>
+</section>
+<section id="plot-the-model-with-the-percent-data" class="level2">
+<h2 class="anchored" data-anchor-id="plot-the-model-with-the-percent-data">Plot the model! With the percent data!</h2>
+<p>While fibrotic area was the response variable in our statistical model, we want to plot the model with the proportion data. This means we need to convert the estimated model means and CIs to proportions. This is easy, simply divide these values by the mean heart area, ignoring genotype levels.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>m3_emm_dt <span class="ot">&lt;-</span> m3_emm <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>m3_pairs_dt <span class="ot">&lt;-</span> <span class="fu">data.table</span>(m3_pairs)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>common_factor <span class="ot">&lt;-</span> <span class="fu">mean</span>(fig2d<span class="sc">$</span>heart_area)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>m3_emm_dt[, mean <span class="sc">:</span><span class="er">=</span> response<span class="sc">/</span>common_factor <span class="sc">*</span> <span class="dv">100</span>]</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>m3_emm_dt[, lo <span class="sc">:</span><span class="er">=</span> lower.CL<span class="sc">/</span>common_factor <span class="sc">*</span> <span class="dv">100</span>]</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>m3_emm_dt[, hi <span class="sc">:</span><span class="er">=</span> upper.CL<span class="sc">/</span>common_factor <span class="sc">*</span> <span class="dv">100</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Here is the percent fibrotic area computed from the model.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>m3_emm_dt[, .SD, .SDcols <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"genotype"</span>, <span class="st">"mean"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   genotype     mean
+     &lt;fctr&gt;    &lt;num&gt;
+1:     Ctrl 8.127159
+2: Cpt1biKO 1.879794</code></pre>
+</div>
+</div>
+<p>And here is the percent fibrotic area computed by simply averaging the percent data.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fig2d[, .(<span class="at">fibrotic_area_percent =</span> <span class="fu">mean</span>(fibrotic_area_percent)),</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>                                by <span class="ot">=</span> .(genotype)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   genotype fibrotic_area_percent
+     &lt;fctr&gt;                 &lt;num&gt;
+1:     Ctrl              8.127159
+2: Cpt1biKO              1.879794</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>gg <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> fig2d,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> genotype,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> fibrotic_area_percent,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> genotype)) <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sina</span>(<span class="at">size =</span> <span class="dv">2</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">maxwidth =</span> <span class="fl">0.5</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="at">data =</span> m3_emm_dt,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x =</span> genotype,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y =</span> mean,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymin =</span> lo,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymax =</span> hi),</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>                <span class="at">width =</span> <span class="fl">0.05</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>                <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> m3_emm_dt,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> genotype,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> mean),</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="dv">3</span>,</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Fibrotic Area (% of Heart Area)"</span>) <span class="sc">+</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> pal_okabe_ito_2) <span class="sc">+</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_pubr</span>() <span class="sc">+</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>()) <span class="sc">+</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  <span class="cn">NULL</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add p-values</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>m3_pairs_dt[, group1 <span class="sc">:</span><span class="er">=</span> <span class="st">"Ctrl"</span>]</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>m3_pairs_dt[, group2 <span class="sc">:</span><span class="er">=</span> <span class="st">"Cpt1biKO"</span>]</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>m3_pairs_dt[, p <span class="sc">:</span><span class="er">=</span> p.value <span class="sc">|&gt;</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>              <span class="fu">p_round</span>(<span class="at">digits =</span> <span class="dv">2</span>) <span class="sc">|&gt;</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>              <span class="fu">p_format</span>(<span class="at">digits =</span> <span class="dv">2</span>, <span class="at">accuracy =</span> <span class="fl">1e-03</span>, <span class="at">add.p =</span> <span class="cn">TRUE</span>)]</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>maxy <span class="ot">&lt;-</span> fig2d[, <span class="fu">max</span>(fibrotic_area_percent)]</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>miny <span class="ot">&lt;-</span> fig2d[, <span class="fu">min</span>(fibrotic_area_percent)]</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>m3_pairs_dt[, y.position <span class="sc">:</span><span class="er">=</span> maxy <span class="sc">+</span> <span class="fl">0.05</span><span class="sc">*</span>(maxy <span class="sc">-</span> miny)]</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>gg <span class="ot">&lt;-</span> gg <span class="sc">+</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_pvalue_manual</span>(</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> m3_pairs_dt,</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">"p"</span>,</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">tip.length =</span> <span class="fl">0.001</span>)</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>gg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Inhibition-of-fatty-acid-oxidation-enables-heart-regeneration-in-adult-mice_files/figure-html/plot-the-model-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>save_it <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(save_it){</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>out_fig <span class="ot">&lt;-</span> <span class="st">"fig2d_ggplot.png"</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>out_path <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"figs"</span>, data_from, out_fig)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggsave</span>(out_path)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>This is beautiful. We don’t need two plots. The GLM with offset estimates the effect of genotype on Fibrotic Area adjusting for differences in total Heart Area. And we’ve plotted the model using the percent fibrotic area data and estimated means and CIs from the model.</p>
+</section>
+<section id="but-is-the-glm-with-offset-any-good-a-simulation-comparing-it-to-what-the-researchers-did-or-might-have-done." class="level2">
+<h2 class="anchored" data-anchor-id="but-is-the-glm-with-offset-any-good-a-simulation-comparing-it-to-what-the-researchers-did-or-might-have-done.">But is the GLM with offset any good? – A simulation comparing it to what the researchers did, or might have done.</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>get_clean_proportion_data <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    n_sample,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    n_cols,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    alpha_num,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    beta_num,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    alpha_denom,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    beta_denom,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    rho_obs,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    seed_starter){</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  rho_matrix <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, r_obs, r_obs, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  params_num <span class="ot">&lt;-</span> <span class="fu">calc_theory</span>(<span class="at">Dist =</span> <span class="st">"Gamma"</span>, <span class="at">params =</span> <span class="fu">c</span>(alpha_num, beta_num)) <span class="co"># fibrotic area</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  params_denom <span class="ot">&lt;-</span> <span class="fu">calc_theory</span>(<span class="at">Dist =</span> <span class="st">"Gamma"</span>, <span class="at">params =</span> <span class="fu">c</span>(alpha_denom, beta_denom)) <span class="co"># heart area</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  n_cols_extra <span class="ot">&lt;-</span> <span class="fu">floor</span>(n_cols <span class="sc">*</span> <span class="fl">1.2</span>)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  fake_y <span class="ot">&lt;-</span> <span class="fu">rcorrvar</span>(<span class="at">n =</span> n_sample <span class="sc">*</span> n_cols_extra,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">k_cont =</span> <span class="dv">2</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> <span class="st">"Polynomial"</span>,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>                     <span class="at">means =</span> <span class="fu">c</span>(params_num[<span class="dv">1</span>], params_denom[<span class="dv">1</span>]), <span class="co"># mean</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>                     <span class="at">vars =</span> <span class="fu">c</span>(params_num[<span class="dv">2</span>]<span class="sc">^</span><span class="dv">2</span>, params_denom[<span class="dv">2</span>]<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>                     <span class="at">skews =</span> <span class="fu">c</span>(params_num[<span class="dv">3</span>], params_denom[<span class="dv">3</span>]),</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>                     <span class="at">skurts =</span> <span class="fu">c</span>(params_num[<span class="dv">4</span>], params_denom[<span class="dv">4</span>]),</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>                     <span class="at">fifths =</span> <span class="fu">c</span>(params_num[<span class="dv">5</span>], params_denom[<span class="dv">5</span>]),</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>                     <span class="at">sixths =</span> <span class="fu">c</span>(params_num[<span class="dv">6</span>], params_denom[<span class="dv">6</span>]),</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>                     <span class="at">rho =</span> rho_matrix,</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>                     <span class="at">seed =</span> seed_starter)<span class="sc">$</span>continuous_variables</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  exc <span class="ot">&lt;-</span> <span class="fu">which</span>(fake_y[, <span class="st">"V1"</span>] <span class="sc">&lt;</span> <span class="dv">0</span>)</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">length</span>(exc <span class="sc">&gt;</span> <span class="dv">0</span>)){</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>    fake_y <span class="ot">&lt;-</span> fake_y[<span class="sc">-</span>exc, ]}</span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  fake_y <span class="ot">&lt;-</span> fake_y[<span class="dv">1</span><span class="sc">:</span>(n_sample <span class="sc">*</span> n_cols), ]</span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>  num_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(fake_y[,<span class="st">"V1"</span>], <span class="at">nrow =</span> n_sample, <span class="at">ncol =</span> n_cols)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  denom_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(fake_y[,<span class="st">"V2"</span>], <span class="at">nrow =</span> n_sample, <span class="at">ncol =</span> n_cols)</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  prop_mat <span class="ot">&lt;-</span> num_mat<span class="sc">/</span>denom_mat</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(</span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">numerator =</span> num_mat,</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">denominator =</span> denom_mat,</span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">proportion =</span> prop_mat</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get parameters</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>do_it <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(do_it){</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  iter_sets <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  n_iter <span class="ot">&lt;-</span> <span class="dv">2500</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  total_iter <span class="ot">&lt;-</span> n_iter <span class="sc">*</span> iter_sets</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># parameters</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample size</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  fig2d_summary <span class="ot">&lt;-</span> fig2d[, .(<span class="at">N =</span> .N), by <span class="ot">=</span> .(genotype)]</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># correlation between fibrotic area and heart area</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  fig2d[, fibrotic_area_resid <span class="sc">:</span><span class="er">=</span> <span class="fu">residuals</span>(<span class="fu">lm</span>(fibrotic_area <span class="sc">~</span> genotype, <span class="at">data =</span> fig2d))]</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  fig2d[, heart_area_resid <span class="sc">:</span><span class="er">=</span> <span class="fu">residuals</span>(<span class="fu">lm</span>(heart_area <span class="sc">~</span> genotype, <span class="at">data =</span> fig2d))]</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  r_obs <span class="ot">&lt;-</span> <span class="fu">cor</span>(fig2d<span class="sc">$</span>fibrotic_area_resid, fig2d<span class="sc">$</span>heart_area_resid)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># the correlation is low-ish: 0.367</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  rho_matrix <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, r_obs, r_obs, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># gamma parameters</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># numerator -- fibrotic area</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  glm1 <span class="ot">&lt;-</span> <span class="fu">glm</span>(fibrotic_area <span class="sc">~</span> genotype,</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>              <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"log"</span>),</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>              <span class="at">data =</span> fig2d)</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  glm1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(glm1, <span class="at">specs =</span> <span class="st">"genotype"</span>, <span class="at">type =</span> <span class="st">"response"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.table</span>()</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  glm1_mu <span class="ot">&lt;-</span> glm1_emm[, response]</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># make effect smaller for power</span></span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>  effect <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>  glm1_mu[<span class="dv">2</span>] <span class="ot">&lt;-</span> glm1_mu[<span class="dv">1</span>]<span class="sc">*</span>effect</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>  glm1_alpha <span class="ot">&lt;-</span> <span class="fu">gamma.shape</span>(glm1)[[<span class="dv">1</span>]]</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  glm1_beta <span class="ot">&lt;-</span> glm1_alpha<span class="sc">/</span>glm1_mu <span class="co"># = rate or 1/scale</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>  <span class="co"># denominator -- heart area</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>  glm2 <span class="ot">&lt;-</span> <span class="fu">glm</span>(heart_area <span class="sc">~</span> genotype,</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>              <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"log"</span>),</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>              <span class="at">data =</span> fig2d)</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>  glm2_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(glm2, <span class="at">specs =</span> <span class="st">"genotype"</span>, <span class="at">type =</span> <span class="st">"response"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.table</span>()</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>  glm2_mu <span class="ot">&lt;-</span> glm2_emm[, response]</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>  glm2_alpha <span class="ot">&lt;-</span> <span class="fu">gamma.shape</span>(glm2)[[<span class="dv">1</span>]]</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>  glm2_beta <span class="ot">&lt;-</span> glm2_alpha<span class="sc">/</span>glm2_mu <span class="co"># = rate or 1/scale</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>  num_params_cn <span class="ot">&lt;-</span> <span class="fu">calc_theory</span>(<span class="at">Dist =</span> <span class="st">"Gamma"</span>, <span class="at">params =</span> <span class="fu">c</span>(glm1_alpha, glm1_beta[<span class="dv">1</span>])) <span class="co"># fibrotic area</span></span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>  denom_params_cn <span class="ot">&lt;-</span> <span class="fu">calc_theory</span>(<span class="at">Dist =</span> <span class="st">"Gamma"</span>, <span class="at">params =</span> <span class="fu">c</span>(glm2_alpha, glm2_beta[<span class="dv">1</span>])) <span class="co"># heart area</span></span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>  num_params_ko <span class="ot">&lt;-</span> <span class="fu">calc_theory</span>(<span class="at">Dist =</span> <span class="st">"Gamma"</span>, <span class="at">params =</span> <span class="fu">c</span>(glm1_alpha, glm1_beta[<span class="dv">2</span>])) <span class="co"># fibrotic area</span></span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>  denom_params_ko <span class="ot">&lt;-</span> <span class="fu">calc_theory</span>(<span class="at">Dist =</span> <span class="st">"Gamma"</span>, <span class="at">params =</span> <span class="fu">c</span>(glm2_alpha, glm2_beta[<span class="dv">2</span>])) <span class="co"># heart area</span></span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>  fd <span class="ot">&lt;-</span> <span class="fu">data.table</span>(</span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>    <span class="at">genotype =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"Ctrl"</span>, <span class="st">"Cpt1biKO"</span>), fig2d_summary<span class="sc">$</span>N),</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>    <span class="at">fibrotic_area =</span> <span class="fu">as.numeric</span>(<span class="cn">NA</span>),</span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>    <span class="at">heart_area =</span> <span class="fu">as.numeric</span>(<span class="cn">NA</span>)</span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a>  power_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow =</span> total_iter, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(power_matrix) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"mwu"</span>,<span class="st">"lm"</span>, <span class="st">"qb"</span>, <span class="st">"gamma"</span>)</span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a>  type1_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="at">nrow =</span> total_iter, <span class="at">ncol =</span> <span class="dv">4</span>)</span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>(type1_matrix) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"mwu"</span>,<span class="st">"lm"</span>, <span class="st">"qb"</span>, <span class="st">"gamma"</span>)</span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a>  seed_starter_sim <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(iter_set <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>iter_sets){</span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a>    <span class="co"># power</span></span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a>    <span class="co"># make effect size smaller so power &lt; 1</span></span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a>    seed_starter_sim <span class="ot">&lt;-</span> seed_starter_sim <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a>    fake_cn <span class="ot">&lt;-</span> <span class="fu">get_clean_proportion_data</span>(</span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a>      <span class="at">n_sample =</span> fig2d_summary[<span class="dv">1</span>, N],</span>
+<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a>      <span class="at">n_cols =</span> n_iter,</span>
+<span id="cb15-69"><a href="#cb15-69" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha_num =</span> glm1_alpha,</span>
+<span id="cb15-70"><a href="#cb15-70" aria-hidden="true" tabindex="-1"></a>      <span class="at">beta_num =</span> glm1_beta[<span class="dv">1</span>],</span>
+<span id="cb15-71"><a href="#cb15-71" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha_denom =</span> glm2_alpha,</span>
+<span id="cb15-72"><a href="#cb15-72" aria-hidden="true" tabindex="-1"></a>      <span class="at">beta_denom =</span> glm2_beta[<span class="dv">1</span>],</span>
+<span id="cb15-73"><a href="#cb15-73" aria-hidden="true" tabindex="-1"></a>      <span class="at">rho_obs =</span> r_obs,</span>
+<span id="cb15-74"><a href="#cb15-74" aria-hidden="true" tabindex="-1"></a>      <span class="at">seed_start =</span> seed_starter_sim)</span>
+<span id="cb15-75"><a href="#cb15-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-76"><a href="#cb15-76" aria-hidden="true" tabindex="-1"></a>    seed_starter_sim <span class="ot">&lt;-</span> seed_starter_sim <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb15-77"><a href="#cb15-77" aria-hidden="true" tabindex="-1"></a>    fake_ko <span class="ot">&lt;-</span> <span class="fu">get_clean_proportion_data</span>(</span>
+<span id="cb15-78"><a href="#cb15-78" aria-hidden="true" tabindex="-1"></a>      <span class="at">n_sample =</span> fig2d_summary[<span class="dv">2</span>, N],</span>
+<span id="cb15-79"><a href="#cb15-79" aria-hidden="true" tabindex="-1"></a>      <span class="at">n_cols =</span> n_iter,</span>
+<span id="cb15-80"><a href="#cb15-80" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha_num =</span> glm1_alpha,</span>
+<span id="cb15-81"><a href="#cb15-81" aria-hidden="true" tabindex="-1"></a>      <span class="at">beta_num =</span> glm1_beta[<span class="dv">2</span>],</span>
+<span id="cb15-82"><a href="#cb15-82" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha_denom =</span> glm2_alpha,</span>
+<span id="cb15-83"><a href="#cb15-83" aria-hidden="true" tabindex="-1"></a>      <span class="at">beta_denom =</span> glm2_beta[<span class="dv">2</span>],</span>
+<span id="cb15-84"><a href="#cb15-84" aria-hidden="true" tabindex="-1"></a>      <span class="at">rho_obs =</span> r_obs,</span>
+<span id="cb15-85"><a href="#cb15-85" aria-hidden="true" tabindex="-1"></a>      <span class="at">seed_start =</span> seed_starter_sim)</span>
+<span id="cb15-86"><a href="#cb15-86" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-87"><a href="#cb15-87" aria-hidden="true" tabindex="-1"></a>    fibrotic_area_mat <span class="ot">&lt;-</span> <span class="fu">rbind</span>(fake_cn[[<span class="st">"numerator"</span>]],</span>
+<span id="cb15-88"><a href="#cb15-88" aria-hidden="true" tabindex="-1"></a>                               fake_ko[[<span class="st">"numerator"</span>]])</span>
+<span id="cb15-89"><a href="#cb15-89" aria-hidden="true" tabindex="-1"></a>    heart_area_mat <span class="ot">&lt;-</span> <span class="fu">rbind</span>(fake_cn[[<span class="st">"denominator"</span>]],</span>
+<span id="cb15-90"><a href="#cb15-90" aria-hidden="true" tabindex="-1"></a>                            fake_ko[[<span class="st">"denominator"</span>]])</span>
+<span id="cb15-91"><a href="#cb15-91" aria-hidden="true" tabindex="-1"></a>    fibrotic_prop_mat <span class="ot">&lt;-</span> <span class="fu">rbind</span>(fake_cn[[<span class="st">"proportion"</span>]],</span>
+<span id="cb15-92"><a href="#cb15-92" aria-hidden="true" tabindex="-1"></a>                               fake_ko[[<span class="st">"proportion"</span>]])</span>
+<span id="cb15-93"><a href="#cb15-93" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-94"><a href="#cb15-94" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(iter <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_iter){</span>
+<span id="cb15-95"><a href="#cb15-95" aria-hidden="true" tabindex="-1"></a>      sim_i <span class="ot">&lt;-</span> n_iter<span class="sc">*</span>(iter_set <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">+</span> iter</span>
+<span id="cb15-96"><a href="#cb15-96" aria-hidden="true" tabindex="-1"></a>      <span class="co"># fake data</span></span>
+<span id="cb15-97"><a href="#cb15-97" aria-hidden="true" tabindex="-1"></a>      fd[, fibrotic_area <span class="sc">:</span><span class="er">=</span> fibrotic_area_mat[, iter]]</span>
+<span id="cb15-98"><a href="#cb15-98" aria-hidden="true" tabindex="-1"></a>      fd[, heart_area <span class="sc">:</span><span class="er">=</span> heart_area_mat[, iter]]</span>
+<span id="cb15-99"><a href="#cb15-99" aria-hidden="true" tabindex="-1"></a>      fd[, fibrotic_prop <span class="sc">:</span><span class="er">=</span> fibrotic_prop_mat[, iter]]</span>
+<span id="cb15-100"><a href="#cb15-100" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb15-101"><a href="#cb15-101" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Mann Whitney</span></span>
+<span id="cb15-102"><a href="#cb15-102" aria-hidden="true" tabindex="-1"></a>      power_matrix[sim_i, <span class="st">"mwu"</span>] <span class="ot">&lt;-</span> <span class="fu">wilcox.test</span>(fibrotic_prop <span class="sc">~</span> genotype, <span class="at">data =</span> fd)<span class="sc">$</span>p.value</span>
+<span id="cb15-103"><a href="#cb15-103" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb15-104"><a href="#cb15-104" aria-hidden="true" tabindex="-1"></a>      <span class="co"># lm</span></span>
+<span id="cb15-105"><a href="#cb15-105" aria-hidden="true" tabindex="-1"></a>      m_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(fibrotic_prop <span class="sc">~</span> genotype, <span class="at">data =</span> fd)</span>
+<span id="cb15-106"><a href="#cb15-106" aria-hidden="true" tabindex="-1"></a>      power_matrix[sim_i, <span class="st">"lm"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_lm))[<span class="st">"genotypeCtrl"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb15-107"><a href="#cb15-107" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb15-108"><a href="#cb15-108" aria-hidden="true" tabindex="-1"></a>      <span class="co"># glm bin</span></span>
+<span id="cb15-109"><a href="#cb15-109" aria-hidden="true" tabindex="-1"></a>      m_qb <span class="ot">&lt;-</span> <span class="fu">glm</span>(fibrotic_prop <span class="sc">~</span> genotype,</span>
+<span id="cb15-110"><a href="#cb15-110" aria-hidden="true" tabindex="-1"></a>                  <span class="at">family =</span> quasibinomial,</span>
+<span id="cb15-111"><a href="#cb15-111" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> fd)</span>
+<span id="cb15-112"><a href="#cb15-112" aria-hidden="true" tabindex="-1"></a>      power_matrix[sim_i, <span class="st">"qb"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_qb))[<span class="st">"genotypeCtrl"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb15-113"><a href="#cb15-113" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb15-114"><a href="#cb15-114" aria-hidden="true" tabindex="-1"></a>      <span class="co"># glm qp</span></span>
+<span id="cb15-115"><a href="#cb15-115" aria-hidden="true" tabindex="-1"></a>      m_gamma <span class="ot">&lt;-</span> <span class="fu">glm</span>(fibrotic_area <span class="sc">~</span> genotype <span class="sc">+</span> <span class="fu">offset</span>(<span class="fu">log</span>(heart_area)),</span>
+<span id="cb15-116"><a href="#cb15-116" aria-hidden="true" tabindex="-1"></a>                  <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"log"</span>),</span>
+<span id="cb15-117"><a href="#cb15-117" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> fd)</span>
+<span id="cb15-118"><a href="#cb15-118" aria-hidden="true" tabindex="-1"></a>      power_matrix[sim_i, <span class="st">"gamma"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_gamma))[<span class="st">"genotypeCtrl"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb15-119"><a href="#cb15-119" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb15-120"><a href="#cb15-120" aria-hidden="true" tabindex="-1"></a>      <span class="co">#       do_plot &lt;- FALSE</span></span>
+<span id="cb15-121"><a href="#cb15-121" aria-hidden="true" tabindex="-1"></a>      <span class="co">#       if(do_plot){</span></span>
+<span id="cb15-122"><a href="#cb15-122" aria-hidden="true" tabindex="-1"></a>      <span class="co"># m_gamma_emm &lt;- emmeans(m_gamma, specs = "genotype", type = "response")</span></span>
+<span id="cb15-123"><a href="#cb15-123" aria-hidden="true" tabindex="-1"></a>      <span class="co"># m_gamma_pairs &lt;- contrast(m_gamma_emm, method = "revpairwise") |&gt;</span></span>
+<span id="cb15-124"><a href="#cb15-124" aria-hidden="true" tabindex="-1"></a>      <span class="co">#   summary(infer = TRUE)</span></span>
+<span id="cb15-125"><a href="#cb15-125" aria-hidden="true" tabindex="-1"></a>      <span class="co">#        plot_response(m_qb, m_qb_emm, m_qb_pairs)</span></span>
+<span id="cb15-126"><a href="#cb15-126" aria-hidden="true" tabindex="-1"></a>              <span class="co"># ggplot(data = fd,</span></span>
+<span id="cb15-127"><a href="#cb15-127" aria-hidden="true" tabindex="-1"></a>              <span class="co">#        aes(x = genotype,</span></span>
+<span id="cb15-128"><a href="#cb15-128" aria-hidden="true" tabindex="-1"></a>              <span class="co">#            y = fibrotic_prop,</span></span>
+<span id="cb15-129"><a href="#cb15-129" aria-hidden="true" tabindex="-1"></a>              <span class="co">#            color = genotype)) +</span></span>
+<span id="cb15-130"><a href="#cb15-130" aria-hidden="true" tabindex="-1"></a>              <span class="co">#   geom_point()</span></span>
+<span id="cb15-131"><a href="#cb15-131" aria-hidden="true" tabindex="-1"></a>      <span class="co">#       }</span></span>
+<span id="cb15-132"><a href="#cb15-132" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb15-133"><a href="#cb15-133" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-134"><a href="#cb15-134" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-135"><a href="#cb15-135" aria-hidden="true" tabindex="-1"></a>    <span class="co"># type I</span></span>
+<span id="cb15-136"><a href="#cb15-136" aria-hidden="true" tabindex="-1"></a>    seed_starter_sim <span class="ot">&lt;-</span> seed_starter_sim <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb15-137"><a href="#cb15-137" aria-hidden="true" tabindex="-1"></a>    fake_cn <span class="ot">&lt;-</span> <span class="fu">get_clean_proportion_data</span>(</span>
+<span id="cb15-138"><a href="#cb15-138" aria-hidden="true" tabindex="-1"></a>      <span class="at">n_sample =</span> fig2d_summary[<span class="dv">1</span>, N],</span>
+<span id="cb15-139"><a href="#cb15-139" aria-hidden="true" tabindex="-1"></a>      <span class="at">n_cols =</span> n_iter,</span>
+<span id="cb15-140"><a href="#cb15-140" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha_num =</span> glm1_alpha,</span>
+<span id="cb15-141"><a href="#cb15-141" aria-hidden="true" tabindex="-1"></a>      <span class="at">beta_num =</span> glm1_beta[<span class="dv">1</span>],</span>
+<span id="cb15-142"><a href="#cb15-142" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha_denom =</span> glm2_alpha,</span>
+<span id="cb15-143"><a href="#cb15-143" aria-hidden="true" tabindex="-1"></a>      <span class="at">beta_denom =</span> glm2_beta[<span class="dv">1</span>],</span>
+<span id="cb15-144"><a href="#cb15-144" aria-hidden="true" tabindex="-1"></a>      <span class="at">rho_obs =</span> r_obs,</span>
+<span id="cb15-145"><a href="#cb15-145" aria-hidden="true" tabindex="-1"></a>      <span class="at">seed_start =</span> seed_starter_sim)</span>
+<span id="cb15-146"><a href="#cb15-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-147"><a href="#cb15-147" aria-hidden="true" tabindex="-1"></a>    seed_starter_sim <span class="ot">&lt;-</span> seed_starter_sim <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb15-148"><a href="#cb15-148" aria-hidden="true" tabindex="-1"></a>    fake_ko <span class="ot">&lt;-</span> <span class="fu">get_clean_proportion_data</span>(</span>
+<span id="cb15-149"><a href="#cb15-149" aria-hidden="true" tabindex="-1"></a>      <span class="at">n_sample =</span> fig2d_summary[<span class="dv">2</span>, N],</span>
+<span id="cb15-150"><a href="#cb15-150" aria-hidden="true" tabindex="-1"></a>      <span class="at">n_cols =</span> n_iter,</span>
+<span id="cb15-151"><a href="#cb15-151" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha_num =</span> glm1_alpha,</span>
+<span id="cb15-152"><a href="#cb15-152" aria-hidden="true" tabindex="-1"></a>      <span class="at">beta_num =</span> glm1_beta[<span class="dv">1</span>],</span>
+<span id="cb15-153"><a href="#cb15-153" aria-hidden="true" tabindex="-1"></a>      <span class="at">alpha_denom =</span> glm2_alpha,</span>
+<span id="cb15-154"><a href="#cb15-154" aria-hidden="true" tabindex="-1"></a>      <span class="at">beta_denom =</span> glm2_beta[<span class="dv">1</span>],</span>
+<span id="cb15-155"><a href="#cb15-155" aria-hidden="true" tabindex="-1"></a>      <span class="at">rho_obs =</span> r_obs,</span>
+<span id="cb15-156"><a href="#cb15-156" aria-hidden="true" tabindex="-1"></a>      <span class="at">seed_start =</span> seed_starter_sim)</span>
+<span id="cb15-157"><a href="#cb15-157" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-158"><a href="#cb15-158" aria-hidden="true" tabindex="-1"></a>    fibrotic_area_mat <span class="ot">&lt;-</span> <span class="fu">rbind</span>(fake_cn[[<span class="st">"numerator"</span>]],</span>
+<span id="cb15-159"><a href="#cb15-159" aria-hidden="true" tabindex="-1"></a>                               fake_ko[[<span class="st">"numerator"</span>]])</span>
+<span id="cb15-160"><a href="#cb15-160" aria-hidden="true" tabindex="-1"></a>    heart_area_mat <span class="ot">&lt;-</span> <span class="fu">rbind</span>(fake_cn[[<span class="st">"denominator"</span>]],</span>
+<span id="cb15-161"><a href="#cb15-161" aria-hidden="true" tabindex="-1"></a>                            fake_ko[[<span class="st">"denominator"</span>]])</span>
+<span id="cb15-162"><a href="#cb15-162" aria-hidden="true" tabindex="-1"></a>    fibrotic_prop_mat <span class="ot">&lt;-</span> <span class="fu">rbind</span>(fake_cn[[<span class="st">"proportion"</span>]],</span>
+<span id="cb15-163"><a href="#cb15-163" aria-hidden="true" tabindex="-1"></a>                               fake_ko[[<span class="st">"proportion"</span>]])</span>
+<span id="cb15-164"><a href="#cb15-164" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-165"><a href="#cb15-165" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(iter <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_iter){</span>
+<span id="cb15-166"><a href="#cb15-166" aria-hidden="true" tabindex="-1"></a>      sim_i <span class="ot">&lt;-</span> n_iter<span class="sc">*</span>(iter_set <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">+</span> iter</span>
+<span id="cb15-167"><a href="#cb15-167" aria-hidden="true" tabindex="-1"></a>      <span class="co"># fake data</span></span>
+<span id="cb15-168"><a href="#cb15-168" aria-hidden="true" tabindex="-1"></a>      fd[, fibrotic_area <span class="sc">:</span><span class="er">=</span> fibrotic_area_mat[, iter]]</span>
+<span id="cb15-169"><a href="#cb15-169" aria-hidden="true" tabindex="-1"></a>      fd[, heart_area <span class="sc">:</span><span class="er">=</span> heart_area_mat[, iter]]</span>
+<span id="cb15-170"><a href="#cb15-170" aria-hidden="true" tabindex="-1"></a>      fd[, fibrotic_prop <span class="sc">:</span><span class="er">=</span> fibrotic_prop_mat[, iter]]</span>
+<span id="cb15-171"><a href="#cb15-171" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb15-172"><a href="#cb15-172" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Mann Whitney</span></span>
+<span id="cb15-173"><a href="#cb15-173" aria-hidden="true" tabindex="-1"></a>      type1_matrix[sim_i, <span class="st">"mwu"</span>] <span class="ot">&lt;-</span> <span class="fu">wilcox.test</span>(fibrotic_prop <span class="sc">~</span> genotype, <span class="at">data =</span> fd)<span class="sc">$</span>p.value</span>
+<span id="cb15-174"><a href="#cb15-174" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb15-175"><a href="#cb15-175" aria-hidden="true" tabindex="-1"></a>      <span class="co"># lm</span></span>
+<span id="cb15-176"><a href="#cb15-176" aria-hidden="true" tabindex="-1"></a>      m_lm <span class="ot">&lt;-</span> <span class="fu">lm</span>(fibrotic_prop <span class="sc">~</span> genotype, <span class="at">data =</span> fd)</span>
+<span id="cb15-177"><a href="#cb15-177" aria-hidden="true" tabindex="-1"></a>      type1_matrix[sim_i, <span class="st">"lm"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_lm))[<span class="st">"genotypeCtrl"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb15-178"><a href="#cb15-178" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb15-179"><a href="#cb15-179" aria-hidden="true" tabindex="-1"></a>      <span class="co"># glm bin</span></span>
+<span id="cb15-180"><a href="#cb15-180" aria-hidden="true" tabindex="-1"></a>      m_qb <span class="ot">&lt;-</span> <span class="fu">glm</span>(fibrotic_prop <span class="sc">~</span> genotype,</span>
+<span id="cb15-181"><a href="#cb15-181" aria-hidden="true" tabindex="-1"></a>                  <span class="at">family =</span> quasibinomial,</span>
+<span id="cb15-182"><a href="#cb15-182" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> fd)</span>
+<span id="cb15-183"><a href="#cb15-183" aria-hidden="true" tabindex="-1"></a>      type1_matrix[sim_i, <span class="st">"qb"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_qb))[<span class="st">"genotypeCtrl"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb15-184"><a href="#cb15-184" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb15-185"><a href="#cb15-185" aria-hidden="true" tabindex="-1"></a>      <span class="co"># glm qp</span></span>
+<span id="cb15-186"><a href="#cb15-186" aria-hidden="true" tabindex="-1"></a>      m_gamma <span class="ot">&lt;-</span> <span class="fu">glm</span>(fibrotic_area <span class="sc">~</span> genotype <span class="sc">+</span> <span class="fu">offset</span>(<span class="fu">log</span>(heart_area)),</span>
+<span id="cb15-187"><a href="#cb15-187" aria-hidden="true" tabindex="-1"></a>                  <span class="at">family =</span> <span class="fu">Gamma</span>(<span class="at">link =</span> <span class="st">"log"</span>),</span>
+<span id="cb15-188"><a href="#cb15-188" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> fd)</span>
+<span id="cb15-189"><a href="#cb15-189" aria-hidden="true" tabindex="-1"></a>      type1_matrix[sim_i, <span class="st">"gamma"</span>] <span class="ot">&lt;-</span> <span class="fu">coef</span>(<span class="fu">summary</span>(m_gamma))[<span class="st">"genotypeCtrl"</span>, <span class="st">"Pr(&gt;|t|)"</span>]</span>
+<span id="cb15-190"><a href="#cb15-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-191"><a href="#cb15-191" aria-hidden="true" tabindex="-1"></a>    }    </span>
+<span id="cb15-192"><a href="#cb15-192" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-193"><a href="#cb15-193" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-194"><a href="#cb15-194" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(power_matrix, <span class="st">"power_matrix.Rds"</span>)</span>
+<span id="cb15-195"><a href="#cb15-195" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(type1_matrix, <span class="st">"type1_matrix.Rds"</span>)</span>
+<span id="cb15-196"><a href="#cb15-196" aria-hidden="true" tabindex="-1"></a>}<span class="cf">else</span>{</span>
+<span id="cb15-197"><a href="#cb15-197" aria-hidden="true" tabindex="-1"></a>  power_matrix <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"power_matrix.Rds"</span>)</span>
+<span id="cb15-198"><a href="#cb15-198" aria-hidden="true" tabindex="-1"></a>  type1_matrix <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"type1_matrix.Rds"</span>)</span>
+<span id="cb15-199"><a href="#cb15-199" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-200"><a href="#cb15-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-201"><a href="#cb15-201" aria-hidden="true" tabindex="-1"></a>pless <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">alpha =</span> <span class="fl">0.05</span>){</span>
+<span id="cb15-202"><a href="#cb15-202" aria-hidden="true" tabindex="-1"></a>  stat <span class="ot">&lt;-</span> <span class="fu">sum</span>(x <span class="sc">&lt;=</span> alpha)<span class="sc">/</span><span class="fu">length</span>(x)</span>
+<span id="cb15-203"><a href="#cb15-203" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(stat)</span>
+<span id="cb15-204"><a href="#cb15-204" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">data.table</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Test =</span> <span class="fu">c</span>(<span class="st">"Mann-Whitney"</span>, <span class="st">"Linear Model/T-test"</span>, <span class="st">"Quasibinomial"</span>, <span class="st">"Gamma offset"</span>),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Power =</span> <span class="fu">apply</span>(power_matrix, <span class="dv">2</span>, pless, <span class="at">alpha =</span> <span class="fl">0.05</span>),</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Type I"</span> <span class="ot">=</span> <span class="fu">apply</span>(type1_matrix, <span class="dv">2</span>, pless, <span class="at">alpha =</span> <span class="fl">0.05</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>res <span class="sc">|&gt;</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Test</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Power</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Type I</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Mann-Whitney</td>
+<td style="text-align: right;">0.71</td>
+<td style="text-align: right;">0.044</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Linear Model/T-test</td>
+<td style="text-align: right;">0.71</td>
+<td style="text-align: right;">0.049</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Quasibinomial</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">0.052</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gamma offset</td>
+<td style="text-align: right;">0.84</td>
+<td style="text-align: right;">0.061</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>For data that look like those in fig.&nbsp;2d, the Gamma GLM with offset has 18% higher power than both the linear model/t-test and the Mann-Whitney U, but has a very slightly inflated Type I error.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
