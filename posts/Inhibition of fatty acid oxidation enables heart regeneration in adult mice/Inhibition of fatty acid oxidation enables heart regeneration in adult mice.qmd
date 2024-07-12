@@ -1,8 +1,8 @@
 ---
-title: "Models for proportion (part to whole percent) data"
+title: "Models for proportion (part to whole percent) data: Part II"
 subtitle: "Data From Fig 2d -- Inhibition of fatty acid oxidation enables heart regeneration in adult mice"
 author: "Jeff Walker"
-date: '5 July 2024'
+date: '11 July 2024'
 date-modified: "`r Sys.Date()`"
 categories: ["percents", "proportions", "generalized linear model", "offset", "power", "simulation"]
 description: "The researchers present two tests/plots: the effect of genotype on fibrotic area and the effect on the percent of fibrotic area, relative to total heart area. A GLM with offset combines these into a single analysis/plot and has more power than the linear model/t-test or Mann-Whitney U."
@@ -188,10 +188,10 @@ A common way to test for the effect of a treatment when the effect is confounded
 Here is a covariate (ANCOVA) model:
 
 $$
-\texttt{log}(\texttt{fibrotic_area}) = b_0 + b_1 \texttt{log}(\texttt{heart_area}) + b_2 \texttt{genotype}
+\texttt{log}(\texttt{fibrotic area}) = b_0 + b_1 \texttt{log}(\texttt{heart area}) + b_2 \texttt{genotype}
 $$
 
-where $b_1$ is the pooled slope of fibrotic area on heart area. If we don't expect larger hearts to have relative more (or less) fibrotic area, the we would expect $b_1 = 1$. An offset forces this expectation.
+where $b_1$ is the slope of fibrotic area on heart area (note that the model *does not contain the interaction* of $\texttt{genotype}$ and $\texttt{heart area}$). If we don't expect larger hearts to have relatively more (or less) fibrotic area, then we would expect $b_1 = 1$. An offset forces this expectation.
 
 Importantly, if we use a GLM with log link, the model only models the log-transformed group means -- not the means of the log transformed data, as in the ANCOVA model above.
 
@@ -206,15 +206,13 @@ m3_pairs <- contrast(m3_emm, method = "revpairwise") |>
 
 ## What is the effect in the GLM model with offset?
 
-By forcing the coefficient to be one, the effect is the ratio of the means of the two proportions (or the difference of the means of the propotions in log space).
+By forcing the coefficient to be one, the effect (0.23) is the ratio of the mean proportion of the KO group to the mean proportion of the Cn group, even though we used the raw fibrotic area (and not the proportion) as the response variable! This is the beauty of the offset model!
 
 ```{r}
 m3_pairs |>
   kable(digits = c(1,7,3,1,2,2,1,2,6)) |>
   kable_styling(full_width = FALSE)
 ```
-
-The effect (0.23) is the ratio of the mean proportion of the KO group to the mean proportion of the Cn group.
 
 Here is the ratio computed manually
 

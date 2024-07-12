@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2024-07-05">
 <meta name="description" content="The researchers present two tests/plots: the effect of genotype on fibrotic area and the effect on the percent of fibrotic area, relative to total heart area. A GLM with offset combines these into a single analysis/plot and has more power than the linear model/t-test or Mann-Whitney U.">
 
-<title>Models for proportion (part to whole percent) data – Data From</title>
+<title>Models for proportion (part to whole percent) data: Part II – Data From</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -181,7 +181,7 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Models for proportion (part to whole percent) data</h1>
+      <h1 class="title">Models for proportion (part to whole percent) data: Part II</h1>
             <p class="subtitle lead">Data From Fig 2d – Inhibition of fatty acid oxidation enables heart regeneration in adult mice</p>
                   <div>
         <div class="description">
@@ -373,9 +373,9 @@ window.Quarto = {
 <p>A common way to test for the effect of a treatment when the effect is confounded by a covariate is ANCOVA. For example, many researchers test for the effect of a treatment on O2 consumption and use body weight as a covariate, since O2 consupmption increases with body weight. A linear model with an offset is exactly like an a linear model with a continuous covariate (ANCOVA model) except the coefficient (slope) of the covariate is forced to be 1.</p>
 <p>Here is a covariate (ANCOVA) model:</p>
 <p><span class="math display">\[
-\texttt{log}(\texttt{fibrotic_area}) = b_0 + b_1 \texttt{log}(\texttt{heart_area}) + b_2 \texttt{genotype}
+\texttt{log}(\texttt{fibrotic area}) = b_0 + b_1 \texttt{log}(\texttt{heart area}) + b_2 \texttt{genotype}
 \]</span></p>
-<p>where <span class="math inline">\(b_1\)</span> is the pooled slope of fibrotic area on heart area. If we don’t expect larger hearts to have relative more (or less) fibrotic area, the we would expect <span class="math inline">\(b_1 = 1\)</span>. An offset forces this expectation.</p>
+<p>where <span class="math inline">\(b_1\)</span> is the slope of fibrotic area on heart area (note that the model <em>does not contain the interaction</em> of <span class="math inline">\(\texttt{genotype}\)</span> and <span class="math inline">\(\texttt{heart area}\)</span>). If we don’t expect larger hearts to have relatively more (or less) fibrotic area, then we would expect <span class="math inline">\(b_1 = 1\)</span>. An offset forces this expectation.</p>
 <p>Importantly, if we use a GLM with log link, the model only models the log-transformed group means – not the means of the log transformed data, as in the ANCOVA model above.</p>
 <div class="cell">
 <details class="code-fold">
@@ -391,7 +391,7 @@ window.Quarto = {
 </section>
 <section id="what-is-the-effect-in-the-glm-model-with-offset" class="level2">
 <h2 class="anchored" data-anchor-id="what-is-the-effect-in-the-glm-model-with-offset">What is the effect in the GLM model with offset?</h2>
-<p>By forcing the coefficient to be one, the effect is the ratio of the means of the two proportions (or the difference of the means of the propotions in log space).</p>
+<p>By forcing the coefficient to be one, the effect (0.23) is the ratio of the mean proportion of the KO group to the mean proportion of the Cn group, even though we used the raw fibrotic area (and not the proportion) as the response variable! This is the beauty of the offset model!</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -432,7 +432,6 @@ window.Quarto = {
 
 </div>
 </div>
-<p>The effect (0.23) is the ratio of the mean proportion of the KO group to the mean proportion of the Cn group.</p>
 <p>Here is the ratio computed manually</p>
 <div class="cell">
 <details class="code-fold">
