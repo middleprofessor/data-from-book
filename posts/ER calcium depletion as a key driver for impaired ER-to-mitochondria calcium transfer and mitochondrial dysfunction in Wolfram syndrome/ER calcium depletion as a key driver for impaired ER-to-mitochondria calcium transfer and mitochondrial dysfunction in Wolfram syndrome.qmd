@@ -1,0 +1,534 @@
+---
+title: "xxx"
+subtitle: "Data From Fig 8c -- ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
+author: "Jeff Walker"
+date: '8 June 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["linear mixed model", "ratio paired t-test", "generalized linear mixed model", "ggplot"]
+description: "xxx"
+draft: true
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+freeze: false
+---
+
+![ggplot better-than-replication of Fig 3b from the article. It's better than because the confidence intervals from the model are asymmetric and reflect the right (upward) skew of the data](../../figs/The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity/fig3b_ggplot.png){width=4in fig-align="left"}
+
+## Vital info
+
+Data From: [Serrano, J., Boyd, J., Brown, I.S. et al. The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity. Nat Commun 15, 4915 (2024). https://doi.org/10.1038/s41467-024-49100-8](https://www.nature.com/articles/s41467-024-49100-8){target="_blank"}
+
+Fig: 3b [download data](../../data from/ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome/Source data for Figures and Table.xlsx){target="_blank"}
+
+key words: 
+
+Published methods: xxx
+
+Design: Completely Randomized Design with Subsampling (CRDS)
+
+Response: gel intensity
+
+Key learning concepts: asymmetric confidence intervals
+
+More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
+
+## The experiment
+From an e-mail from A. Vaarmann:
+The meaning of the blocks:
+A single block corresponds to measurements from 10 neurons from one cell culture dish. Each cell culture preparation contributes at least 3 dishes to one treatment group, so 3 times 10 neurons equals 30 neurons per group. This also answers your second question. All measurements within three blocks (three blocks of 10 rows with a blank row in between blocks) correspond to one cell culture preparation i.e. n=30 per group as shown in the right panel of Fig. 1e (n = 30, 30, 30, or 29 neurons). In cases where n=60 (or more, e.g., n=90) as shown in the left panel of Fig.1e, the data from two replicate experiments are combined, with the only difference being that they are from different cell culture preparations. All other conditions are kept as similar as possible, i.e., the time between transfections and imaging, and the imaging settings.
+
+All experiments have been repeated at least three times, i.e., with three cell culture preparations, but data from multiple cultures are combined only if the microscopy settings and the conditions between transfection and imaging are the same. That's why the neuron n varies in different panels of the figures.
+
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+source_path <- here("R", "ggptm.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+## Fig 1c
+
+```{r fig-1c-import, message=FALSE, warning=FALSE}
+data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
+file_name <- "Source data for Figures and Table.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig1c <- read_excel(file_path,
+                    sheet = "Fig 1C",
+                    range = "A1:D56",
+                    col_names = TRUE) |>
+  data.table() |>
+  melt(id.vars = c("dish"),
+              variable.name = "treatment",
+              value.name = "er_calcium") |>
+  na.omit()
+fig1c[, dish_id := as.character(dish)]
+fig1c[, dish := paste(treatment, dish)]
+
+# output as clean excel file
+fileout_name <- "fig1c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig1c, fileout_path)
+```
+
+```{r fig1c-plot-each-prep}
+ggplot(data = fig1c,
+       aes(x = treatment,
+           y = er_calcium,
+           color = dish_id)) +
+  geom_point(position = position_jitterdodge(jitter.width = 0))
+
+```
+
+```{r fig1c-icc}
+lmm1 <- lmer(er_calcium ~ treatment + (1 | dish), data = fig1c)
+var_table <- VarCorr(lmm1) |> as.data.frame()
+icc = var_table[1, "vcov"]/(var_table[1, "vcov"] + var_table[2, "vcov"])
+icc
+```
+
+```{r fig1c-inference}
+lmm1 <- lmer(er_calcium ~ treatment + (1 | dish), data = fig1c)
+lmm1_emm <- emmeans(lmm1, specs = "treatment")
+lmm1_pairs <- contrast(lmm1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm1_pairs
+
+```
+
+```{r}
+fig1c_ss <- fig1c[prep != "5"]
+aov1 <- aov_4(er_calcium ~ treatment + (treatment | prep), data = fig1c_ss, fun_aggregate = mean)
+aov1_emm <- emmeans(aov1, specs = "treatment")
+aov1_pairs <- contrast(aov1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+aov1_pairs
+
+```
+
+```{r fig1c-plot}
+plot_response(lmm1, lmm1_emm, lmm1_pairs)
+```
+
+## Fig 1e left
+
+```{r fig-1e_left-import, message=FALSE, warning=FALSE}
+data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
+file_name <- "Source data for Figures and Table.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig1e_left <- read_excel(file_path,
+                    sheet = "Fig 1E",
+                    range = "A1:F67",
+                    col_names = TRUE) |>
+  data.table() |>
+  melt(id.vars = c("experiment", "dish"),
+              variable.name = "treatment",
+              value.name = "er_calcium") |>
+  na.omit()
+fig1e_left[, dish_id := as.character(dish)] # for plot only
+fig1e_left[, dish := paste(treatment, dish)] # dish 1 differs in each treatment
+
+# output as clean excel file
+# fileout_name <- "fig1c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"
+# fileout_path <- here(data_folder, data_from, fileout_name)
+# write_xlsx(fig1c, fileout_path)
+```
+
+```{r fig1e_left-plot-each-prep}
+ggplot(data = fig1e_left,
+       aes(x = treatment,
+           y = er_calcium,
+           color = dish_id)) +
+  geom_point(position = position_jitterdodge(jitter.width = 0))
+
+```
+
+```{r fig1e_left-icc}
+lmm1 <- lmer(er_calcium ~ treatment + (1 | experiment), data = fig1e_left)
+var_table <- VarCorr(lmm1) |> as.data.frame()
+icc = var_table[1, "vcov"]/(var_table[1, "vcov"] + var_table[2, "vcov"])
+icc
+
+lmm1 <- lmer(er_calcium ~ treatment + (treatment | experiment), data = fig1e_left)
+var_table <- VarCorr(lmm1) |> as.data.frame()
+icc = var_table[1, "vcov"]/(var_table[1, "vcov"] + var_table[2, "vcov"])
+icc
+
+```
+
+```{r fig1e_left-inference}
+lmm1 <- lmer(er_calcium ~ treatment + (treatment | experiment), data = fig1e_left)
+lmm1_emm <- emmeans(lmm1, specs = "treatment")
+lmm1_pairs <- contrast(lmm1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm1_pairs
+
+fig1e_left_agg <- fig1e_left[, .(er_calcium = mean(er_calcium)),
+                   by = .(treatment, experiment, dish)]
+lmm2 <- lmer(er_calcium ~ treatment + (1 | experiment), data = fig1e_left_agg)
+lmm2_emm <- emmeans(lmm2, specs = "treatment")
+lmm2_pairs <- contrast(lmm2_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm2_pairs
+
+lm1 <- lm(er_calcium ~ treatment, data = fig1e_left_agg)
+lm1_emm <- emmeans(lm1, specs = "treatment")
+lm1_pairs <- contrast(lm1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lm1_pairs
+
+```
+
+```{r}
+aov1 <- aov_4(er_calcium ~ treatment + (treatment | experiment), data = fig1e_left, fun_aggregate = mean)
+aov1_emm <- emmeans(aov1, specs = "treatment")
+aov1_pairs <- contrast(aov1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+aov1_pairs
+
+```
+
+```{r fig1e_left-plot}
+plot_response(lmm1, lmm1_emm, lmm1_pairs)
+```
+
+
+## Fig 1e right
+
+```{r fig-1e_right-import, message=FALSE, warning=FALSE}
+data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
+file_name <- "Source data for Figures and Table.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig1e_right <- read_excel(file_path,
+                    sheet = "Fig 1E",
+                    range = "F1:J34",
+                    col_names = TRUE) |>
+  data.table() |>
+  melt(id.vars = c("dish"),
+              variable.name = "treatment",
+              value.name = "er_calcium") |>
+  na.omit()
+fig1e_right[, dish_id := as.character(dish)] # for plot only
+fig1e_right[, dish := paste(treatment, dish)] # dish 1 differs in each treatment
+
+# output as clean excel file
+# fileout_name <- "fig1c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"
+# fileout_path <- here(data_folder, data_from, fileout_name)
+# write_xlsx(fig1c, fileout_path)
+```
+
+```{r fig1e_right-plot-each-prep}
+ggplot(data = fig1e_right,
+       aes(x = treatment,
+           y = er_calcium,
+           color = dish_id)) +
+  geom_point(position = position_jitterdodge(jitter.width = 0))
+
+```
+
+```{r fig1e_right-icc}
+lmm1 <- lmer(er_calcium ~ treatment + (1 | dish), data = fig1e_right)
+var_table <- VarCorr(lmm1) |> as.data.frame()
+icc = var_table[1, "vcov"]/(var_table[1, "vcov"] + var_table[2, "vcov"])
+icc
+```
+
+```{r fig1e_right-inference}
+lmm1 <- lmer(er_calcium ~ treatment + (treatment | dish), data = fig1e_right)
+lmm1_emm <- emmeans(lmm1, specs = "treatment")
+lmm1_pairs <- contrast(lmm1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm1_pairs
+
+fig1e_right_agg <- fig1e_right[, .(er_calcium = mean(er_calcium)),
+                   by = .(treatment, dish)]
+lm1 <- lm(er_calcium ~ treatment, data = fig1e_right_agg)
+lm1_emm <- emmeans(lmm2, specs = "treatment")
+lm1_pairs <- contrast(lmm2_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lm1_pairs
+```
+
+
+```{r fig1e_right-plot}
+plot_response(lmm1, lmm1_emm, lmm1_pairs)
+```
+
+## Fig 2b: Four experiments
+
+```{r fig-1e_left-import, message=FALSE, warning=FALSE}
+data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
+file_name <- "Source data for Figures and Table.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig2b <- read_excel(file_path,
+                    sheet = "Fig 2B",
+                    range = "A1:F138",
+                    col_names = TRUE) |>
+  data.table() |>
+  melt(id.vars = c("experiment", "dish"),
+              variable.name = "treatment",
+              value.name = "er_calcium") |>
+  na.omit()
+fig2b[, dish_id := as.character(dish)] # for plot only
+fig2b[, dish := paste(treatment, dish)] # dish 1 differs in each treatment
+fig2b[, experiment := as.character(experiment)] # for plot only
+
+# output as clean excel file
+# fileout_name <- "fig1c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"
+# fileout_path <- here(data_folder, data_from, fileout_name)
+# write_xlsx(fig1c, fileout_path)
+```
+
+```{r fig2b-plot-each-prep}
+ggplot(data = fig2b,
+       aes(x = treatment,
+           y = er_calcium)) +
+  geom_point(aes(group = dish_id, color = experiment),
+             position = position_jitterdodge(jitter.width = 0)
+             )
+
+```
+
+
+```{r fig2b-icc}
+lmm1 <- lmer(er_calcium ~ treatment + (1 | experiment) + (1 | experiment:dish), data = fig2b)
+var_table <- VarCorr(lmm1) |> as.data.frame()
+icc = (var_table[1, "vcov"] + var_table[2, "vcov"])/(var_table[1, "vcov"] + var_table[2, "vcov"] + var_table[3, "vcov"])
+icc
+
+
+```
+
+```{r fig2b-aggregate}
+fig2b_rcbds <- fig2b[, .(er_calcium = mean(er_calcium)), by = .(experiment, dish, treatment)]
+fig2b_rcbd <- fig2b_rcbds[, .(er_calcium = mean(er_calcium)), by = .(experiment, treatment)]
+```
+
+
+```{r fig2b-inference}
+
+lmm1 <- lmer(er_calcium ~ treatment + (1 | experiment), data = fig2b_rcbd)
+lmm1_emm <- emmeans(lmm1, specs = "treatment")
+lmm1_pairs <- contrast(lmm1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm1_pairs
+
+lmm2 <- lmer(er_calcium ~ treatment + (treatment | experiment), data = fig2b_rcbds)
+lmm2_emm <- emmeans(lmm2, specs = "treatment")
+lmm2_pairs <- contrast(lmm2_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm2_pairs
+
+lmm3 <- lmer(er_calcium ~ treatment + (1 | experiment) + (1 | experiment:treatment), data = fig2b_rcbds)
+lmm3_emm <- emmeans(lmm3, specs = "treatment")
+lmm3_pairs <- contrast(lmm3_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm3_pairs
+
+aov1 <- aov_4(er_calcium ~ treatment + (treatment | experiment),
+              data = fig2b_rcbd)
+aov1_emm <- emmeans(aov1, specs = "treatment")
+aov1_pairs <- contrast(aov1_emm, method = "revpairwise", adjust = "none") |>
+summary(infer = TRUE)
+aov1_pairs
+
+aov2 <- aov_4(er_calcium ~ treatment + (treatment | experiment),
+              fun_aggregate = mean,
+              data = fig2b_rcbds)
+aov2_emm <- emmeans(aov2, specs = "treatment")
+aov2_pairs <- contrast(aov2_emm, method = "revpairwise", adjust = "none") |>
+summary(infer = TRUE)
+aov2_pairs
+
+lmm4 <- pptt(er_calcium ~ treatment + (1 | experiment), data = fig2b_rcbd)
+lmm4
+```
+
+```{r}
+aov1 <- aov_4(er_calcium ~ treatment + (treatment | experiment), data = fig2b, fun_aggregate = mean)
+aov1_emm <- emmeans(aov1, specs = "treatment")
+aov1_pairs <- contrast(aov1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+aov1_pairs
+
+```
+
+## 8c
+
+```{r fig-8c-import, message=FALSE, warning=FALSE}
+data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
+file_name <- "Source data for Figures and Table.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig8c_wide <- read_excel(file_path,
+                    sheet = "Fig 8C",
+                    range = "F1:I164",
+                    col_names = TRUE) |>
+  data.table() |>
+  na.omit()
+# assume blank rows separate preps. each prep has 10 technical replicates
+fig8c_wide[, prep := paste("prep_", rep(1:14, each = 10))]
+fig8c <- melt(fig8c_wide,
+              id.vars = c("prep"),
+              variable.name = "treatment",
+              value.name = "number_with_mitochondria")
+
+# output as clean excel file
+fileout_name <- "fig8c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig8c, fileout_path)
+```
+
+
+## Fit the model
+
+```{r}
+m0 <- lm(number_with_mitochondria ~ treatment, data = fig8c)
+coef(summary(m0))
+```
+
+```{r}
+lmm1 <- lmer(number_with_mitochondria ~ treatment + (1 | prep), data = fig8c)
+lmm1_emm <- emmeans(lmm1, specs = "treatment")
+lmm1_pairs <- contrast(lmm1_emm,
+                       method = "revpairwise")
+lmm1_pairs
+
+
+plot_the_response(lmm1, lmm1_emm, lmm1_pairs)
+```
+
+```{r}
+m1 <- lm(number_with_mitochondria ~ treatment * prep, data = fig8c)
+m1_emm <- emmeans(m1, specs = c("treatment", "prep"))
+m1_pairs <- contrast(m1_emm,
+                     method = "revpairwise",
+                     adjust = "none")
+
+ggplot(data = fig8c,
+       aes(x = treatment,
+           y = number_with_mitochondria,
+           color = prep)) +
+  geom_point(position = position_jitterdodge(jitter.width = 0))
+```
+
+
+### Simulation
+
+Does pseudoreplication increase type I if ICC is low?
+
+```{r}
+n_iter <- 2000
+n_cell <- 10
+n_dish <- 3
+n_exper <- 6
+n_treat <- 2 # number of treatments
+
+t_dish <- n_dish * n_exper * n_treat
+t_cell <- t_dish * n_cell
+
+
+sigma_cell <- c(0.955)
+sigma_dish <- sqrt((1 - sigma_cell^2)/2)
+sigma_exper <- sigma_dish
+icc_dish <- sigma_dish^2/(sigma_cell^2 + sigma_dish^2 + sigma_exper^2)
+icc_exper <- sigma_exper^2/(sigma_cell^2 + sigma_dish^2 + sigma_exper^2)
+icc <- (sigma_dish^2 + sigma_exper^2)/(sigma_cell^2 + sigma_dish^2 + sigma_exper^2)
+# sigma_cell^2 + sigma_dish^2 + sigma_exper^2
+
+fd <- data.table(
+  treatment = rep(c("Cn", "Tr"), each = n_exper * n_dish * n_cell),
+  experiment = rep(rep(paste0("exper_", 1:n_exper), each = n_dish * n_cell), 2),
+  dish = rep(paste0("dish_", 1:t_dish), each = n_cell),
+  cell = paste0("cell_", 1:t_cell),
+  y = rep(NA, t_cell)
+)
+
+b_cell_mat <- matrix(rnorm(t_cell * n_iter, mean = 0, sd = sigma_cell), nrow = t_cell, ncol = n_iter)
+
+beta_1 <- 0
+b_treat_col <- rep(c(0, beta_1), each = n_cell * n_dish * n_exper) # the fixed effects
+
+p_m1 <- numeric(n_iter)
+for(iter in 1:n_iter){
+  b_exp <- rnorm(n_exper, mean = 0, sd = sigma_exper)
+  b_exp_col <- rep(rep(b_exp, each = n_dish * n_cell), 2)
+  b_dish <- rnorm(t_dish, mean = 0, sd = sigma_dish)
+  b_dish_col <- rep(b_dish, each = n_cell)
+  b_cell_col <- rnorm(t_cell, mean = 0, sd = sigma_cell)
+  fd[, y := b_exp_col + b_dish_col + b_cell_col + b_treat_col]
+  
+  m1 <- lm(y ~ treatment, data = fd)
+  p_m1[iter] <- coef(summary(m1))[2, 4]
+}
+
+icc
+sum(p_m1 < 0.05)/n_iter
+
+```
+

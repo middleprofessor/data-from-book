@@ -1,0 +1,376 @@
+---
+title: "Models for Replicated Experiments: Randomized Complete Block Designs with Subsampling"
+subtitle: "Data From Fig xxx -- An interphase actin wave promotes mitochondrial content mixing and organelle homeostasis"
+author: "Jeff Walker"
+date: '26 July 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["linear mixed model", "ratio paired t-test", "randomized complete block design", "ratio paired t-test", "pseudoreplication"]
+description: "The authors have many nice examples of replicated experiments, which are a kind of blocked experimental design. Here, I focus on three of the experiments -- each should be analyzed in the same way but were analyzed in a different way. More generally, experimental bench biology doesn't seem too aware of the best practice method for analyzing data from block designs, other than the special case of paired t-tests. "
+draft: false
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+freeze: false
+---
+
+![ggplot better-than-replication of Fig 3b from the article. It's better than because the confidence intervals from the model are asymmetric and reflect the right (upward) skew of the data](../../figs/The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity/fig3b_ggplot.png){width=4in fig-align="left"}
+
+## Vital info
+
+Data From: [Serrano, J., Boyd, J., Brown, I.S. et al. The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity. Nat Commun 15, 4915 (2024). https://doi.org/10.1038/s41467-024-49100-8](https://www.nature.com/articles/s41467-024-49100-8){target="_blank"}
+
+Fig: xxx [download data](../../data from/An interphase actin wave promotes mitochondrial content mixing and organelle homeostasis/Source_data_1file.xlsx){target="_blank"}
+
+key words: 
+
+Published methods: ratio paired t-test
+
+Design: Randomized Complete Block Design (RCBD)
+
+Response: gel intensity
+
+Key learning concepts: asymmetric confidence intervals
+
+More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
+
+## The experiment
+
+The researchers engineered mice to express human TAS1R2 receptor in the muscles of muscle-specific TAS1R2 knockout (mKO) mice. Aspartame is a TAS1R2 agonist in humans but not mice. Presumably Saline was injected in muscle on one side and Aspartame on the other side of the same mouse, so mouse is a block, hence the ratio paierd *t*-test.
+
+Treatments
+
+1. Veh -- Saline? injected into mTg mice muscle
+2. Asp -- Aspartame injected into mTg mice muscle
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+source_path <- here("R", "ggptm.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+## Fig 2g
+
+researchers used: t-test on all data
+
+```{r fig-2g-import, message=FALSE, warning=FALSE}
+data_from <- "An interphase actin wave promotes mitochondrial content mixing and organelle homeostasis"
+file_name <- "Source_data_1file.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig2g <- read_excel(file_path,
+                    sheet = "Fig2G",
+                    range = "Q4:S27",
+                    col_names = TRUE) |>
+  data.table() |>
+  melt(id.vars = c("experiment"),
+              variable.name = "treatment",
+              value.name = "wave_speed") |>
+  na.omit()
+fig2g[, experiment := paste0("experiment_", experiment)]
+
+# output as clean excel file
+fileout_name <- "fig2g - RCBDS - An interphase actin wave promotes mitochondrial content mixing and organelle homeost"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig2g, fileout_path)
+```
+
+```{r fig2g-plot-each-experiment}
+ggplot(data = fig2g,
+       aes(x = treatment,
+           y = wave_speed,
+           color = experiment)) +
+  geom_point(position = position_jitterdodge(jitter.width = 0))
+
+```
+
+```{r fig2g-icc}
+lmm1 <- lmer(wave_speed ~ treatment + (treatment | experiment), data = fig2g)
+var_cor <- VarCorr(lmm1)
+var_cor_dt <- var_cor |> as.data.frame() |> data.table()
+icc = var_cor_dt[1, vcov]/(var_cor_dt[1, vcov] + var_cor_dt[grp == "Residual", vcov])
+icc
+```
+
+```{r fig2g-inference}
+lmm1 <- lmer(wave_speed ~ treatment + (treatment | experiment), data = fig2g)
+lmm1_emm <- emmeans(lmm1, specs = "treatment")
+lmm1_pairs <- contrast(lmm1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm1_pairs
+
+fig2g_agg <- fig2g[, .(wave_speed = mean(wave_speed)),
+                   by = .(treatment, experiment)]
+lmm2 <- lmer(wave_speed ~ treatment + (1 | experiment), data = fig2g_agg)
+lmm2_emm <- emmeans(lmm2, specs = "treatment")
+lmm2_pairs <- contrast(lmm2_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm2_pairs
+```
+
+```{r fig2n-aov}
+fig2g_ss <- fig2g[experiment != "5"]
+aov1 <- aov_4(wave_speed ~ treatment + (treatment | experiment), data = fig2g_ss, fun_aggregate = mean)
+aov1_emm <- emmeans(aov1, specs = "treatment")
+aov1_pairs <- contrast(aov1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+aov1_pairs
+
+```
+
+```{r fig2g-plot}
+plot_response(lmm1, lmm1_emm, lmm1_pairs)
+```
+
+
+## Fig 2n
+
+researchers used - don't give any statistics  but do show means of each experiment:treatment group, which suggests paired t.
+
+```{r fig-2n-import, message=FALSE, warning=FALSE}
+data_from <- "An interphase actin wave promotes mitochondrial content mixing and organelle homeostasis"
+file_name <- "Source_data_1file.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig2n <- read_excel(file_path,
+                    sheet = "Fig2N",
+                    range = "O2:Q42",
+                    col_names = TRUE) |>
+  data.table() |>
+  melt(id.vars = c("experiment"),
+              variable.name = "treatment",
+              value.name = "fmnl1") |>
+  na.omit()
+fig2n[, experiment := paste0("experiment_", experiment)]
+
+# output as clean excel file
+fileout_name <- "fig2n - RCBDS - An interphase actin wave promotes mitochondrial content mixing and organelle homeost"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig2n, fileout_path)
+```
+
+```{r fig2n-plot-each-experiment}
+ggplot(data = fig2n,
+       aes(x = treatment,
+           y = fmnl1,
+           color = experiment)) +
+  geom_point(position = position_jitterdodge(jitter.width = 0))
+
+```
+
+```{r fig2n-icc}
+lmm1 <- lmer(fmnl1 ~ treatment + (treatment | experiment), data = fig2n)
+var_cor <- VarCorr(lmm1)
+var_cor_dt <- var_cor |> as.data.frame() |> data.table()
+icc = var_cor_dt[1, vcov]/(var_cor_dt[1, vcov] + var_cor_dt[grp == "Residual", vcov])
+icc
+```
+
+```{r fig2n-inference}
+lmm1 <- lmer(fmnl1 ~ treatment + (treatment | experiment), data = fig2n)
+lmm1_emm <- emmeans(lmm1, specs = "treatment")
+lmm1_pairs <- contrast(lmm1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm1_pairs
+
+fig2n_agg <- fig2n[, .(fmnl1 = mean(fmnl1)),
+                   by = .(treatment, experiment)]
+lmm2 <- lmer(fmnl1 ~ treatment + (1 | experiment), data = fig2n_agg)
+lmm2_emm <- emmeans(lmm2, specs = "treatment")
+lmm2_pairs <- contrast(lmm2_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+lmm2_pairs
+```
+
+```{r fig2n-aov}
+fig2n_ss <- fig2n[experiment != "5"]
+aov1 <- aov_4(fmnl1 ~ treatment + (treatment | experiment), data = fig2n_ss, fun_aggregate = mean)
+aov1_emm <- emmeans(aov1, specs = "treatment")
+aov1_pairs <- contrast(aov1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+aov1_pairs
+
+```
+
+```{r fig2n-plot}
+plot_response(lmm1, lmm1_emm, lmm1_pairs)
+```
+
+# Fig 3e
+
+```{r fig-3e-import, message=FALSE, warning=FALSE}
+data_from <- "An interphase actin wave promotes mitochondrial content mixing and organelle homeostasis"
+file_name <- "Source_data_1file.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig3_import <- function(range, experiment){
+  fig3_part <- read_excel(file_path,
+                    sheet = "Fig3E",
+                    range = range,
+                    col_names = FALSE) |>
+  data.table()
+  colnames(fig3_part) <- c("sample", "ID", "area", "mean", "fluor", "bkgrnd")
+  fig3_part[, treatment := ifelse(str_detect(ID, "NToligo"), "Control", "FMNL1 si")]
+  fig3_part[, treatment := factor(treatment, levels = c("Control", "FMNL1 si"))]
+  fig3_part <- fig3_part[, .SD, .SDcols = c("treatment", "fluor")]
+  fig3_part[, experiment := paste0("experiment_", experiment)]
+  fig3_part[, fluor_nonneg := ifelse(fluor < 0, 0, fluor)]
+  return(fig3_part)
+}
+range_list <- c("A9:F47", "A54:F93", "A100:F139", "A146:F185")
+fig3e <- data.table(NULL)
+for(experiment in 1:4){
+  fig3_exp <- fig3_import(range = range_list[experiment], experiment = experiment)
+  fig3e <- rbind(fig3e, fig3_exp)
+}
+
+fig3e[, log_fluor := ifelse(fluor > 0, log(fluor), NA)]
+
+# output as clean excel file
+fileout_name <- "fig3e - RCBDS - An interphase actin wave promotes mitochondrial content mixing and organelle homeost"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig3e, fileout_path)
+```
+
+```{r fig2n-plot-each-experiment}
+ggplot(data = fig3e,
+       aes(x = treatment,
+           y = fluor,
+           color = experiment)) +
+  geom_point(position = position_jitterdodge(jitter.width = 0))
+
+```
+
+```{r fig2n-icc}
+lmm1 <- lmer(fluor ~ treatment + (treatment | experiment), data = fig3e)
+var_cor <- VarCorr(lmm1)
+var_cor_dt <- var_cor |> as.data.frame() |> data.table()
+icc = var_cor_dt[1, vcov]/(var_cor_dt[1, vcov] + var_cor_dt[grp == "Residual", vcov])
+icc
+```
+
+### ratio paired t-test
+
+```{r}
+fig3e_means <- fig3e[, .(mean_fluor = mean(fluor, na.rm = TRUE),
+                         mean_fluor_nn = mean(fluor_nonneg, na.rm = TRUE),
+                         mean_logfluor = mean(log_fluor, na.rm = TRUE)),
+                     by = .(treatment, experiment)]
+fig3e_means[, log_meanfluor := log(mean_fluor)]
+fig3e_means[, log_meanfluor_nn := log(mean_fluor_nn)]
+
+# test of log of means
+a <- fig3e_means[treatment == "Control", log_meanfluor]
+b <- fig3e_means[treatment == "FMNL1 si", log_meanfluor]
+log_ba <- log(b/a)
+t.test(log_ba, mu = 0)
+
+# test of log of means with no negative values
+a <- fig3e_means[treatment == "Control", log_meanfluor_nn]
+b <- fig3e_means[treatment == "FMNL1 si", log_meanfluor_nn]
+log_ba <- log(b/a)
+t.test(log_ba, mu = 0)
+
+# test of mean of logs
+a <- fig3e_means[treatment == "Control", mean_logfluor]
+b <- fig3e_means[treatment == "FMNL1 si", mean_logfluor]
+log_ba <- log(b/a)
+t.test(log_ba, mu = 0)
+```
+
+### A linear model
+
+```{r}
+lm1 <- lm(mean_fluor ~ treatment, data = fig3e_means)
+ggcheck_the_model(lm1)
+```
+
+```{r}
+lmm1 <- lmer(fluor ~ treatment + (treatment | experiment), data = fig3e)
+check_lmm1 <- simulateResiduals(fittedModel = lmm1,
+                                       n = 250,
+                                       refit = FALSE)
+plot(check_lmm1)
+```
+
+### Effect of the single negative value
+
+```{r}
+lmm_a <- lmer(fluor ~ treatment + (treatment | experiment), data = fig3e)
+coef(summary(lmm_a))
+lmm_b <- lmer(fluor_nonneg ~ treatment + (treatment | experiment), data = fig3e)
+coef(summary(lmm_b))
+```
+
+### models
+
+```{r}
+# paired t
+lmm0 <- lmer(mean_fluor ~ treatment + (1 | experiment), data = fig3e_means)
+coef(summary(lmm0))
+# lmm
+lmm1 <- lmer(fluor ~ treatment + (treatment | experiment), data = fig3e)
+coef(summary(lmm1))
+
+```
+
