@@ -14,9 +14,9 @@ format:
 execute: 
   message: false
   warning: false
+  freeze: false
 editor_options: 
   chunk_output_type: inline
-freeze: false
 ---
 
 ![Better than Reproducibility of Fig 5c. The CIs and p-values are from a quasipoisson GLM model with offset](../../figs/Inhibition of fatty acid oxidation enables heart regeneration in adult mice/fig2d_ggplot.png){width=6in fig-align="left"}  

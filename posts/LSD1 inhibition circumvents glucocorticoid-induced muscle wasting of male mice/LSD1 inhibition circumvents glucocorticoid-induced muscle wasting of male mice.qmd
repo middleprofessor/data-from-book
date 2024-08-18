@@ -14,9 +14,9 @@ format:
 execute: 
   message: false
   warning: false
+  freeze: false
 editor_options: 
   chunk_output_type: inline
-freeze: false
 ---
 
 ![(A) Reproduced published plot using ANOVA model. Note the modeled CIs imply negative counts and absurd variances. (B) Better-than-reproduced plot using NB-GLM modeled CIs that don't dip below zero and reflect true variance among groups.](../../figs/LSD1 inhibition circumvents glucocorticoid-induced muscle wasting of male mice/fig7d_ggplot.png){width=6in fig-align="left"}

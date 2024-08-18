@@ -2,7 +2,7 @@
 title: "Analyzing Replicated Experiments"
 subtitle: "Data From Fig 2b -- ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
 author: "Jeff Walker"
-date: '25 July 2024'
+date: '18 Aug 2024'
 date-modified: "`r Sys.Date()`"
 categories: ["nested subsampling", "linear mixed model", "ggplot", "simulation"]
 description: "In bench biology, experimental replicates often themselves contain replicates, and these nested replicate datasets are almost always analyzed using statistical models that lead to an increased rate of false discoveries from an inflated Type I error rate. A good example is the experiment in Fig 2b, which contains four replicates of the experiment, where each experiment contains three replicate dishes for each treatment and ten measures from each dish. But, the amount of shared variance within the nests seems kinda low, posing the question: Do we really want to sacrifice the power of the linear/ANOVA model if the nested replicates are nearly statistically independent? Yes, yes we do. A simulation of the Fig 2b data shows that the Type I error rate is about three times the expected rate and only with extremely low ICC does Type I error rates approach the expected rate."
