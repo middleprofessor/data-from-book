@@ -1,51 +1,57 @@
 ---
-title: "xxx"
-subtitle: "Data From Fig 8c -- ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
+title: "Analyzing Replicated Experiments"
+subtitle: "Data From Fig 2b -- ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
 author: "Jeff Walker"
-date: '8 June 2024'
+date: '25 July 2024'
 date-modified: "`r Sys.Date()`"
-categories: ["linear mixed model", "ratio paired t-test", "generalized linear mixed model", "ggplot"]
-description: "xxx"
-draft: true
+categories: ["nested subsampling", "linear mixed model", "ggplot", "simulation"]
+description: "In bench biology, experimental replicates often themselves contain replicates, and these nested replicate datasets are almost always analyzed using statistical models that lead to an increased rate of false discoveries from an inflated Type I error rate. A good example is the experiment in Fig 2b, which contains four replicates of the experiment, where each experiment contains three replicate dishes for each treatment and ten measures from each dish. But, the amount of shared variance within the nests seems kinda low, posing the question: Do we really want to sacrifice the power of the linear/ANOVA model if the nested replicates are nearly statistically independent? Yes, yes we do. A simulation of the Fig 2b data shows that the Type I error rate is about three times the expected rate and only with extremely low ICC does Type I error rates approach the expected rate."
+draft: false
 format: 
   html: 
     toc: true 
     toc-location: right
 execute: 
+  freeze: false
   message: false
   warning: false
 editor_options: 
   chunk_output_type: inline
-freeze: false
 ---
 
-![ggplot better-than-replication of Fig 3b from the article. It's better than because the confidence intervals from the model are asymmetric and reflect the right (upward) skew of the data](../../figs/The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity/fig3b_ggplot.png){width=4in fig-align="left"}
+![ggplot better-than-replication of Fig 2b from the article. It's better because the plot shows the nested subsampling design...and the p-values account for this design](../../figs/ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome/fig2b_ggplot.png){width=4in fig-align="left"}
 
 ## Vital info
 
-Data From: [Serrano, J., Boyd, J., Brown, I.S. et al. The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity. Nat Commun 15, 4915 (2024). https://doi.org/10.1038/s41467-024-49100-8](https://www.nature.com/articles/s41467-024-49100-8){target="_blank"}
+Data From: [Liiv, M., Vaarmann, A., Safiulina, D., Choubey, V., Gupta, R., Kuum, M., ... & Kaasik, A. (2024). ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome. Nature Communications, 15(1), 6143.](https://www.nature.com/articles/s41467-024-50502-x){target="_blank"}
 
-Fig: 3b [download data](../../data from/ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome/Source data for Figures and Table.xlsx){target="_blank"}
+Fig: 2b [download data](../../data from/ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome/Source data for Figures and Table.xlsx){target="_blank"}
 
 key words: 
 
-Published methods: xxx
+Published methods: ANOVA model with Sidak adjustment for the *p*-values
 
-Design: Completely Randomized Design with Subsampling (CRDS)
+Design: Randomized Complete Block Design with nested subsampling (RCBDSS)
 
-Response: gel intensity
+Response: ER Ca++ levels
 
-Key learning concepts: asymmetric confidence intervals
+Key learning concepts: nested subsampling within RCBD
 
 More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
 
+## TL;DR
+
+Fig 2b contains four replicates of an experiment, where each experiment contains three replicate dishes for each treatment and ten measures from each dish. The researchers analyzed the data as if the sample size (n) is 10 x 3 x 4 = 120, which assumes all measurements within a treatment are independent. In fact, measures within a dish share variance, dishes within a treatment:experiment combination share variance, and dishes across treatments within an experiment share variance. The researchers' analysis is pseudoreplicated. The best practice analysis is linear mixed model or repeated measures ANOVA. A simulation of the data shows that the Type I error rate, which leads to false discovery, is about three times the expected rate.
+
 ## The experiment
-From an e-mail from A. Vaarmann:
-The meaning of the blocks:
-A single block corresponds to measurements from 10 neurons from one cell culture dish. Each cell culture preparation contributes at least 3 dishes to one treatment group, so 3 times 10 neurons equals 30 neurons per group. This also answers your second question. All measurements within three blocks (three blocks of 10 rows with a blank row in between blocks) correspond to one cell culture preparation i.e. n=30 per group as shown in the right panel of Fig. 1e (n = 30, 30, 30, or 29 neurons). In cases where n=60 (or more, e.g., n=90) as shown in the left panel of Fig.1e, the data from two replicate experiments are combined, with the only difference being that they are from different cell culture preparations. All other conditions are kept as similar as possible, i.e., the time between transfections and imaging, and the imaging settings.
 
-All experiments have been repeated at least three times, i.e., with three cell culture preparations, but data from multiple cultures are combined only if the microscopy settings and the conditions between transfection and imaging are the same. That's why the neuron n varies in different panels of the figures.
+Within one experimental replicate, there were three culture dishes per treatment and the researchers measured Ca++ levels in ten neurons per culture dish. The experiment was replicated four times.
 
+From an e-mail from A. Vaarmann: "A single block corresponds to measurements from 10 neurons from one cell culture dish. Each cell culture preparation contributes at least 3 dishes to one treatment group, so 3 times 10 neurons equals 30 neurons per group. This also answers your second question. All measurements within three blocks (three blocks of 10 rows with a blank row in between blocks) correspond to one cell culture preparation i.e. n=30 per group as shown in the right panel of Fig. 1e (n = 30, 30, 30, or 29 neurons). In cases where n=60 (or more, e.g., n=90) as shown in the left panel of Fig.1e, the data from two replicate experiments are combined, with the only difference being that they are from different cell culture preparations. All other conditions are kept as similar as possible, i.e., the time between transfections and imaging, and the imaging settings.
+
+All experiments have been repeated at least three times, i.e., with three cell culture preparations, but data from multiple cultures are combined only if the microscopy settings and the conditions between transfection and imaging are the same. That's why the neuron n varies in different panels of the figures."
+
+The researchers analyzed the data as if the sample size, n, is 10 x 3 x 4 = 120, which assumes all measurements within a treatment are independent. In fact, measures within a dish share variance, dishes within a treatment:experiment combination share variance, and dishes across treatments within an experiment share variance. The researchers' analysis is pseudoreplicated.
 
 ## Setup
 
@@ -108,7 +114,675 @@ image_folder <- "images"
 output_folder <- "output"
 ```
 
-## Fig 1c
+## Fig 2b: Four experiments
+
+```{r fig2b-import, message=FALSE, warning=FALSE}
+data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
+file_name <- "Source data for Figures and Table.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig2b <- read_excel(file_path,
+                    sheet = "Fig 2B",
+                    range = "A1:F138",
+                    col_names = TRUE) |>
+  data.table() |>
+  melt(id.vars = c("experiment", "dish"),
+              variable.name = "treatment_id",
+              value.name = "er_calcium") |>
+  na.omit()
+
+fig2b[treatment_id == "scr shRNA", treatment := "Control"]
+fig2b[treatment_id == "Wfs1 shRNA", treatment := "Wfs1"]
+fig2b[treatment_id == "RyR2 shRNA", treatment := "RyR2"]
+fig2b[treatment_id == "Wfs1 shRNA + RyR2 shRNA", treatment := "Wfs1_RyR2"]
+fig2b[, treatment := factor(treatment,
+                            levels = c("Control", "Wfs1", "RyR2", "Wfs1_RyR2"))]
+fig2b[, dish_id := ifelse(dish < 10, paste0("0", dish), as.character(dish))] # for plot only
+fig2b[, dish := paste(treatment, dish)] # dish 1 differs in each treatment
+fig2b[, experiment := as.character(experiment)] # for plot only
+
+# output as clean excel file
+fileout_name <- "fig2b-rcbdss-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig2b, fileout_path)
+```
+
+### What the researchers did
+
+The researchers fit a Linear/ANOVA model and used Sidak adjustment for the *p*-values. Here, I fit a linear/ANOVA model but I don't bother adjusting since the focal *p*-values are really small, so the adjustment doesn't matter. Also I don't think the adjustment is a best strategy for most experiments like these.
+
+```{r fig2b-lm}
+lm1 <- lm(er_calcium ~ treatment, data = fig2b)
+lm1_emm <- emmeans(lm1, specs = "treatment")
+lm1_pairs <- contrast(lm1_emm,
+                      method = "revpairwise") |>
+  summary(infer = TRUE)
+plot_response(lm1, lm1_emm, lm1_pairs[c(1,5), ],
+              palette = "pal_okabe_ito_blue")
+```
+
+### The problem -- short version
+
+Within one experimental replicate, there were three culture dishes per treatment and the researchers measured Ca++ levels in ten neurons per culture dish. The experiment was replicated four times.
+
+1. The ten measures per dish are technical replicates that are not independent of each other. If the statistical model doesn't account for this, this is pseudoreplication and inference is liberal.
+2. The three dishes within a treatment:experiment combination are technical replicates that are not independent of each other. If the statistical model doesn't account for this, this is pseudoreplication and inference is liberal.
+3. The four experiments are blocks. If the statistical model doesn't account for this, inference is conservative.
+
+### Thinking about building a best practice model
+
+**Level 1** The basic design of the experiment is a Randomized Complete Block Design (RCBD) -- each experiment is a block containing all four treatment combinations.
+
+The basic linear mixed model formula for a RCBD design is
+
+$$y \sim treatment + (1 | experiment)$$
+the RM-ANOVA model for this design is
+
+$$y \sim treatment + (treatment | experiment)$$
+**Level 2** There are three dishes per experiment:treatment combination. I refer to the three dishes as a batch. These three dishes are subsampled (technical) replicates. If there is one measure per dish, then the design is a Randomized Complete Block Design with subsampling (RCBDS)
+
+With three replicates within a batch, a linear mixed model can estimate treatment x experiment interactions, also known as random slopes. There are two ways of implementing this.
+
+The interaction intercept model looks like a model with an interaction effect
+
+$$y \sim treatment + (1 | experiment) + (1 | treatment:experiment)$$
+
+This model assumes no correlation between the slope and intercept. If each batch is given a unique label, we could use this
+
+$$y \sim treatment + (1 | experiment) + (1 | batch)$$
+
+The random slope and intercept model models a correlation between slope and intercept.
+
+$$y \sim treatment + (treatment | experiment)$$
+The random slope/intercept model is the maximal model -- it makes the fewest assumptions about the structure of the random variances and covariances.
+
+The RM-ANOVA model for this design is
+
+$$y \sim treatment + (treatment | experiment)$$
+
+The RM-ANOVA model aggregates the data by analyzing the batch means.
+
+**Level 3**. There are ten measures per dish. These ten measures are subsampled (technical) replicates. Since a dish is a subsampled replicate, the design has nested subsampled replicates. The design is a Randomized Complete Block Design with nested subsampling (RCBDSS).
+
+Again, we can model this with either the interaction intercept model or the random slope and intercept model.
+
+The interaction intercept model
+
+$$y \sim treatment + (1 | experiment) + (1 | treatment:experiment) + (1 | treatment:experiment:dish)$$
+
+If each batch is given a unique label and each dish is given a unique label, we could use this
+
+$$y \sim treatment + (1 | experiment) + (1 | batch) + (1|dish)$$
+
+The random slope and intercept model is.
+
+$$y \sim treatment + (treatment | experiment) + (1 | treatment:experiment:dish)$$
+
+The RM-ANOVA model for this design is
+
+$$y \sim treatment + (treatment | experiment)$$
+
+The RM-ANOVA model aggregates the data by analyzing the batch grand means.
+
+### Equivalencies between best practice models
+
+1. If the data are balanced, the default RM-ANOVA in the afex R package is equivalent to the random slope and intercept model (this default uses a multivariate model to compute the RM-ANOVA).
+2. In GraphPad, one might want to aggregate the data by averaging the data within a dish, then averaging these within a batch, and using RM-ANOVA. The R afex package does this automatically. 
+This will be equivalent to the random slope and intercept model if the data are balanced.
+3. If the data are balanced, pairwise paired t-tests on the aggregated data are equivalent to the default RM-ANOVA and to the random slope and intercept model.
+
+These equivalencies mean that we don't need to use LMMs if our data are balanced. The advantage of this is that LMMs can be hard to fit if there is relatively little variation in these levels relative to the variation within a dish.
+ 
+### A hidden problem emerges when we analyze the aggregated data with best practice models
+
+If we plot the aggregated data, we see a second problem, which is hidden in the initial plot above but can be seen in the plot of the variation at different levels. The problem is, the data were normalized so that the mean response of the control treatment in each experiment is 1.0. The logic of this normalization is to remove the noise (non-biological) variation due to experiment. The problem is, the linear/ANOVA model of the aggregated data "thinks" the variance in the control treatment is zero and the pooled variance used for inference (the p-value), will be artificially small. The result will be slightly elevated false discoveries. While this is a minor issue, it's easily avoided by simply not normalizing the data as the blocking variable in RM-ANOVA/LMM adjusts for this among-experiment variation. I explore
+
+```{r fig2b-aggregate}
+fig2b_grcbd <- fig2b[, .(er_calcium = mean(er_calcium)), by = .(experiment, dish, treatment)]
+fig2b_rcbd <- fig2b_grcbd[, .(er_calcium = mean(er_calcium)), by = .(experiment, treatment)]
+```
+
+```{r fig2b-aggregated-plot}
+pd <- position_jitterdodge(dodge.width = 0.25, jitter.width = 0)
+gg1 <- ggplot(data = fig2b_rcbd,
+       aes(x = treatment,
+           y = er_calcium,
+           color = experiment)) +
+  geom_point(position = pd) +
+  geom_line(aes(group = experiment),
+            position = pd,
+            alpha = 0.5) +
+  theme_pubr()
+
+gg1
+```
+
+### The problem -- long version
+The variation of the data around each treatment mean (the residual variation) comes from four sources in the experiment:
+
+1) variation among the ten cells within a dish $\sigma^2_{cell}$
+2) variation among the three dish means within a batch, where a batch is a treatment:experiment combination $\sigma^2_{dish}$
+3) variation among the batch means $\sigma^2_{batch}$
+3) variation among the four experiments $\sigma^2_{experiment}$
+
+But, inference from the linear/ANOVA model fit above and by the researchers assumes *independence* of the residuals, equivalent to item 1 in the list. So the linear/ANOVA model assumes zero variation in items 2 -- 4 above.
+
+A quick way to explore variation in items 2 -- 4, relative to variation in item 1, is a simple plot of the residuals of the linear/ANOVA model (so there is no variation due to treatment), and ploting the batch (treatment:experiment) and dish means.
+
+
+```{r fig2b-plot-each-prep}
+fig2b[, lm_resid := residuals(lm1)]
+batch_means1 <- fig2b[, .(y = mean(lm_resid)),
+                     by = .(treatment, experiment)]
+lm2 <- lm(er_calcium ~ treatment * experiment, data = fig2b)
+fig2b[, lm2_resid := residuals(lm2)]
+batch_means2 <- fig2b[, .(y = mean(lm2_resid)),
+                     by = .(treatment, experiment)]
+dish_means <- fig2b[, .(y = mean(lm_resid)),
+                     by = .(treatment, experiment, dish_id)]
+
+ggplot(data = fig2b,
+       aes(x = treatment,
+           y = lm_resid)) +
+  geom_point(aes(group = dish_id, shape = experiment),
+             position = position_jitterdodge(jitter.width = 0),
+             color = "gray",
+             NULL
+             ) +
+  geom_point(data = batch_means1,
+             aes(x = treatment,
+                 y = y,
+                 color = experiment),
+             position = position_jitterdodge(jitter.width = 0),
+             size = 3) +
+  geom_point(data = dish_means,
+             aes(x = treatment,
+                 y = y,
+                 group = dish_id,
+                 color = experiment),
+             position = position_jitterdodge(jitter.width = 0)
+             ) +
+  NULL
+
+```
+
+The plot shows small variation among dishes, among batches, and among experiments, relative to variation within a dish. But, how close to zero variation do we need to be to have nominal Type I error (5% if we set alpha to 0.05)?
+
+We can measure this with a ratio of the variance at each level relative to the total random variance. These ratios are called intraclass correlations. The total random variance $\sigma^2$ is 
+
+$$
+\sigma^2 = \sigma_{experiment}^2 + \sigma_{batch}^2 + \sigma_{dish}^2 + \sigma_{cell}^2
+$$
+
+
+$$
+ICC = \frac{\sigma_{experiment}^2 + \sigma_{batch}^2 + \sigma_{dish}^2}{\sigma^2}
+$$
+
+We can also measure the ICC at the level of the batch, dish, or experiment alone.
+
+The problem with these data is that the variances are artificially shrunken due to the normalization described above (the data were normalized to make the control treatment mean for each experiment equal to one). So, I compute two sets of variance components: 1) the first uses all of the data, 2) the second uses only the data from the non-control groups, so the experiment component should be more similar to that had the data not been normalized.
+
+The table below shows both computations of the three difference variance components ("Residual" is the variance among cells within a dish) used to compute the various ICCs.
+
+```{r fig2b-varcov}
+# (1 | experiment) - block intercept. Variance among experiments
+# (1 | treatment:experiment) - treatment:experiment intercept. This is mean of batch of three dishes
+# (1 | treatment:experiment:dish) - dish intercept. This is mean of 10 cells within a dish
+# Residual - this is variance among cells within a dish
+
+lmm1 <- lmer(er_calcium ~ treatment + (1 | experiment) + (1 | treatment:experiment) + (1 | treatment:experiment:dish),
+             data = fig2b)
+var_table_1 <- VarCorr(lmm1) |> as.data.frame()
+var_table_1$source = c("dish", "batch", "experiment", "cell")
+var_table_1 <- var_table_1[, c(1, 6, 4, 5)]
+
+lmm2 <- lmer(er_calcium ~ treatment + (1 | experiment) + (1 | treatment:experiment) + (1 | treatment:experiment:dish),
+             data = fig2b[treatment != "Control"])
+var_table_2 <- VarCorr(lmm2) |> as.data.frame()
+var_table_2$source = c("dish", "batch", "experiment", "cell")
+var_table_2 <- var_table_2[, c(1, 6, 4, 5)]
+
+var_table <- rbind(var_table_1, var_table_2)
+
+var_table |>
+  kable(digits = 4) |>
+  kable_styling() |>
+  pack_rows("All treatments", 1, 4) |>
+  pack_rows("Non-control treatments", 5, 8)
+
+```
+
+The table below are the various ICCs computed from the variance components above
+
+```{r fig2b-icc}
+v_total <- sum(var_table_1[, "vcov"])
+icc_1 <- sum(var_table_1[1:3, "vcov"]) / v_total
+icc_1_dish <- var_table_1[1, "vcov"] / v_total
+icc_1_batch <- var_table_1[2, "vcov"] / v_total
+icc_1_experiment <- var_table_1[3, "vcov"] / v_total
+
+icc_2 <- sum(var_table_2[1:3, "vcov"]) / v_total
+icc_2_dish <- var_table_2[1, "vcov"] / v_total
+icc_2_batch <- var_table_2[2, "vcov"] / v_total
+icc_2_experiment <- var_table_2[3, "vcov"] / v_total
+
+data.table(
+  stat = c("icc", "icc_dish", "icc_batch", "icc_experiment"),
+  "All" = c(icc_1, icc_1_dish, icc_1_batch, icc_1_experiment),
+  "Non-Ctl" = c(icc_2, icc_2_dish, icc_2_batch, icc_2_experiment)
+) |>
+  kable(digits = c(1, 3, 3)) |>
+  kable_styling(full_width = FALSE)
+```
+
+The low ICC (0.113) shows that, indeed, the data in figure 2b are pretty independent. The table also shows that most (72%) of the non-residual random variance is due to dish.
+
+How much does this small non-independence affect Type I error rate? We'll explore this with a simulation below, but first, fit some best practice models.
+
+### Fitting best practice models
+#### Linear mixed models
+
+Linear mixed models have the flexibility to model all levels of variance in data like these but the solutions are not exact as in linear/ANOVA models, and they will often have a "boundary error" when variance is low at one or more levels. This happens with any of the models with the batch (treatment:experiment) intercept, which means variation among these batch means is small. The result of a model fit with a boundary layer is the collapse of this level, which will tend to have slightly inflated type I (false discovery) error. The LMM that fits without a boundary error is the simple RCBD of the completely aggregated data, which is equivalent to a paired *t*-test when there are only two treatment levels.
+
+```{r fig2b-lmm-inference}
+# (1 | experiment) - block intercept. Variance among experiments
+# (1 | treatment:experiment) - treatment:experiment intercept. This is mean of batch of three dishes
+# (1 | treatment:experiment:dish) - dish intercept. This is mean of 10 cells within a dish
+# Residual - this is variance among cells within a dish
+lmm1 <- lmer(er_calcium ~ treatment + (1 | experiment) + (1 | treatment:experiment) + (1 | treatment:experiment:dish), data = fig2b)
+
+# aggregate dish model
+lmm2 <- lmer(er_calcium ~ treatment + (1 | experiment) + (1 | treatment:experiment), data = fig2b_grcbd)
+
+# RCBD model
+lmm3 <- lmer(er_calcium ~ treatment + (1 | experiment), data = fig2b_rcbd)
+lmm3_emm <- emmeans(lmm3, specs = "treatment")
+lmm3_pairs <- contrast(lmm3_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+
+gg1 <- plot_response(lmm3, lmm3_emm, lmm3_pairs[c(1,5),],
+              palette = "pal_okabe_ito_blue")
+
+```
+
+#### Repeated measures ANOVA model
+
+Repeated measures ANOVA is the punching bag of biostatistics but the multivariate-response version of RM-ANOVA is equivalent to a LMM with random slope and intercept if the nested sets of data are balanced. These data are balanced.
+
+```{r fig2b-aov4-inference}
+aov1 <- aov_4(er_calcium ~ treatment + (treatment | experiment),
+              fun_aggregate = mean,
+              data = fig2b)
+aov1_emm <- emmeans(aov1, specs = "treatment")
+aov1_pairs <- contrast(aov1_emm, method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+gg2 <- plot_response(aov1, aov1_emm, aov1_pairs[c(1,5),],
+              palette = "pal_okabe_ito_blue")
+
+# to show that the above does the aggregation 
+# aov2 <- aov_4(er_calcium ~ treatment + (treatment | experiment),
+#               data = fig2b_rcbd)
+# aov2_emm <- emmeans(aov2, specs = "treatment")
+# aov2_pairs <- contrast(aov2_emm, method = "revpairwise", adjust = "none") |>
+#   summary(infer = TRUE)
+```
+
+#### Pairwise paired t-tests
+
+Pairwise paired t-tests are also equivalent to a random slope and intercept model if the nested sets are balanced. The advantage of this over a RM-ANOVA is that we can use more of the treatment:experiment combiantions if there is imbalance.
+
+```{r fig2b-pptt}
+pptt_pairs <- pptt(er_calcium ~ treatment + (1 | experiment), data = fig2b_rcbd)
+
+gg3 <- plot_response(aov1, aov1_emm, pptt_pairs[c(1,5),],
+              palette = "pal_okabe_ito_blue")
+```
+
+#### A quick plot of the LMM and RM-ANOVA models
+
+```{r fig2b-plots, fig.xheight = 5, fig.width = 8}
+plot_grid(gg1, gg2, ncol = 2)
+```
+
+### Plot the model!
+
+A publishable plot of the RM-ANOVA model that shows the nested design
+
+```{r fib2b-plot-the-model}
+# make aov1_emm a data.table
+aov1_emm_dt <- aov1_emm |>
+  summary() |>
+  data.table()
+
+# get batch and dish means
+batch_means <- fig2b[, .(y = mean(er_calcium)),
+                     by = .(treatment, experiment)]
+dish_means <- fig2b[, .(y = mean(er_calcium)),
+                    by = .(treatment, experiment, dish_id)]
+
+gg <- ggplot(data = fig2b,
+             aes(x = treatment,
+                 y = er_calcium)) +
+  # raw measures
+  geom_point(aes(group = dish_id, color = experiment),
+             position = position_jitterdodge(jitter.width = 0),
+             size = 0.8,
+             alpha = 0.3,
+             NULL
+  ) +
+  # dish means
+  geom_point(data = dish_means,
+             aes(x = treatment,
+                 y = y,
+                 group = dish_id,
+                 color = experiment),
+             size = 1,
+             position = position_jitterdodge(jitter.width = 0)
+  ) +
+  # batch means
+  geom_point(data = batch_means,
+             aes(x = treatment,
+                 y = y,
+                 color = experiment),
+             position = position_jitterdodge(jitter.width = 0),
+             size = 3) +
+  # treatment means
+  geom_point(data = aov1_emm_dt,
+             aes(x = treatment,
+                 y = emmean),
+             color = "black",
+             size = 5) +
+  geom_errorbar(data = aov1_emm_dt,
+                aes(x = treatment,
+                    y = emmean,
+                    ymin = lower.CL,
+                    ymax = upper.CL),
+                color = "black",
+                width = .1) +
+  theme_pubr() +
+  ylab("ER Calcium") +
+  theme(axis.title.x = element_blank()) +
+  NULL
+
+  # add p-values
+aov1_pairs_dt <- aov1_pairs |>
+  data.table()
+aov1_pairs_dt[, c("group1", "group2") := tstrsplit(contrast, " - ")]
+aov1_pairs_dt[, p := paste0("p=", round(p.value, 3))]
+maxy <- fig2b[, max(er_calcium)]
+miny <- fig2b[, min(er_calcium)]
+# show only rows 1 & 5, per the paper
+aov1_pairs_1_5 <- aov1_pairs_dt[c(1,5),]
+aov1_pairs_1_5[, y.position := maxy + .I*0.05*(maxy - miny)]
+
+gg <- gg +
+  stat_pvalue_manual(
+    data = aov1_pairs_1_5,
+    label = "p",
+    tip.length = 0.01)
+
+gg
+
+save_it <- TRUE
+if(save_it){
+  out_fig <- "fig2b_ggplot.png"
+  out_path <- here("figs", data_from, out_fig)
+  ggsave(out_path)
+}
+
+```
+
+
+### A simulation to explore false discovery when the data look pretty independent
+
+The principal question that this simulation addresses is, how much does pseudoreplication increase type I error when ICC is low? Here I create fake data with three levels of error variance, as in Fig 2b
+
+1) among cells within a dish
+2) among replicate dishes within a treatment:experiment combination
+3) among experimental replicates
+
+I simulate all combinations of:
+
+ICC = 0.05, 0.1, 0.15
+
+
+```{r simulation, eval = TRUE, warning=FALSE, message=FALSE}
+do_it <- FALSE
+set.seed(1)
+type_1_matrix <- data.table(NULL)
+if(do_it == TRUE){
+  n_iter <- 10000
+  n_cell <- 10
+  n_dish <- 3
+  n_exper <- 4
+  n_treat <- 4 # number of treatments
+  
+  t_batch <- n_treat * n_exper
+  t_dish <- n_dish * t_batch
+  t_cell <- t_dish * n_cell
+  
+  beta_1 <- rep(0, n_treat)
+  b_treat_col <- rep(beta_1, each = n_cell * n_dish * n_exper) # the fixed effects
+  
+  var_table_2 <- data.table(var_table_2)
+  var_table_2[, frac_of_whole := vcov/sum(var_table_2[, vcov])]
+  var_table_2[, frac_of_modeled := vcov/sum(var_table_2[1:3, vcov])]
+  # unmodeled random variance is 88.8 %
+  # dish has 72% of modeled random variance
+  # batch has 0 % of modeled random variance
+  # experiment has 28% of modeled random variance
+  sigma <- 1 # this is the root variance lm(y ~ treatment)
+  residual_frac_list <- c(0.9, 0.95, 0.85) # fraction of random variance that is unmodeled noise
+  dish_frac <- .72 - 0.05/2
+  batch_frac <- 0.05
+  exp_frac <- .28 - 0.05/2
+  # ICC
+  residual_var <- residual_frac_list * sigma^2 # residual variance or variance among cells in a dish
+  random_var <- sigma^2 - residual_var # total random variance
+  exper_var <- exp_frac * random_var # variance among experiments
+  batch_var <- batch_frac * random_var # variance among batch of three dishes means
+  dish_var <- dish_frac * random_var # variance among dish means
+  icc <- (exper_var + batch_var + dish_var)/sigma^2
+  
+  # dish_frac + batch_frac + exp_frac # check!
+  param_mat <- expand.grid(residual_frac = residual_frac_list) |>
+    data.table()
+
+  p1_m1 <- numeric(n_iter)
+  p2_m1 <- numeric(n_iter)
+  p1_m2 <- numeric(n_iter)
+  p2_m2 <- numeric(n_iter)
+  p1_lmm1 <- numeric(n_iter)
+  p2_lmm1 <- numeric(n_iter)
+  p1_aov1 <- numeric(n_iter)
+  p2_aov1 <- numeric(n_iter)
+
+  
+  for(param_set in 1:nrow(param_mat)){
+    residual_frac_i <- param_mat[param_set, residual_frac] # fraction of random variance that is unmodeled noise
+    # total variance is 1
+    residual_var <- residual_frac_i * sigma^2 # residual variance or variance among cells in a dish
+    random_var <- sigma^2 - residual_var # total random variance
+    exper_var <- exp_frac * random_var # variance among experiments
+    batch_var <- batch_frac * random_var # variance among batch of three dishes means
+    dish_var <- dish_frac * random_var # variance among dish means
+    sigma_cell <- sqrt(residual_var) # among cells within a dish - this is residual
+    sigma_exper <- sqrt(exper_var) # among experiments
+    sigma_batch <- sqrt(batch_var) # among batches within a treatment:experiment
+    sigma_dish <- sqrt(dish_var) # among dishes within a treatment:experiment:batch
+    
+    fd <- data.table(
+      treatment = rep(paste0("Trt", 1:n_treat), each = n_exper * n_dish * n_cell),
+      experiment = rep(rep(paste0("exper_", 1:n_exper), each = n_dish * n_cell), 2),
+      batch = rep(paste0("batch_", 1:t_batch), each = n_dish * n_cell),
+      dish = rep(paste0("dish_", 1:t_dish), each = n_cell),
+      cell = paste0("cell_", 1:t_cell),
+      y = rep(NA, t_cell)
+    )
+    
+    for(iter in 1:n_iter){
+      b_exper <- rnorm(n_exper, mean = 0, sd = sigma_exper)
+      b_exper_col <- rep(rep(b_exper, each = n_dish * n_cell), n_treat)
+      # length(b_exper_col)
+      
+      b_batch <- rnorm(t_batch, mean = 0, sd = sigma_batch)
+      b_batch_col <- rep(b_batch, each = n_dish * n_cell)
+      # length(b_batch_col)
+      
+      b_dish <- rnorm(t_dish, mean = 0, sd = sigma_dish)
+      b_dish_col <- rep(b_dish, each = n_cell)
+      # length(b_dish_col)
+      
+      b_cell_col <- rnorm(t_cell, mean = 0, sd = sigma_cell)
+      # length(b_cell_col)
+      
+      # put it all together
+      fd[, y := b_treat_col + b_exper_col + b_batch_col + b_dish_col + b_cell_col]
+      
+      # lm of raw data
+      m1 <- lm(y ~ treatment, data = fd)
+      m1_pairs <- emmeans(m1, specs = "treatment") |>
+        contrast(method = "revpairwise", adjust = "none") |>
+        summary()
+      p1_m1[iter] <- m1_pairs[1, "p.value"]
+      p2_m1[iter] <- m1_pairs[5, "p.value"]
+      
+      # lm of control centered data
+      exper_means <- fd[, .(y_bar = mean(y)), by = .(treatment, experiment)]
+      y_bar_vec <- rep(rep(exper_means[1:4, y_bar], each = n_cell * n_dish), 4)
+      fd[, y_c := y/y_bar_vec]
+      # fd[, .(mean = mean(y_c),
+      #        sd = sd(y_c)), by = .(treatment, experiment)]
+
+      m2 <- lm(y_c ~ treatment, data = fd)
+      m2_pairs <- emmeans(m2, specs = "treatment") |>
+        contrast(method = "revpairwise", adjust = "none") |>
+        summary()
+      p1_m2[iter] <- m2_pairs[1, "p.value"]
+      p2_m2[iter] <- m2_pairs[5, "p.value"]
+      
+      # lmm models
+      lmm1 <- lmer(y ~ treatment + (1 | experiment) + (1 | batch) + (1 | dish), data = fd)
+      lmm1_pairs <- emmeans(lmm1, specs = "treatment") |>
+        contrast(method = "revpairwise", adjust = "none") |>
+        summary()
+      p1_lmm1[iter] <- lmm1_pairs[1, "p.value"]
+      p2_lmm1[iter] <- lmm1_pairs[5, "p.value"]
+
+      # RM-ANOVA models
+      aov1 <- aov_4(y ~ treatment + (treatment | experiment), data = fd, fun_aggregate = mean)
+      aov1_pairs <- emmeans(aov1, specs = "treatment") |>
+        contrast(method = "revpairwise", adjust = "none") |> summary()
+      p1_aov1[iter] <- aov1_pairs[1, "p.value"]
+      p2_aov1[iter] <- aov1_pairs[5, "p.value"]
+    }
+    type_1_matrix <- rbind(
+      type_1_matrix,
+      data.table(
+        resid_frac = residual_frac_i,
+        "sigma_cell" = sigma_cell, # among cells within a dish - this is residual
+        "sigma_exper" = sigma_exper, # among experiments
+        "sigma_batch" = sigma_batch, # among batches within a treatment:experiment
+        "sigma_dish" = sigma_dish, # among dishes within a treatment:experiment:batch
+        "p1_m1" = p1_m1,
+        "p2_m1" = p2_m1,
+        "p1_m2" = p1_m2,
+        "p2_m2" = p2_m2,
+        "p1_lmm1" = p1_lmm1,
+        "p2_lmm1" = p2_lmm1,
+        # "p1_lmm2" = p1_lmm2,
+        # "p2_lmm2" = p2_lmm2,
+        "p1_aov1" = p1_aov1,
+        "p2_aov1" = p2_aov1
+      )
+    )
+  }
+  saveRDS(type_1_matrix, "type_1_matrix.Rds")
+}else{
+  type_1_matrix <- readRDS("type_1_matrix.Rds")
+}
+
+residual_frac_list <- unique(type_1_matrix$resid_frac)
+param_mat <- expand.grid(residual_frac = residual_frac_list)
+param_mat$icc <- NA
+param_mat$lm1_p1 <- NA
+param_mat$lm1_p2 <- NA
+param_mat$lm2_p1 <- NA
+param_mat$lm2_p2 <- NA
+param_mat$lmm1_p1 <- NA
+param_mat$lmm1_p2 <- NA
+param_mat$rmaov_p1 <- NA
+param_mat$rmaov_p2 <- NA
+
+for(param_set in 1:nrow(param_mat)){
+    residual_frac_i <- param_mat[param_set, "residual_frac"] # fraction of random variance that is unmodeled noise
+    random_var <- 
+      type_1_matrix[resid_frac == residual_frac_i, sigma_exper][1]^2 +
+      type_1_matrix[resid_frac == residual_frac_i, sigma_batch][1]^2 +
+      type_1_matrix[resid_frac == residual_frac_i, sigma_dish][1]^2
+    total_var <- random_var + 
+      type_1_matrix[resid_frac == residual_frac_i, sigma_cell][1]^2
+    param_mat[param_set, "icc"] <- random_var/total_var
+    p1_m1 <- type_1_matrix[resid_frac == residual_frac_i, p1_m1]
+    p2_m1 <- type_1_matrix[resid_frac == residual_frac_i, p2_m1]
+    p1_m2 <- type_1_matrix[resid_frac == residual_frac_i, p1_m2]
+    p2_m2 <- type_1_matrix[resid_frac == residual_frac_i, p2_m2]
+    p1_lmm1 <- type_1_matrix[resid_frac == residual_frac_i, p1_lmm1]
+    p2_lmm1 <- type_1_matrix[resid_frac == residual_frac_i, p2_lmm1]
+    p1_aov1 <- type_1_matrix[resid_frac == residual_frac_i, p1_aov1]
+    p2_aov1 <- type_1_matrix[resid_frac == residual_frac_i, p2_aov1]
+    n_iter <- length(p1_m1)
+    param_mat[param_set, "lm1_p1"] <- sum(p1_m1 < 0.05)/n_iter
+    param_mat[param_set, "lm1_p2"] <- sum(p2_m1 < 0.05)/n_iter
+    param_mat[param_set, "lmm1_p1"] <- sum(p1_lmm1 < 0.05)/n_iter
+    param_mat[param_set, "lmm1_p2"] <- sum(p2_lmm1 < 0.05)/n_iter
+    param_mat[param_set, "lm2_p1"] <- sum(p1_m2 < 0.05)/n_iter
+    param_mat[param_set, "lm2_p2"] <- sum(p2_m2 < 0.05)/n_iter
+    param_mat[param_set, "rmaov_p1"] <- sum(p1_aov1 < 0.05)/n_iter
+    param_mat[param_set, "rmaov_p2"] <- sum(p2_aov1 < 0.05)/n_iter
+}
+
+param_mat |>
+  kable(digits = c(2,2,3,3,3,3,3,3,3,3)) |>
+  kable_styling()
+
+```
+
+```{r fib2b-plot-simulation}
+out_table <- melt(data.table(param_mat),
+                  id.vars = c("residual_frac", "icc"),
+                  variable.name = "test",
+                  value.name = "type_1")
+# out_table[, contrast := ifelse(str_detect(test, "p1"), "p1", "p2")]
+out_table[, c("model", "contrast") := tstrsplit(test, "_")]
+ggplot(data = out_table,
+       aes(x = icc,
+           y = type_1,
+           color = model,
+           linetype = contrast)) +
+  geom_point() +
+  geom_line() +
+  ylab("Type I error rate") +
+  theme_pubr()
+```
+
+Even though the dependence due to shared variance seems small given the figure of this variance above, the Type I error rate is 14.4% - 14.9%, or almost 3X the expected rate of 5%. This is an unacceptable inflation of type I error that will lead to frequent false discovery. By contrast, the RM-ANOVA model has exceptional control of Type I error rate. And, the naive LMM is overly conservative.
+
+Key:
+
+lm1: Linear/ANOVA model of all data, ignoring nesting. The data are not normalized by the mean of the control.
+
+lm2: Linear/ANOVA model of the control-normalized data, ignoring nesting. This is what the researchers did
+
+lmm1: Linear mixed model with intercepts for experiment, batch (= treatment:experiment), and dish. A naive model that simply accepts results regardless of boundary errors.
+
+aov1: multivariate Repeated Measures ANOVA
+
+
+
+## Exploring other figure panels
+### Fig 1c
 
 ```{r fig-1c-import, message=FALSE, warning=FALSE}
 data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
@@ -158,21 +832,7 @@ lmm1_pairs
 
 ```
 
-```{r}
-fig1c_ss <- fig1c[prep != "5"]
-aov1 <- aov_4(er_calcium ~ treatment + (treatment | prep), data = fig1c_ss, fun_aggregate = mean)
-aov1_emm <- emmeans(aov1, specs = "treatment")
-aov1_pairs <- contrast(aov1_emm, method = "revpairwise", adjust = "none") |>
-  summary(infer = TRUE)
-aov1_pairs
-
-```
-
-```{r fig1c-plot}
-plot_response(lmm1, lmm1_emm, lmm1_pairs)
-```
-
-## Fig 1e left
+### Fig 1e left
 
 ```{r fig-1e_left-import, message=FALSE, warning=FALSE}
 data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
@@ -251,12 +911,8 @@ aov1_pairs
 
 ```
 
-```{r fig1e_left-plot}
-plot_response(lmm1, lmm1_emm, lmm1_pairs)
-```
 
-
-## Fig 1e right
+### Fig 1e right
 
 ```{r fig-1e_right-import, message=FALSE, warning=FALSE}
 data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
@@ -314,111 +970,8 @@ lm1_pairs
 ```
 
 
-```{r fig1e_right-plot}
-plot_response(lmm1, lmm1_emm, lmm1_pairs)
-```
 
-## Fig 2b: Four experiments
-
-```{r fig-1e_left-import, message=FALSE, warning=FALSE}
-data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
-file_name <- "Source data for Figures and Table.xlsx"
-file_path <- here(data_folder, data_from, file_name)
-
-fig2b <- read_excel(file_path,
-                    sheet = "Fig 2B",
-                    range = "A1:F138",
-                    col_names = TRUE) |>
-  data.table() |>
-  melt(id.vars = c("experiment", "dish"),
-              variable.name = "treatment",
-              value.name = "er_calcium") |>
-  na.omit()
-fig2b[, dish_id := as.character(dish)] # for plot only
-fig2b[, dish := paste(treatment, dish)] # dish 1 differs in each treatment
-fig2b[, experiment := as.character(experiment)] # for plot only
-
-# output as clean excel file
-# fileout_name <- "fig1c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"
-# fileout_path <- here(data_folder, data_from, fileout_name)
-# write_xlsx(fig1c, fileout_path)
-```
-
-```{r fig2b-plot-each-prep}
-ggplot(data = fig2b,
-       aes(x = treatment,
-           y = er_calcium)) +
-  geom_point(aes(group = dish_id, color = experiment),
-             position = position_jitterdodge(jitter.width = 0)
-             )
-
-```
-
-
-```{r fig2b-icc}
-lmm1 <- lmer(er_calcium ~ treatment + (1 | experiment) + (1 | experiment:dish), data = fig2b)
-var_table <- VarCorr(lmm1) |> as.data.frame()
-icc = (var_table[1, "vcov"] + var_table[2, "vcov"])/(var_table[1, "vcov"] + var_table[2, "vcov"] + var_table[3, "vcov"])
-icc
-
-
-```
-
-```{r fig2b-aggregate}
-fig2b_rcbds <- fig2b[, .(er_calcium = mean(er_calcium)), by = .(experiment, dish, treatment)]
-fig2b_rcbd <- fig2b_rcbds[, .(er_calcium = mean(er_calcium)), by = .(experiment, treatment)]
-```
-
-
-```{r fig2b-inference}
-
-lmm1 <- lmer(er_calcium ~ treatment + (1 | experiment), data = fig2b_rcbd)
-lmm1_emm <- emmeans(lmm1, specs = "treatment")
-lmm1_pairs <- contrast(lmm1_emm, method = "revpairwise", adjust = "none") |>
-  summary(infer = TRUE)
-lmm1_pairs
-
-lmm2 <- lmer(er_calcium ~ treatment + (treatment | experiment), data = fig2b_rcbds)
-lmm2_emm <- emmeans(lmm2, specs = "treatment")
-lmm2_pairs <- contrast(lmm2_emm, method = "revpairwise", adjust = "none") |>
-  summary(infer = TRUE)
-lmm2_pairs
-
-lmm3 <- lmer(er_calcium ~ treatment + (1 | experiment) + (1 | experiment:treatment), data = fig2b_rcbds)
-lmm3_emm <- emmeans(lmm3, specs = "treatment")
-lmm3_pairs <- contrast(lmm3_emm, method = "revpairwise", adjust = "none") |>
-  summary(infer = TRUE)
-lmm3_pairs
-
-aov1 <- aov_4(er_calcium ~ treatment + (treatment | experiment),
-              data = fig2b_rcbd)
-aov1_emm <- emmeans(aov1, specs = "treatment")
-aov1_pairs <- contrast(aov1_emm, method = "revpairwise", adjust = "none") |>
-summary(infer = TRUE)
-aov1_pairs
-
-aov2 <- aov_4(er_calcium ~ treatment + (treatment | experiment),
-              fun_aggregate = mean,
-              data = fig2b_rcbds)
-aov2_emm <- emmeans(aov2, specs = "treatment")
-aov2_pairs <- contrast(aov2_emm, method = "revpairwise", adjust = "none") |>
-summary(infer = TRUE)
-aov2_pairs
-
-lmm4 <- pptt(er_calcium ~ treatment + (1 | experiment), data = fig2b_rcbd)
-lmm4
-```
-
-```{r}
-aov1 <- aov_4(er_calcium ~ treatment + (treatment | experiment), data = fig2b, fun_aggregate = mean)
-aov1_emm <- emmeans(aov1, specs = "treatment")
-aov1_pairs <- contrast(aov1_emm, method = "revpairwise", adjust = "none") |>
-  summary(infer = TRUE)
-aov1_pairs
-
-```
-
-## 8c
+### 8c three experiments
 
 ```{r fig-8c-import, message=FALSE, warning=FALSE}
 data_from <- "ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"
@@ -427,16 +980,19 @@ file_path <- here(data_folder, data_from, file_name)
 
 fig8c_wide <- read_excel(file_path,
                     sheet = "Fig 8C",
-                    range = "F1:I164",
+                    range = "G1:L164",
                     col_names = TRUE) |>
   data.table() |>
   na.omit()
-# assume blank rows separate preps. each prep has 10 technical replicates
-fig8c_wide[, prep := paste("prep_", rep(1:14, each = 10))]
+
 fig8c <- melt(fig8c_wide,
-              id.vars = c("prep"),
+              id.vars = c("experiment", "dish"),
               variable.name = "treatment",
               value.name = "number_with_mitochondria")
+
+fig8c[, dish_id := ifelse(dish < 10, paste0("0", dish), as.character(dish))] # for plot only
+fig8c[, dish := paste(treatment, dish)] # dish 1 differs in each treatment
+fig8c[, experiment := as.character(experiment)] # for plot only
 
 # output as clean excel file
 fileout_name <- "fig8c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"
@@ -445,90 +1001,13 @@ write_xlsx(fig8c, fileout_path)
 ```
 
 
-## Fit the model
-
-```{r}
-m0 <- lm(number_with_mitochondria ~ treatment, data = fig8c)
-coef(summary(m0))
-```
-
-```{r}
-lmm1 <- lmer(number_with_mitochondria ~ treatment + (1 | prep), data = fig8c)
-lmm1_emm <- emmeans(lmm1, specs = "treatment")
-lmm1_pairs <- contrast(lmm1_emm,
-                       method = "revpairwise")
-lmm1_pairs
-
-
-plot_the_response(lmm1, lmm1_emm, lmm1_pairs)
-```
-
-```{r}
-m1 <- lm(number_with_mitochondria ~ treatment * prep, data = fig8c)
-m1_emm <- emmeans(m1, specs = c("treatment", "prep"))
-m1_pairs <- contrast(m1_emm,
-                     method = "revpairwise",
-                     adjust = "none")
-
+```{r fig8c-plot-each-prep}
 ggplot(data = fig8c,
        aes(x = treatment,
-           y = number_with_mitochondria,
-           color = prep)) +
-  geom_point(position = position_jitterdodge(jitter.width = 0))
-```
-
-
-### Simulation
-
-Does pseudoreplication increase type I if ICC is low?
-
-```{r}
-n_iter <- 2000
-n_cell <- 10
-n_dish <- 3
-n_exper <- 6
-n_treat <- 2 # number of treatments
-
-t_dish <- n_dish * n_exper * n_treat
-t_cell <- t_dish * n_cell
-
-
-sigma_cell <- c(0.955)
-sigma_dish <- sqrt((1 - sigma_cell^2)/2)
-sigma_exper <- sigma_dish
-icc_dish <- sigma_dish^2/(sigma_cell^2 + sigma_dish^2 + sigma_exper^2)
-icc_exper <- sigma_exper^2/(sigma_cell^2 + sigma_dish^2 + sigma_exper^2)
-icc <- (sigma_dish^2 + sigma_exper^2)/(sigma_cell^2 + sigma_dish^2 + sigma_exper^2)
-# sigma_cell^2 + sigma_dish^2 + sigma_exper^2
-
-fd <- data.table(
-  treatment = rep(c("Cn", "Tr"), each = n_exper * n_dish * n_cell),
-  experiment = rep(rep(paste0("exper_", 1:n_exper), each = n_dish * n_cell), 2),
-  dish = rep(paste0("dish_", 1:t_dish), each = n_cell),
-  cell = paste0("cell_", 1:t_cell),
-  y = rep(NA, t_cell)
-)
-
-b_cell_mat <- matrix(rnorm(t_cell * n_iter, mean = 0, sd = sigma_cell), nrow = t_cell, ncol = n_iter)
-
-beta_1 <- 0
-b_treat_col <- rep(c(0, beta_1), each = n_cell * n_dish * n_exper) # the fixed effects
-
-p_m1 <- numeric(n_iter)
-for(iter in 1:n_iter){
-  b_exp <- rnorm(n_exper, mean = 0, sd = sigma_exper)
-  b_exp_col <- rep(rep(b_exp, each = n_dish * n_cell), 2)
-  b_dish <- rnorm(t_dish, mean = 0, sd = sigma_dish)
-  b_dish_col <- rep(b_dish, each = n_cell)
-  b_cell_col <- rnorm(t_cell, mean = 0, sd = sigma_cell)
-  fd[, y := b_exp_col + b_dish_col + b_cell_col + b_treat_col]
-  
-  m1 <- lm(y ~ treatment, data = fd)
-  p_m1[iter] <- coef(summary(m1))[2, 4]
-}
-
-icc
-sum(p_m1 < 0.05)/n_iter
+           y = number_with_mitochondria)) +
+  geom_point(aes(group = dish_id, color = experiment),
+             position = position_jitterdodge(jitter.width = 0)
+             )
 
 ```
 

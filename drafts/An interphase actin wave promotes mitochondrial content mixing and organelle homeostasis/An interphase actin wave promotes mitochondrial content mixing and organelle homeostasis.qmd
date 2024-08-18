@@ -6,7 +6,7 @@ date: '26 July 2024'
 date-modified: "`r Sys.Date()`"
 categories: ["linear mixed model", "ratio paired t-test", "randomized complete block design", "ratio paired t-test", "pseudoreplication"]
 description: "The authors have many nice examples of replicated experiments, which are a kind of blocked experimental design. Here, I focus on three of the experiments -- each should be analyzed in the same way but were analyzed in a different way. More generally, experimental bench biology doesn't seem too aware of the best practice method for analyzing data from block designs, other than the special case of paired t-tests. "
-draft: false
+draft: true
 format: 
   html: 
     toc: true 
@@ -14,9 +14,9 @@ format:
 execute: 
   message: false
   warning: false
+  freeze: true
 editor_options: 
   chunk_output_type: inline
-freeze: false
 ---
 
 ![ggplot better-than-replication of Fig 3b from the article. It's better than because the confidence intervals from the model are asymmetric and reflect the right (upward) skew of the data](../../figs/The TAS1R2 G-protein-coupled receptor is an ambient glucose sensor in skeletal muscle that regulates NAD homeostasis and mitochondrial capacity/fig3b_ggplot.png){width=4in fig-align="left"}
@@ -168,7 +168,7 @@ lmm2_pairs <- contrast(lmm2_emm, method = "revpairwise", adjust = "none") |>
 lmm2_pairs
 ```
 
-```{r fig2n-aov}
+```{r fig2g-aov}
 fig2g_ss <- fig2g[experiment != "5"]
 aov1 <- aov_4(wave_speed ~ treatment + (treatment | experiment), data = fig2g_ss, fun_aggregate = mean)
 aov1_emm <- emmeans(aov1, specs = "treatment")
@@ -179,7 +179,7 @@ aov1_pairs
 ```
 
 ```{r fig2g-plot}
-plot_response(lmm1, lmm1_emm, lmm1_pairs)
+# plot_response(lmm1, lmm1_emm, lmm1_pairs)
 ```
 
 
@@ -253,7 +253,7 @@ aov1_pairs
 ```
 
 ```{r fig2n-plot}
-plot_response(lmm1, lmm1_emm, lmm1_pairs)
+# plot_response(lmm1, lmm1_emm, lmm1_pairs)
 ```
 
 # Fig 3e
@@ -292,7 +292,7 @@ fileout_path <- here(data_folder, data_from, fileout_name)
 write_xlsx(fig3e, fileout_path)
 ```
 
-```{r fig2n-plot-each-experiment}
+```{r fig3e-plot-each-experiment}
 ggplot(data = fig3e,
        aes(x = treatment,
            y = fluor,
@@ -301,7 +301,7 @@ ggplot(data = fig3e,
 
 ```
 
-```{r fig2n-icc}
+```{r fig3e-icc}
 lmm1 <- lmer(fluor ~ treatment + (treatment | experiment), data = fig3e)
 var_cor <- VarCorr(lmm1)
 var_cor_dt <- var_cor |> as.data.frame() |> data.table()

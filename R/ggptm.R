@@ -1,4 +1,4 @@
-## ----setup, include=FALSE------------------------------------------------------------------
+## ----setup, include=FALSE----------------------------------------------------
 # wrangling
 library(data.table)
 library(stringr)
@@ -12,7 +12,7 @@ library(cowplot)
 
 
 
-## ----palettes------------------------------------------------------------------------------
+## ----palettes----------------------------------------------------------------
 # get some palettes
 pal_okabe_ito <- c(
   "#E69F00",
@@ -30,7 +30,7 @@ pal_jco <- pal_jco("default")(10)
 pal_frontiers <- pal_frontiers("default")(7)
 
 
-## ------------------------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 remove_parentheses <- function(x){
   if(substr(x, 1, 1) == "("){
     x <- substr(x, 2, nchar(x))
@@ -50,8 +50,17 @@ pretty_pvalues <- function(p){
   return(p_string)
 }
 
+sci_to_10 <- function(n) {
+  # https://stackoverflow.com/questions/29785555/in-r-using-scientific-notation-10-rather-than-e
+  output <- format(n, scientific = TRUE)
+  output <- sub("1e+", "10^", output) #Replace e with 10^
+  output <- sub("\\+0?", "", output) #Remove + symbol and leading zeros on expoent, if > 1
+  output <- sub("-0?", "-", output) #Leaves - symbol but removes leading zeros on expoent, if < 1
+  return(output)
+}
 
-## ----ggcheck_the_qq, warning = FALSE-------------------------------------------------------
+
+## ----ggcheck_the_qq, warning = FALSE-----------------------------------------
 ggcheck_the_qq = function(m1,
                    line = "robust",
                    n_boot = 200){
@@ -158,7 +167,7 @@ ggcheck_the_qq = function(m1,
 }
 
 
-## ------------------------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 
 ggcheck_the_glm_qq = function(m1,
                    n_sim = 250,
@@ -234,7 +243,7 @@ ggcheck_the_glm_qq = function(m1,
 
 
 
-## ----ggcheck_the_spreadlevel---------------------------------------------------------------
+## ----ggcheck_the_spreadlevel-------------------------------------------------
 ggcheck_the_spreadlevel <- function(m1,
                    n_boot = 200){
   n <- nobs(m1)
@@ -289,7 +298,7 @@ ggcheck_the_spreadlevel <- function(m1,
 }
 
 
-## ----ggcheck_the_model---------------------------------------------------------------------
+## ----ggcheck_the_model-------------------------------------------------------
 ggcheck_the_model <- function(m1){
   gg1 <- ggcheck_the_qq(m1)
   gg2 <- ggcheck_the_spreadlevel(m1)
@@ -297,7 +306,7 @@ ggcheck_the_model <- function(m1){
 }
 
 
-## ------------------------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 
 create_model_data <- function(
     data,
@@ -306,14 +315,17 @@ create_model_data <- function(
     factor2_label = "factor2_label",
     block_label = "block_label",
     nest_label = "nest_label",
+    cov_label = "cov_label",
     two_factors = FALSE,
     include_block = FALSE,
-    include_nest = FALSE
+    include_nest = FALSE,
+    include_cov = FALSE
 ){
   y_cols <- c(response_label, factor1_label)
   if(two_factors == TRUE){y_cols <- c(y_cols, factor2_label)}
   if(include_block == TRUE){y_cols <- c(y_cols, block_label)}
   if(include_nest == TRUE){y_cols <- c(y_cols, nest_label)}
+  if(include_cov == TRUE){y_cols <- c(y_cols, cov_label)}
   model_data <- data[, y_cols] |>
     data.table()
   
@@ -336,6 +348,12 @@ create_model_data <- function(
   model_data[, nest_id := ifelse(include_nest == TRUE,
                                  get(nest_label),
                                  NA)]
+  if(include_cov){
+    model_data[, cov_id := get(cov_label)]
+  }else{
+    model_data[, cov_id := as.numeric(NA)]
+  }
+  
   # reorder factor levels for 2-factor plots
   levels_1 <- levels(model_data$factor_1) |>
     as.character()
@@ -351,7 +369,7 @@ create_model_data <- function(
 
 
 
-## ------------------------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 
 create_plot_data <- function(m1, ptm){
   gg_data <- get_data(m1) |>
@@ -386,7 +404,7 @@ create_plot_data <- function(m1, ptm){
 
 
 
-## ------------------------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 create_emm_data <- function(m1_emm, ptm){
 
   if(is.data.frame(m1_emm) == TRUE){
@@ -424,7 +442,7 @@ create_emm_data <- function(m1_emm, ptm){
 }
 
 
-## ----combine-contrasts---------------------------------------------------------------------
+## ----combine-contrasts-------------------------------------------------------
 combine_contrasts <- function(m1_pairs){
   part_1 <- m1_pairs[[1]]
   part_2 <- m1_pairs[[2]]
@@ -444,13 +462,18 @@ combine_contrasts <- function(m1_pairs){
 }
 
 
-## ----create-pairs-data---------------------------------------------------------------------
-create_pairs_data <- function(m1_pairs, ptm){
+## ----create-pairs-data-------------------------------------------------------
+create_pairs_data <- function(m1_pairs,
+                              hide_pairs, # the rows to hide
+                              ptm){
   if(is.data.frame(m1_pairs) == TRUE){
     gg_pairs <- data.table(m1_pairs)
   }else{
     gg_pairs <- summary(m1_pairs) %>%
       data.table()
+  }
+  if(!any(is.na(hide_pairs))){
+    gg_pairs <- gg_pairs[-hide_pairs,]    
   }
   
   # is the contrast a difference or ratio?
@@ -493,7 +516,7 @@ create_pairs_data <- function(m1_pairs, ptm){
 
 
 
-## ------------------------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 create_nest_data <- function(m1, gg_data, ptm){
   gg_nest_data <- gg_data[, .(y = mean(get(ptm$response_label), na.rm = TRUE)),
                           by = c(ptm$factor1_label, ptm$factor1_label, "factor_1",
@@ -507,7 +530,7 @@ create_nest_data <- function(m1, gg_data, ptm){
 }
 
 
-## ------------------------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 # need to find maximum y-value from experimental reps, technical reps, or CIs
 add_y_pos <- function(gg_pairs, gg_data, gg_emm, gg_nest, ptm){
   if(ptm$nested == FALSE | (ptm$nested == TRUE & ptm$show_nest == TRUE)){
@@ -536,8 +559,11 @@ add_y_pos <- function(gg_pairs, gg_data, gg_emm, gg_nest, ptm){
 
 
 
-## ------------------------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 get_ptm_parameters <- function(m1, m1_pairs){
+  gg_data <- get_data(m1) |>
+    data.table()
+  
   ptm <- list()
   ptm$response_label <- find_response(m1)
   predictors <- find_predictors(m1)
@@ -550,21 +576,37 @@ get_ptm_parameters <- function(m1, m1_pairs){
   }
   ptm$factor1_label <- predictors_fixed[1]
   ptm$factor2_label <- predictors_fixed[2]
+
+  # is factor2 a covariate?
+  ptm$covariate <- NA
+  ptm$offset <- FALSE
+  if(!is.na(ptm$factor2_label)){
+    if(is.numeric(gg_data[, get(ptm$factor2_label)])){
+      ptm$covariate <- ptm$factor2_label
+      ptm$factor2_label <- NA
+      
+      # is covariate an offset?
+      if(any(str_detect(as.character(m1$formula), "offset"))){
+        ptm$offset <- TRUE
+      }
+    }
+  }
   ptm$two_factors <- ifelse(is.na(ptm$factor2_label), FALSE, TRUE)
   random <- find_random(m1)$random
   ptm$random <- ifelse(is.null(random), NA, random)
   
+  factor_list <- c(ptm$factor1_label, ptm$factor2_label, ptm$random) |>
+    na.omit()
+  
   # nesting or blocked?
-  gg_data <- get_data(m1) |>
-    data.table()
   if(is.na(ptm$random)){
     ptm$nested <- FALSE
     ptm$nest_id <- NA
     ptm$blocked <- FALSE
     ptm$block_id <- NA
   }else{
-    counts <- gg_data[!is.na(get(ptm$response)), .(N = .N),
-                      by = c(ptm$factor1_label, ptm$factor2_label, ptm$random)]
+    counts <- gg_data[!is.na(get(ptm$response_label)), .(N = .N),
+                      by = factor_list]
     ptm$nested <- ifelse(any(counts$N > 1), TRUE, FALSE) # could be block block if...
     if(ptm$nest == TRUE){
       ptm$nest_id <- ptm$random
@@ -588,11 +630,12 @@ get_ptm_parameters <- function(m1, m1_pairs){
 }
 
 
-## ------------------------------------------------------------------------------------------
+## ----------------------------------------------------------------------------
 plot_response <- function(m1,
                           m1_emm,
                           m1_pairs,
-                          m1_pairs_rows = NA,
+                          hide_pairs = NA, # rows of m1_pairs to hide
+                          rescale = 1, # divide y-axis by this amount
                           join_blocks = FALSE,
                           show_nest_data = FALSE,
                           block_id = NA, # this is the column containing the blocks
@@ -600,8 +643,11 @@ plot_response <- function(m1,
                           jitter_spread = 0.8,
                           jitter_width = 0.2,
                           palette = "pal_ggplot",
+                          y_label = NA,
+                          y_units = NA,
                           x_axis_labels = NA,
-                          y_label = NA){
+                          font_size = 12
+                          ){
   
   # correct m1_pairs if its a list
   if(!is.null(names(m1_pairs[[1]]))){
@@ -612,12 +658,10 @@ plot_response <- function(m1,
   ptm$show_nest <- show_nest_data
   if(!is.na(nest_id)){ptm$nest_id <- nest_id}
   
-  if(is.na(y_label)){y_label <- ptm$response_label}
-  
   gg_data <- create_plot_data(m1, ptm)
   gg_emm <- create_emm_data(m1_emm, ptm)
   ptm$plot_factor_levels <- gg_emm[, plot_factor] |> as.character()
-  gg_pairs <- create_pairs_data(m1_pairs, ptm)
+  gg_pairs <- create_pairs_data(m1_pairs, hide_pairs, ptm)
   if(!is.na(nest_id)){
     gg_nest <- create_nest_data(m1, gg_data, ptm)
   }else{
@@ -626,7 +670,32 @@ plot_response <- function(m1,
   gg_pairs <- add_y_pos(gg_pairs, gg_data, gg_emm, gg_nest, ptm)
   
   if(any(is.na(x_axis_labels)) == TRUE){x_axis_labels <- levels(gg_data$plot_factor)}
-
+  
+  # rescale
+  gg_data[, y := y / rescale]
+  gg_emm[, mean := mean / rescale]
+  gg_emm[, lo := lo / rescale]
+  gg_emm[, hi := hi / rescale]
+  gg_pairs[, y_pos := y_pos / rescale]
+  if(!is.na(gg_nest)){
+    gg_nest[, nest_mean := nest_mean / rescale]
+  }
+  
+  # if cov is offset then create proportion and rescale emm by mean of covarariate to make proportion
+  if(ptm$offset == TRUE){
+    gg_data[, y := y/get(ptm$covariate) * 100]
+    common_scale <- mean(gg_data[, get(ptm$covariate)])
+    gg_emm[, mean := mean / common_scale * 100]
+    gg_emm[, lo := lo / common_scale * 100]
+    gg_emm[, hi := hi / common_scale * 100]
+    gg_pairs[, y_pos := y_pos / common_scale * 100]
+    if(is.na(y_label)){
+#      y_label <- paste0("Relative ", ptm$response_label, " (% of ", ptm$covariate)
+      y_label <- paste("%", ptm$response_label)
+    }
+  }
+  
+  if(is.na(y_label)){y_label <- ptm$response_label}
   
   gg <- ggplot(data = gg_data,
                aes(x = plot_factor_id,
@@ -716,13 +785,41 @@ plot_response <- function(m1,
                        size = 4,
                        tip.length = 0.01)
   
-  # add axis labels and x-axis tick labels
-  gg <- gg +
-    ylab(y_label) +
-    scale_x_discrete(labels = x_axis_labels)
+  # add y-axis label
+  if(rescale != 1){
+    if(rescale > 1000){
+      rescale_str <- sci_to_10(rescale)
+    }else{
+      rescale_str <- as.character(rescale)
+    }
+    if(is.na(y_units)){
+      y_units <- paste0("X", rescale_str)
+    }else{
+      y_units <- paste0("X", rescale_str, " ", y_units)
+    }
+  }
+  # if % is in label then
+  if(any(str_detect(y_label, "%"))){
+    gg <- gg + ylab(y_label)
+  }else{
+    y_label <- str_replace_all(y_label, " ", "~")
+    y_units <- str_replace_all(y_units, " ", "~")
+    if(is.na(y_units)){
+      gg <- gg +
+        ylab(bquote(.(rlang::parse_expr(paste(y_label)))))
+    }else{
+      gg <- gg +
+        ylab(bquote(.(rlang::parse_expr(paste(y_label)))
+                    ~(.(rlang::parse_expr(paste(y_units))))))
+    }
+  }
+  
+  
+  # x-axis tick labels
+  gg <- gg + scale_x_discrete(labels = x_axis_labels)
     
   # add theme
-  gg <- gg + theme_pubr() +
+  gg <- gg + theme_pubr(base_size = font_size) +
     theme(axis.title.x = element_blank())
   
   # gg
@@ -731,7 +828,102 @@ plot_response <- function(m1,
 }
 
 
-## ----output-as-R-file----------------------------------------------------------------------
+## ----------------------------------------------------------------------------
+geom_ancova <- function(m1){
+  geom_smooth(method = "lm",
+              se = FALSE,
+              mapping = aes(y = predict(m1, type = "response"))
+  )
+}
+
+
+
+## ----------------------------------------------------------------------------
+
+plot_the_ancova_model <- function(m1, m1_emm, m1_pairs){
+  
+  ptm <- get_ptm_parameters(m1, m1_pairs)
+  ptm$show_nest <- show_nest_data
+  if(!is.na(nest_id)){ptm$nest_id <- nest_id}
+  gg_data <- create_plot_data(m1, ptm)
+  gg_emm <- create_emm_data(m1_emm, ptm)
+  ptm$plot_factor_levels <- gg_emm[, plot_factor] |> as.character()
+  gg_pairs <- create_pairs_data(m1_pairs, hide_pairs, ptm)
+  if(!is.na(nest_id)){
+    gg_nest <- create_nest_data(m1, gg_data, ptm)
+  }else{
+    gg_nest <- NA
+  }
+  gg_pairs <- add_y_pos(gg_pairs, gg_data, gg_emm, gg_nest, ptm)
+  if(is.na(y_label)){y_label <- ptm$response_label}
+
+  gg <- ggplot(data = gg_data,
+               aes(x = get(ptm$covariate),
+                   y = y,
+                   color = plot_factor)) +
+    geom_point(size = 2) +
+    geom_ancova(m1)
+
+  # add some color
+  if(palette != "pal_ggplot"){
+    gg <- gg +
+      scale_color_manual(values = get(palette))
+  }
+  
+  # add p-value brackets
+  # gg <- gg +
+  #   stat_pvalue_manual(gg_pairs,
+  #                      label = "p.print",
+  #                      y.position = "y_pos",
+  #                      # xmin = "minx",
+  #                      # xmax = "maxx",
+  #                      size = 4,
+  #                      tip.length = 0.01)
+  
+  # add x-axis label
+  gg <- gg +
+    xlab(ptm$covariate)
+  
+  # add y-axis label
+  if(rescale != 1){
+    if(rescale > 1000){
+      rescale_str <- sci_to_10(rescale)
+    }else{
+      rescale_str <- as.character(rescale)
+    }
+    if(is.na(y_units)){
+      y_units <- paste0("X", rescale_str)
+    }else{
+      y_units <- paste0("X", rescale_str, " ", y_units)
+    }
+  }
+  # if % is in label then
+  if(any(str_detect(y_label, "%"))){
+    gg <- gg + ylab(y_label)
+  }else{
+    y_label <- str_replace(y_label, " ", "~")
+    y_units <- str_replace(y_units, " ", "~")
+    if(is.na(y_units)){
+      gg <- gg +
+        ylab(bquote(.(rlang::parse_expr(paste(y_label)))))
+    }else{
+      gg <- gg +
+        ylab(bquote(.(rlang::parse_expr(paste(y_label)))
+                    ~(.(rlang::parse_expr(paste(y_units))))))
+    }
+  }
+  
+  # add theme
+  gg <- gg + theme_pubr(base_size = font_size)
+  
+
+  return(gg)
+}
+
+
+
+
+## ----output-as-R-file--------------------------------------------------------
 # highlight and run to put update into R folder
 # knitr::purl("ggptm.Rmd")
 

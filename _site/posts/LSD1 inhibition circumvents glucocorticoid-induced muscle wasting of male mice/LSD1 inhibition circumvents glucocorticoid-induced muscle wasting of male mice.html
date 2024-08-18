@@ -192,7 +192,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">July 12, 2024</p>
+        <p class="date-modified">August 18, 2024</p>
       </div>
     </div>
       
@@ -548,25 +548,21 @@ treatmentCC      1276.484  10823.560 0.1179357 9.067929e-01</code></pre>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>gg1 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(m1,</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>              m1_emm,</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>              m1_pairs[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,],</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#              x_axis_labels = c("DEX-\nCC-", "DEX+\nCC-", "DEX+\nCC+", "DEX-\nCC+"),</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>              <span class="cn">NULL</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>m2_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m2, <span class="fu">c</span>(<span class="st">"treatment"</span>), <span class="at">type =</span> <span class="st">"response"</span>)</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m2_emm,</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> focal_contrasts,</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> m2_pairs[, <span class="sc">-</span><span class="dv">7</span>]</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>gg2 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(m2,</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>              m2_emm,</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>              m2_pairs[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,],</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>,</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co">#              x_axis_labels = c("DEX-\nCC-", "DEX+\nCC-", "DEX+\nCC+", "DEX-\nCC+"),</span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>              <span class="cn">NULL</span>)</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(gg1, gg2, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">labels =</span> <span class="st">"AUTO"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>m2 <span class="ot">&lt;-</span> <span class="fu">glm.nb</span>(Fbxo32 <span class="sc">~</span> treatment, <span class="at">data =</span> fig7d)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>m2_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m2, <span class="fu">c</span>(<span class="st">"treatment"</span>), <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(m2_emm,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                     <span class="at">method =</span> focal_contrasts,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>                     <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>m2_pairs <span class="ot">&lt;-</span> m2_pairs[, <span class="sc">-</span><span class="dv">7</span>]</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>gg2 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(m2,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>              m2_emm,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>              m2_pairs[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>,],</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(gg1, gg2, <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">labels =</span> <span class="st">"AUTO"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
