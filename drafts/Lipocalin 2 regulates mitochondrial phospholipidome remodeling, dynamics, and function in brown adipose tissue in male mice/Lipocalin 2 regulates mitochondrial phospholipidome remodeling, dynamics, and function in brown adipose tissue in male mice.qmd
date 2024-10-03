@@ -1,0 +1,199 @@
+---
+title: "Multiple testing"
+subtitle: "Data From Fig 3d-u -- Lipocalin 2 regulates mitochondrial phospholipidome remodeling, dynamics, and function in brown adipose tissue in male mice"
+author: "Jeff Walker"
+date: '2 October 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["xxx"]
+description: "xxx"
+draft: true
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  message: false
+  warning: false
+  freeze: true
+editor_options: 
+  chunk_output_type: inline
+---
+
+## Vital info
+
+Data From: [Su, H., Guo, H., Qiu, X. et al. Lipocalin 2 regulates mitochondrial phospholipidome remodeling, dynamics, and function in brown adipose tissue in male mice. Nat Commun 14, 6729 (2023). https://doi.org/10.1038/s41467-023-42473-2](https://www.nature.com/articles/s41467-023-42473-2){target="_blank"}
+
+Fig: xxx [download data](../../data from/Lipocalin 2 regulates mitochondrial phospholipidome remodeling, dynamics, and function in brown adipose tissue in male mice/41467_2023_42473_MOESM7_ESM.xlsx){target="_blank"}
+
+key words: 
+
+Published methods: xxx
+
+Design: xxx
+
+Response: xxx
+
+Key learning concepts: multiple testing
+
+More info: [xxx](xxx){target="_blank"}
+
+## The experiment
+
+xxx
+
+Treatments
+
+1. xxx
+2. xxx
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(stringr) # string functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+source_path <- here("R", "ggptm.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+## Fig 3d-u
+
+researchers used: t-test on all data
+
+```{r fig-2g-import, message=FALSE, warning=FALSE}
+data_from <- "Lipocalin 2 regulates mitochondrial phospholipidome remodeling, dynamics, and function in brown adipose tissue in male mice"
+file_name <- "41467_2023_42473_MOESM7_ESM.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+# note I had to insert rows in the excel file 
+# in between some of the
+# sets because of inconsistency in the file
+fig3_import <- function(range_in = "xxx"){
+  fig3_wide <- read_excel(file_path,
+                    sheet = "Fig. 3",
+                    range = range_in) |>
+    data.table()
+  fig3_long <- melt(fig3_wide,
+                    measure.vars = colnames(fig3_wide),
+                    variable.name = "treatment",
+                    value.name = "cardiolipin") |>
+    na.omit()
+  fig3_long[, treatment := factor(treatment,
+                                  levels = colnames(fig3_wide))]
+  return(fig3_long)
+}
+
+fig3 <- data.table(NULL)
+row_1 <- 12
+for(fig_id in letters[4:21]){
+  row_2 <- row_1 + 5
+  range_in <- paste0(
+    "B",row_1,":E",row_2
+  )
+  fig3 <- rbind(
+    fig3,
+    data.table(
+      figure = fig_id,
+      fig3_import(range_in))
+  )
+  row_1 <- row_2 + 4
+}
+
+```
+
+
+```{r}
+lipin_id <- unique(fig3$figure)
+n_cardiolipins <- length(lipin_id)
+
+p_table <- data.table(NULL)
+for(set_i in 1:n_cardiolipins){
+  subdata <- fig3[figure == lipin_id[set_i]]
+  m1 <- lm(cardiolipin ~ treatment, data = subdata)
+  m1_pairs <- emmeans(m1, specs = "treatment") |>
+    contrast(method = "revpairwise",
+             adjust = "none") |>
+    summary() |>
+    data.table()
+  # authors are keeping contrasts in rows 1,2,6 and use t-test
+  p1 <- t.test(subdata[treatment == "WT-Saline", cardiolipin],
+               subdata[treatment == "WT-CL", cardiolipin],
+               var.equal = TRUE)$p.value
+  p2 <- t.test(subdata[treatment == "WT-Saline", cardiolipin],
+               subdata[treatment == "KO-Saline", cardiolipin],
+               var.equal = TRUE)$p.value
+  p3 <- t.test(subdata[treatment == "KO-Saline", cardiolipin],
+               subdata[treatment == "KO-CL", cardiolipin],
+               var.equal = TRUE)$p.value
+  p_table <- rbind(
+    p_table,
+    data.table(
+      lipin_id = lipin_id[set_i],
+      m1_pairs[c(1,2,6), .SD, .SDcols = c("contrast", "p.value")],
+      ttest = c(p1, p2, p3)
+    )
+  )
+}
+
+  p_table[, holm := p.adjust(ttest, "holm") |> round(3)]
+  p_table[, fdr := p.adjust(ttest, "fdr") |> round(3)]
+  p_table[, ttest := round(ttest, 4)]
+  
+  data.table(
+    adjust = c("lm","ttest", "holm", "fdr"),
+    n_lt_5 = c(sum(p_table[, p.value] < 0.05),
+               sum(p_table[, ttest] < 0.05),
+               sum(p_table[, holm] < 0.05),
+               sum(p_table[, fdr] < 0.05))
+  )
+
+```
+

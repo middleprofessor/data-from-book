@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.52">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Jeff Walker">
+<meta name="dcterms.date" content="2024-08-18">
+<meta name="description" content="Fig 2b contains four replicates of an experiment, each with four treatment levels. The data were analyzed with an ANOVA model. There is nothing unusual about this. This is too bad because replicated experiments are examples of Randomized Complete Block Designs, where each experiment is a block. Analyzing blocked designs using best-practice models increases power, so the usual ANOVA model is a lost opportunity. What is highly unusual about this publication is the researchers identified the experiments in the archived data, which means I can reanalyze the data with a best practice model, either a linear mixed model or an equivalent repeated measures (RM) ANOVA. The design also contains nested technical replicates, and ignoring this is pseudorpelication, leading to increased Type I (false discoveries) error. A simulation of the Fig 2b data shows that the Type I error rate is about three times the expected rate and only with extremely low ICC does Type I error rates approach the expected rate.">
+
+<title>Analyzing Replicated Experiments – Data From</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="../../site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="../../site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Data From</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html"> 
+<span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com"> <i class="bi bi-twitter" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Analyzing Replicated Experiments</h1>
+            <p class="subtitle lead">Data From Fig 2b – ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome</p>
+                  <div>
+        <div class="description">
+          Fig 2b contains four replicates of an experiment, each with four treatment levels. The data were analyzed with an ANOVA model. There is nothing unusual about this. This is too bad because replicated experiments are examples of Randomized Complete Block Designs, where each experiment is a block. Analyzing blocked designs using best-practice models increases power, so the usual ANOVA model is a lost opportunity. What is <em>highly</em> unusual about this publication is the researchers identified the experiments in the archived data, which means I can reanalyze the data with a best practice model, either a linear mixed model or an equivalent repeated measures (RM) ANOVA. The design also contains nested technical replicates, and ignoring this is pseudorpelication, leading to increased Type I (false discoveries) error. A simulation of the Fig 2b data shows that the Type I error rate is about three times the expected rate and only with extremely low ICC does Type I error rates approach the expected rate.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">nested subsampling</div>
+                <div class="quarto-category">linear mixed model</div>
+                <div class="quarto-category">ggplot</div>
+                <div class="quarto-category">simulation</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Jeff Walker </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 18, 2024</p>
+      </div>
+    </div>
+    
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">October 2, 2024</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#vital-info" id="toc-vital-info" class="nav-link active" data-scroll-target="#vital-info">Vital info</a></li>
+  <li><a href="#tldr" id="toc-tldr" class="nav-link" data-scroll-target="#tldr">TL;DR</a></li>
+  <li><a href="#the-experiment" id="toc-the-experiment" class="nav-link" data-scroll-target="#the-experiment">The experiment</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#fig-2b-four-experiments" id="toc-fig-2b-four-experiments" class="nav-link" data-scroll-target="#fig-2b-four-experiments">Fig 2b: Four experiments</a>
+  <ul class="collapse">
+  <li><a href="#what-the-researchers-did" id="toc-what-the-researchers-did" class="nav-link" data-scroll-target="#what-the-researchers-did">What the researchers did</a></li>
+  <li><a href="#the-problem-short-version" id="toc-the-problem-short-version" class="nav-link" data-scroll-target="#the-problem-short-version">The problem – short version</a></li>
+  <li><a href="#thinking-about-building-a-best-practice-model" id="toc-thinking-about-building-a-best-practice-model" class="nav-link" data-scroll-target="#thinking-about-building-a-best-practice-model">Thinking about building a best practice model</a></li>
+  <li><a href="#equivalencies-between-best-practice-models" id="toc-equivalencies-between-best-practice-models" class="nav-link" data-scroll-target="#equivalencies-between-best-practice-models">Equivalencies between best practice models</a></li>
+  <li><a href="#a-hidden-problem-emerges-when-we-analyze-the-aggregated-data-with-best-practice-models" id="toc-a-hidden-problem-emerges-when-we-analyze-the-aggregated-data-with-best-practice-models" class="nav-link" data-scroll-target="#a-hidden-problem-emerges-when-we-analyze-the-aggregated-data-with-best-practice-models">A hidden problem emerges when we analyze the aggregated data with best practice models</a></li>
+  <li><a href="#the-problem-long-version" id="toc-the-problem-long-version" class="nav-link" data-scroll-target="#the-problem-long-version">The problem – long version</a></li>
+  <li><a href="#fitting-best-practice-models" id="toc-fitting-best-practice-models" class="nav-link" data-scroll-target="#fitting-best-practice-models">Fitting best practice models</a></li>
+  <li><a href="#plot-the-model" id="toc-plot-the-model" class="nav-link" data-scroll-target="#plot-the-model">Plot the model!</a></li>
+  <li><a href="#a-simulation-to-explore-false-discovery-when-the-data-look-pretty-independent" id="toc-a-simulation-to-explore-false-discovery-when-the-data-look-pretty-independent" class="nav-link" data-scroll-target="#a-simulation-to-explore-false-discovery-when-the-data-look-pretty-independent">A simulation to explore false discovery when the data look pretty independent</a></li>
+  </ul></li>
+  <li><a href="#exploring-other-figure-panels" id="toc-exploring-other-figure-panels" class="nav-link" data-scroll-target="#exploring-other-figure-panels">Exploring other figure panels</a>
+  <ul class="collapse">
+  <li><a href="#fig-1c" id="toc-fig-1c" class="nav-link" data-scroll-target="#fig-1c">Fig 1c</a></li>
+  <li><a href="#fig-1e-left" id="toc-fig-1e-left" class="nav-link" data-scroll-target="#fig-1e-left">Fig 1e left</a></li>
+  <li><a href="#fig-1e-right" id="toc-fig-1e-right" class="nav-link" data-scroll-target="#fig-1e-right">Fig 1e right</a></li>
+  <li><a href="#c-three-experiments" id="toc-c-three-experiments" class="nav-link" data-scroll-target="#c-three-experiments">8c three experiments</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<div class="quarto-figure quarto-figure-left">
+<figure class="figure">
+<p><img src="../../figs/ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome/fig2b_ggplot.png" class="img-fluid figure-img" style="width:4in"></p>
+<figcaption>ggplot better-than-replication of Fig 2b from the article. It’s better because the plot shows the nested subsampling design…and the p-values account for this design</figcaption>
+</figure>
+</div>
+<section id="vital-info" class="level2">
+<h2 class="anchored" data-anchor-id="vital-info">Vital info</h2>
+<p>Data From: <a href="https://www.nature.com/articles/s41467-024-50502-x" target="_blank">Liiv, M., Vaarmann, A., Safiulina, D., Choubey, V., Gupta, R., Kuum, M., … &amp; Kaasik, A. (2024). ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome. Nature Communications, 15(1), 6143.</a></p>
+<p>Fig: 2b <a href="../../data from/ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome/Source data for Figures and Table.xlsx" target="_blank">download data</a></p>
+<p>key words:</p>
+<p>Published methods: ANOVA model with Sidak adjustment for the <em>p</em>-values</p>
+<p>Design: Randomized Complete Block Design with nested subsampling (RCBDSS)</p>
+<p>Response: ER Ca++ levels</p>
+<p>Key learning concepts: analyzing replicated experiments with RM-ANOVA or LMMs</p>
+<p>More info: <a href="https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm" target="_blank">Chapter 16 Models for non-independence – linear mixed models</a></p>
+</section>
+<section id="tldr" class="level2">
+<h2 class="anchored" data-anchor-id="tldr">TL;DR</h2>
+<p>Fig 2b contains four replicates of an experiment, each with four treatment levels. The data were analyzed with an ANOVA model. There is nothing unusual about this. This is too bad because replicated experiments are examples of Randomized Complete Block Designs, where each experiment is a block. Analyzing blocked designs using best-practice models increases power, so the usual ANOVA model is a lost opportunity. What is <em>highly</em> unusual about this publication is the researchers identified the experiments in the archived data, which means I can reanalyze the data with a best practice model, either a linear mixed model or an equivalent repeated measures (RM) ANOVA.</p>
+<p>The data in Fig 2b is actually more complex than that for a simple RCBD. In the experiment, there are four replicates of an experiment, where each experiment contains three replicate dishes for each treatment and ten measures from each dish. The researchers analyzed the data as if the sample size (n) is 10 x 3 x 4 = 120, which assumes all measurements within a treatment are independent. In fact, measures within a dish share variance, dishes within a treatment:experiment combination share variance, and dishes across treatments within an experiment share variance. The researchers’ analysis is pseudoreplicated. A simulation of the data shows that the Type I error rate, which leads to false discovery, is about three times the expected rate.</p>
+<ul>
+<li>the design is actually 2 x 2 factorial but I’ll treat it as if its 4 x 0.</li>
+</ul>
+</section>
+<section id="the-experiment" class="level2">
+<h2 class="anchored" data-anchor-id="the-experiment">The experiment</h2>
+<p>Within one experimental replicate, there were three culture dishes per treatment and the researchers measured Ca++ levels in ten neurons per culture dish. The experiment was replicated four times.</p>
+<p>From an e-mail from A. Vaarmann: “A single block corresponds to measurements from 10 neurons from one cell culture dish. Each cell culture preparation contributes at least 3 dishes to one treatment group, so 3 times 10 neurons equals 30 neurons per group. This also answers your second question. All measurements within three blocks (three blocks of 10 rows with a blank row in between blocks) correspond to one cell culture preparation i.e.&nbsp;n=30 per group as shown in the right panel of Fig. 1e (n = 30, 30, 30, or 29 neurons). In cases where n=60 (or more, e.g., n=90) as shown in the left panel of Fig.1e, the data from two replicate experiments are combined, with the only difference being that they are from different cell culture preparations. All other conditions are kept as similar as possible, i.e., the time between transfections and imaging, and the imaging settings.</p>
+<p>All experiments have been repeated at least three times, i.e., with three cell culture preparations, but data from multiple cultures are combined only if the microscopy settings and the conditions between transfection and imaging are the same. That’s why the neuron n varies in different panels of the figures.”</p>
+<p>The researchers analyzed the data as if the sample size, n, is 10 x 3 x 4 = 120, which assumes all measurements within a treatment are independent. In fact, measures within a dish share variance, dishes within a treatment:experiment combination share variance, and dishes across treatments within an experiment share variance. The researchers’ analysis is pseudoreplicated.</p>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+</section>
+<section id="fig-2b-four-experiments" class="level2">
+<h2 class="anchored" data-anchor-id="fig-2b-four-experiments">Fig 2b: Four experiments</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data_from <span class="ot">&lt;-</span> <span class="st">"ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>file_name <span class="ot">&lt;-</span> <span class="st">"Source data for Figures and Table.xlsx"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, file_name)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fig2b <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(file_path,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sheet =</span> <span class="st">"Fig 2B"</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">range =</span> <span class="st">"A1:F138"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">col_names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">melt</span>(<span class="at">id.vars =</span> <span class="fu">c</span>(<span class="st">"experiment"</span>, <span class="st">"dish"</span>),</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">variable.name =</span> <span class="st">"treatment_id"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">value.name =</span> <span class="st">"er_calcium"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>fig2b[treatment_id <span class="sc">==</span> <span class="st">"scr shRNA"</span>, treatment <span class="sc">:</span><span class="er">=</span> <span class="st">"Control"</span>]</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>fig2b[treatment_id <span class="sc">==</span> <span class="st">"Wfs1 shRNA"</span>, treatment <span class="sc">:</span><span class="er">=</span> <span class="st">"Wfs1"</span>]</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>fig2b[treatment_id <span class="sc">==</span> <span class="st">"RyR2 shRNA"</span>, treatment <span class="sc">:</span><span class="er">=</span> <span class="st">"RyR2"</span>]</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>fig2b[treatment_id <span class="sc">==</span> <span class="st">"Wfs1 shRNA + RyR2 shRNA"</span>, treatment <span class="sc">:</span><span class="er">=</span> <span class="st">"Wfs1_RyR2"</span>]</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>fig2b[, treatment <span class="sc">:</span><span class="er">=</span> <span class="fu">factor</span>(treatment,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>                            <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Control"</span>, <span class="st">"Wfs1"</span>, <span class="st">"RyR2"</span>, <span class="st">"Wfs1_RyR2"</span>))]</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>fig2b[, dish_id <span class="sc">:</span><span class="er">=</span> <span class="fu">ifelse</span>(dish <span class="sc">&lt;</span> <span class="dv">10</span>, <span class="fu">paste0</span>(<span class="st">"0"</span>, dish), <span class="fu">as.character</span>(dish))] <span class="co"># for plot only</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>fig2b[, dish <span class="sc">:</span><span class="er">=</span> <span class="fu">paste</span>(treatment, dish)] <span class="co"># dish 1 differs in each treatment</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>fig2b[, experiment <span class="sc">:</span><span class="er">=</span> <span class="fu">as.character</span>(experiment)] <span class="co"># for plot only</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># output as clean excel file</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>fileout_name <span class="ot">&lt;-</span> <span class="st">"fig2b-rcbdss-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>fileout_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, fileout_name)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(fig2b, fileout_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="what-the-researchers-did" class="level3">
+<h3 class="anchored" data-anchor-id="what-the-researchers-did">What the researchers did</h3>
+<p>The researchers fit a Linear/ANOVA model and used Sidak adjustment for the <em>p</em>-values. Here, I fit a linear/ANOVA model but I don’t bother adjusting since the focal <em>p</em>-values are really small, so the adjustment doesn’t matter. Also I don’t think the adjustment is a best strategy for most experiments like these.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>lm1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(er_calcium <span class="sc">~</span> treatment, <span class="at">data =</span> fig2b)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>lm1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm1, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>lm1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lm1_emm,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                      <span class="at">method =</span> <span class="st">"revpairwise"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_response</span>(lm1, lm1_emm, lm1_pairs[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>), ],</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ER-calcium-depletion-as-a-key-driver-for-impaired-ER-to-mitochondria-calcium-transfer-and-mitochondrial-dysfunction-in-Wolfram-syndrome_files/figure-html/fig2b-lm-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="the-problem-short-version" class="level3">
+<h3 class="anchored" data-anchor-id="the-problem-short-version">The problem – short version</h3>
+<p>Within one experimental replicate, there were three culture dishes per treatment and the researchers measured Ca++ levels in ten neurons per culture dish. The experiment was replicated four times.</p>
+<ol type="1">
+<li>The ten measures per dish are technical replicates that are not independent of each other. If the statistical model doesn’t account for this, this is pseudoreplication and inference is liberal.</li>
+<li>The three dishes within a treatment:experiment combination are technical replicates that are not independent of each other. If the statistical model doesn’t account for this, this is pseudoreplication and inference is liberal.</li>
+<li>The four experiments are blocks. If the statistical model doesn’t account for this, inference is conservative.</li>
+</ol>
+</section>
+<section id="thinking-about-building-a-best-practice-model" class="level3">
+<h3 class="anchored" data-anchor-id="thinking-about-building-a-best-practice-model">Thinking about building a best practice model</h3>
+<p><strong>Level 1</strong> The basic design of the experiment is a Randomized Complete Block Design (RCBD) – each experiment is a block containing all four treatment combinations.</p>
+<p>The basic linear mixed model formula for a RCBD design is</p>
+<p><span class="math display">\[y \sim treatment + (1 | experiment)\]</span> the RM-ANOVA model for this design is</p>
+<p><span class="math display">\[y \sim treatment + (treatment | experiment)\]</span> <strong>Level 2</strong> There are three dishes per experiment:treatment combination. I refer to the three dishes as a batch. These three dishes are subsampled (technical) replicates. If there is one measure per dish, then the design is a Randomized Complete Block Design with subsampling (RCBDS)</p>
+<p>With three replicates within a batch, a linear mixed model can estimate treatment x experiment interactions, also known as random slopes. There are two ways of implementing this.</p>
+<p>The interaction intercept model looks like a model with an interaction effect</p>
+<p><span class="math display">\[y \sim treatment + (1 | experiment) + (1 | treatment:experiment)\]</span></p>
+<p>This model assumes no correlation between the slope and intercept. If each batch is given a unique label, we could use this</p>
+<p><span class="math display">\[y \sim treatment + (1 | experiment) + (1 | batch)\]</span></p>
+<p>The random slope and intercept model models a correlation between slope and intercept.</p>
+<p><span class="math display">\[y \sim treatment + (treatment | experiment)\]</span> The random slope/intercept model is the maximal model – it makes the fewest assumptions about the structure of the random variances and covariances.</p>
+<p>The RM-ANOVA model for this design is</p>
+<p><span class="math display">\[y \sim treatment + (treatment | experiment)\]</span></p>
+<p>The RM-ANOVA model aggregates the data by analyzing the batch means.</p>
+<p><strong>Level 3</strong>. There are ten measures per dish. These ten measures are subsampled (technical) replicates. Since a dish is a subsampled replicate, the design has nested subsampled replicates. The design is a Randomized Complete Block Design with nested subsampling (RCBDSS).</p>
+<p>Again, we can model this with either the interaction intercept model or the random slope and intercept model.</p>
+<p>The interaction intercept model</p>
+<p><span class="math display">\[y \sim treatment + (1 | experiment) + (1 | treatment:experiment) + (1 | treatment:experiment:dish)\]</span></p>
+<p>If each batch is given a unique label and each dish is given a unique label, we could use this</p>
+<p><span class="math display">\[y \sim treatment + (1 | experiment) + (1 | batch) + (1|dish)\]</span></p>
+<p>The random slope and intercept model is.</p>
+<p><span class="math display">\[y \sim treatment + (treatment | experiment) + (1 | treatment:experiment:dish)\]</span></p>
+<p>The RM-ANOVA model for this design is</p>
+<p><span class="math display">\[y \sim treatment + (treatment | experiment)\]</span></p>
+<p>The RM-ANOVA model aggregates the data by analyzing the batch grand means.</p>
+</section>
+<section id="equivalencies-between-best-practice-models" class="level3">
+<h3 class="anchored" data-anchor-id="equivalencies-between-best-practice-models">Equivalencies between best practice models</h3>
+<ol type="1">
+<li>If the data are balanced, the default RM-ANOVA in the afex R package is equivalent to the random slope and intercept model (this default uses a multivariate model to compute the RM-ANOVA).</li>
+<li>In GraphPad, one might want to aggregate the data by averaging the data within a dish, then averaging these within a batch, and using RM-ANOVA. The R afex package does this automatically. This will be equivalent to the random slope and intercept model if the data are balanced.</li>
+<li>If the data are balanced, pairwise paired t-tests on the aggregated data are equivalent to the default RM-ANOVA and to the random slope and intercept model.</li>
+</ol>
+<p>These equivalencies mean that we don’t need to use LMMs if our data are balanced. The advantage of this is that LMMs can be hard to fit if there is relatively little variation in these levels relative to the variation within a dish.</p>
+</section>
+<section id="a-hidden-problem-emerges-when-we-analyze-the-aggregated-data-with-best-practice-models" class="level3">
+<h3 class="anchored" data-anchor-id="a-hidden-problem-emerges-when-we-analyze-the-aggregated-data-with-best-practice-models">A hidden problem emerges when we analyze the aggregated data with best practice models</h3>
+<p>If we plot the aggregated data, we see a second problem, which is hidden in the initial plot above but can be seen in the plot of the variation at different levels. The problem is, the data were normalized so that the mean response of the control treatment in each experiment is 1.0. The logic of this normalization is to remove the noise (non-biological) variation due to experiment. The problem is, the linear/ANOVA model of the aggregated data “thinks” the variance in the control treatment is zero and the pooled variance used for inference (the p-value), will be artificially small. The result will be slightly elevated false discoveries. While this is a minor issue, it’s easily avoided by simply not normalizing the data as the blocking variable in RM-ANOVA/LMM adjusts for this among-experiment variation. I explore</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fig2b_grcbd <span class="ot">&lt;-</span> fig2b[, .(<span class="at">er_calcium =</span> <span class="fu">mean</span>(er_calcium)), by <span class="ot">=</span> .(experiment, dish, treatment)]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fig2b_rcbd <span class="ot">&lt;-</span> fig2b_grcbd[, .(<span class="at">er_calcium =</span> <span class="fu">mean</span>(er_calcium)), by <span class="ot">=</span> .(experiment, treatment)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pd <span class="ot">&lt;-</span> <span class="fu">position_jitterdodge</span>(<span class="at">dodge.width =</span> <span class="fl">0.25</span>, <span class="at">jitter.width =</span> <span class="dv">0</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>gg1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> fig2b_rcbd,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> er_calcium,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> experiment)) <span class="sc">+</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> pd) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> experiment),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">position =</span> pd,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_pubr</span>()</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>gg1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ER-calcium-depletion-as-a-key-driver-for-impaired-ER-to-mitochondria-calcium-transfer-and-mitochondrial-dysfunction-in-Wolfram-syndrome_files/figure-html/fig2b-aggregated-plot-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="the-problem-long-version" class="level3">
+<h3 class="anchored" data-anchor-id="the-problem-long-version">The problem – long version</h3>
+<p>The variation of the data around each treatment mean (the residual variation) comes from four sources in the experiment:</p>
+<ol type="1">
+<li>variation among the ten cells within a dish <span class="math inline">\(\sigma^2_{cell}\)</span></li>
+<li>variation among the three dish means within a batch, where a batch is a treatment:experiment combination <span class="math inline">\(\sigma^2_{dish}\)</span></li>
+<li>variation among the batch means <span class="math inline">\(\sigma^2_{batch}\)</span></li>
+<li>variation among the four experiments <span class="math inline">\(\sigma^2_{experiment}\)</span></li>
+</ol>
+<p>But, inference from the linear/ANOVA model fit above and by the researchers assumes <em>independence</em> of the residuals, equivalent to item 1 in the list. So the linear/ANOVA model assumes zero variation in items 2 – 4 above.</p>
+<p>A quick way to explore variation in items 2 – 4, relative to variation in item 1, is a simple plot of the residuals of the linear/ANOVA model (so there is no variation due to treatment), and ploting the batch (treatment:experiment) and dish means.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fig2b[, lm_resid <span class="sc">:</span><span class="er">=</span> <span class="fu">residuals</span>(lm1)]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>batch_means1 <span class="ot">&lt;-</span> fig2b[, .(<span class="at">y =</span> <span class="fu">mean</span>(lm_resid)),</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                     by <span class="ot">=</span> .(treatment, experiment)]</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>lm2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">*</span> experiment, <span class="at">data =</span> fig2b)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>fig2b[, lm2_resid <span class="sc">:</span><span class="er">=</span> <span class="fu">residuals</span>(lm2)]</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>batch_means2 <span class="ot">&lt;-</span> fig2b[, .(<span class="at">y =</span> <span class="fu">mean</span>(lm2_resid)),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>                     by <span class="ot">=</span> .(treatment, experiment)]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>dish_means <span class="ot">&lt;-</span> fig2b[, .(<span class="at">y =</span> <span class="fu">mean</span>(lm_resid)),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>                     by <span class="ot">=</span> .(treatment, experiment, dish_id)]</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> fig2b,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> lm_resid)) <span class="sc">+</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">group =</span> dish_id, <span class="at">shape =</span> experiment),</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>             <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="dv">0</span>),</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"gray"</span>,</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>             <span class="cn">NULL</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>             ) <span class="sc">+</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> batch_means1,</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> y,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> experiment),</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>             <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="dv">0</span>),</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> dish_means,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> y,</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>                 <span class="at">group =</span> dish_id,</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> experiment),</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>             <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="dv">0</span>)</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>             ) <span class="sc">+</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  <span class="cn">NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ER-calcium-depletion-as-a-key-driver-for-impaired-ER-to-mitochondria-calcium-transfer-and-mitochondrial-dysfunction-in-Wolfram-syndrome_files/figure-html/fig2b-plot-each-prep-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The plot shows small variation among dishes, among batches, and among experiments, relative to variation within a dish. But, how close to zero variation do we need to be to have nominal Type I error (5% if we set alpha to 0.05)?</p>
+<p>We can measure this with a ratio of the variance at each level relative to the total random variance. These ratios are called intraclass correlations. The total random variance <span class="math inline">\(\sigma^2\)</span> is</p>
+<p><span class="math display">\[
+\sigma^2 = \sigma_{experiment}^2 + \sigma_{batch}^2 + \sigma_{dish}^2 + \sigma_{cell}^2
+\]</span></p>
+<p><span class="math display">\[
+ICC = \frac{\sigma_{experiment}^2 + \sigma_{batch}^2 + \sigma_{dish}^2}{\sigma^2}
+\]</span></p>
+<p>We can also measure the ICC at the level of the batch, dish, or experiment alone.</p>
+<p>The problem with these data is that the variances are artificially shrunken due to the normalization described above (the data were normalized to make the control treatment mean for each experiment equal to one). So, I compute two sets of variance components: 1) the first uses all of the data, 2) the second uses only the data from the non-control groups, so the experiment component should be more similar to that had the data not been normalized.</p>
+<p>The table below shows both computations of the three difference variance components (“Residual” is the variance among cells within a dish) used to compute the various ICCs.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># (1 | experiment) - block intercept. Variance among experiments</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># (1 | treatment:experiment) - treatment:experiment intercept. This is mean of batch of three dishes</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># (1 | treatment:experiment:dish) - dish intercept. This is mean of 10 cells within a dish</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Residual - this is variance among cells within a dish</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>lmm1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> experiment) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> treatment<span class="sc">:</span>experiment) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> treatment<span class="sc">:</span>experiment<span class="sc">:</span>dish),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> fig2b)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>var_table_1 <span class="ot">&lt;-</span> <span class="fu">VarCorr</span>(lmm1) <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>var_table_1<span class="sc">$</span>source <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"dish"</span>, <span class="st">"batch"</span>, <span class="st">"experiment"</span>, <span class="st">"cell"</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>var_table_1 <span class="ot">&lt;-</span> var_table_1[, <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">5</span>)]</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>lmm2 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> experiment) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> treatment<span class="sc">:</span>experiment) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> treatment<span class="sc">:</span>experiment<span class="sc">:</span>dish),</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> fig2b[treatment <span class="sc">!=</span> <span class="st">"Control"</span>])</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>var_table_2 <span class="ot">&lt;-</span> <span class="fu">VarCorr</span>(lmm2) <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>var_table_2<span class="sc">$</span>source <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"dish"</span>, <span class="st">"batch"</span>, <span class="st">"experiment"</span>, <span class="st">"cell"</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>var_table_2 <span class="ot">&lt;-</span> var_table_2[, <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">5</span>)]</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>var_table <span class="ot">&lt;-</span> <span class="fu">rbind</span>(var_table_1, var_table_2)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>var_table <span class="sc">|&gt;</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>() <span class="sc">|&gt;</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"All treatments"</span>, <span class="dv">1</span>, <span class="dv">4</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pack_rows</span>(<span class="st">"Non-control treatments"</span>, <span class="dv">5</span>, <span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">grp</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">source</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">vcov</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sdcor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd" data-grouplength="4">
+<td colspan="4" style="border-bottom: 1px solid"><strong>All treatments</strong></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">treatment:experiment:dish</td>
+<td style="text-align: left;">dish</td>
+<td style="text-align: right;">0.0012</td>
+<td style="text-align: right;">0.0348</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">treatment:experiment</td>
+<td style="text-align: left;">batch</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">experiment</td>
+<td style="text-align: left;">experiment</td>
+<td style="text-align: right;">0.0003</td>
+<td style="text-align: right;">0.0164</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Residual</td>
+<td style="text-align: left;">cell</td>
+<td style="text-align: right;">0.0163</td>
+<td style="text-align: right;">0.1276</td>
+</tr>
+<tr class="even" data-grouplength="4">
+<td colspan="4" style="border-bottom: 1px solid"><strong>Non-control treatments</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">treatment:experiment:dish</td>
+<td style="text-align: left;">dish</td>
+<td style="text-align: right;">0.0014</td>
+<td style="text-align: right;">0.0379</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">treatment:experiment</td>
+<td style="text-align: left;">batch</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">experiment</td>
+<td style="text-align: left;">experiment</td>
+<td style="text-align: right;">0.0006</td>
+<td style="text-align: right;">0.0237</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding-left: 2em;" data-indentlevel="1">Residual</td>
+<td style="text-align: left;">cell</td>
+<td style="text-align: right;">0.0159</td>
+<td style="text-align: right;">0.1260</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>The table below are the various ICCs computed from the variance components above</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>v_total <span class="ot">&lt;-</span> <span class="fu">sum</span>(var_table_1[, <span class="st">"vcov"</span>])</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>icc_1 <span class="ot">&lt;-</span> <span class="fu">sum</span>(var_table_1[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="st">"vcov"</span>]) <span class="sc">/</span> v_total</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>icc_1_dish <span class="ot">&lt;-</span> var_table_1[<span class="dv">1</span>, <span class="st">"vcov"</span>] <span class="sc">/</span> v_total</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>icc_1_batch <span class="ot">&lt;-</span> var_table_1[<span class="dv">2</span>, <span class="st">"vcov"</span>] <span class="sc">/</span> v_total</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>icc_1_experiment <span class="ot">&lt;-</span> var_table_1[<span class="dv">3</span>, <span class="st">"vcov"</span>] <span class="sc">/</span> v_total</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>icc_2 <span class="ot">&lt;-</span> <span class="fu">sum</span>(var_table_2[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="st">"vcov"</span>]) <span class="sc">/</span> v_total</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>icc_2_dish <span class="ot">&lt;-</span> var_table_2[<span class="dv">1</span>, <span class="st">"vcov"</span>] <span class="sc">/</span> v_total</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>icc_2_batch <span class="ot">&lt;-</span> var_table_2[<span class="dv">2</span>, <span class="st">"vcov"</span>] <span class="sc">/</span> v_total</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>icc_2_experiment <span class="ot">&lt;-</span> var_table_2[<span class="dv">3</span>, <span class="st">"vcov"</span>] <span class="sc">/</span> v_total</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">data.table</span>(</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">stat =</span> <span class="fu">c</span>(<span class="st">"icc"</span>, <span class="st">"icc_dish"</span>, <span class="st">"icc_batch"</span>, <span class="st">"icc_experiment"</span>),</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"All"</span> <span class="ot">=</span> <span class="fu">c</span>(icc_1, icc_1_dish, icc_1_batch, icc_1_experiment),</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Non-Ctl"</span> <span class="ot">=</span> <span class="fu">c</span>(icc_2, icc_2_dish, icc_2_batch, icc_2_experiment)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>, <span class="dv">3</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">full_width =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">stat</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">All</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Non-Ctl</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">icc</td>
+<td style="text-align: right;">0.083</td>
+<td style="text-align: right;">0.113</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">icc_dish</td>
+<td style="text-align: right;">0.068</td>
+<td style="text-align: right;">0.081</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">icc_batch</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">icc_experiment</td>
+<td style="text-align: right;">0.015</td>
+<td style="text-align: right;">0.032</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<p>The low ICC (0.113) shows that, indeed, the data in figure 2b are pretty independent. The table also shows that most (72%) of the non-residual random variance is due to dish.</p>
+<p>How much does this small non-independence affect Type I error rate? We’ll explore this with a simulation below, but first, fit some best practice models.</p>
+</section>
+<section id="fitting-best-practice-models" class="level3">
+<h3 class="anchored" data-anchor-id="fitting-best-practice-models">Fitting best practice models</h3>
+<section id="linear-mixed-models" class="level4">
+<h4 class="anchored" data-anchor-id="linear-mixed-models">Linear mixed models</h4>
+<p>Linear mixed models have the flexibility to model all levels of variance in data like these but the solutions are not exact as in linear/ANOVA models, and they will often have a “boundary error” when variance is low at one or more levels. This happens with any of the models with the batch (treatment:experiment) intercept, which means variation among these batch means is small. The result of a model fit with a boundary layer is the collapse of this level, which will tend to have slightly inflated type I (false discovery) error. The LMM that fits without a boundary error is the simple RCBD of the completely aggregated data, which is equivalent to a paired <em>t</em>-test when there are only two treatment levels.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># (1 | experiment) - block intercept. Variance among experiments</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># (1 | treatment:experiment) - treatment:experiment intercept. This is mean of batch of three dishes</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># (1 | treatment:experiment:dish) - dish intercept. This is mean of 10 cells within a dish</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Residual - this is variance among cells within a dish</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>lmm1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> experiment) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> treatment<span class="sc">:</span>experiment) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> treatment<span class="sc">:</span>experiment<span class="sc">:</span>dish), <span class="at">data =</span> fig2b)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># aggregate dish model</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>lmm2 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> experiment) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> treatment<span class="sc">:</span>experiment), <span class="at">data =</span> fig2b_grcbd)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># RCBD model</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>lmm3 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> experiment), <span class="at">data =</span> fig2b_rcbd)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>lmm3_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lmm3, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>lmm3_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lmm3_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>gg1 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(lmm3, lmm3_emm, lmm3_pairs[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>),],</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="repeated-measures-anova-model" class="level4">
+<h4 class="anchored" data-anchor-id="repeated-measures-anova-model">Repeated measures ANOVA model</h4>
+<p>Repeated measures ANOVA is the punching bag of biostatistics but the multivariate-response version of RM-ANOVA is equivalent to a LMM with random slope and intercept if the nested sets of data are balanced. These data are balanced.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>aov1 <span class="ot">&lt;-</span> <span class="fu">aov_4</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (treatment <span class="sc">|</span> experiment),</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">fun_aggregate =</span> mean,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">data =</span> fig2b)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>aov1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(aov1, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>aov1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(aov1_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>gg2 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(aov1, aov1_emm, aov1_pairs[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>),],</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># to show that the above does the aggregation </span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"># aov2 &lt;- aov_4(er_calcium ~ treatment + (treatment | experiment),</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#               data = fig2b_rcbd)</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># aov2_emm &lt;- emmeans(aov2, specs = "treatment")</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co"># aov2_pairs &lt;- contrast(aov2_emm, method = "revpairwise", adjust = "none") |&gt;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   summary(infer = TRUE)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="pairwise-paired-t-tests" class="level4">
+<h4 class="anchored" data-anchor-id="pairwise-paired-t-tests">Pairwise paired t-tests</h4>
+<p>Pairwise paired t-tests are also equivalent to a random slope and intercept model if the nested sets are balanced. The advantage of this over a RM-ANOVA is that we can use more of the treatment:experiment combiantions if there is imbalance.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pptt_pairs <span class="ot">&lt;-</span> <span class="fu">pptt</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> experiment), <span class="at">data =</span> fig2b_rcbd)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>gg3 <span class="ot">&lt;-</span> <span class="fu">plot_response</span>(aov1, aov1_emm, pptt_pairs[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>),],</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"pal_okabe_ito_blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="a-quick-plot-of-the-lmm-and-rm-anova-models" class="level4">
+<h4 class="anchored" data-anchor-id="a-quick-plot-of-the-lmm-and-rm-anova-models">A quick plot of the LMM and RM-ANOVA models</h4>
+<div class="cell" data-fig.xheight="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_grid</span>(gg1, gg2, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ER-calcium-depletion-as-a-key-driver-for-impaired-ER-to-mitochondria-calcium-transfer-and-mitochondrial-dysfunction-in-Wolfram-syndrome_files/figure-html/fig2b-plots-1.png" class="img-fluid figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="plot-the-model" class="level3">
+<h3 class="anchored" data-anchor-id="plot-the-model">Plot the model!</h3>
+<p>A publishable plot of the RM-ANOVA model that shows the nested design</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># make aov1_emm a data.table</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>aov1_emm_dt <span class="ot">&lt;-</span> aov1_emm <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>() <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>()</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co"># get batch and dish means</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>batch_means <span class="ot">&lt;-</span> fig2b[, .(<span class="at">y =</span> <span class="fu">mean</span>(er_calcium)),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                     by <span class="ot">=</span> .(treatment, experiment)]</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>dish_means <span class="ot">&lt;-</span> fig2b[, .(<span class="at">y =</span> <span class="fu">mean</span>(er_calcium)),</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                    by <span class="ot">=</span> .(treatment, experiment, dish_id)]</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>gg <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> fig2b,</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> er_calcium)) <span class="sc">+</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># raw measures</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">group =</span> dish_id, <span class="at">color =</span> experiment),</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>             <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="dv">0</span>),</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="fl">0.8</span>,</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>             <span class="at">alpha =</span> <span class="fl">0.3</span>,</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>             <span class="cn">NULL</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># dish means</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> dish_means,</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> y,</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>                 <span class="at">group =</span> dish_id,</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> experiment),</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="dv">1</span>,</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>             <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="dv">0</span>)</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># batch means</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> batch_means,</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> y,</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>                 <span class="at">color =</span> experiment),</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>             <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="dv">0</span>),</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>  <span class="co"># treatment means</span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> aov1_emm_dt,</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>             <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>                 <span class="at">y =</span> emmean),</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="dv">5</span>) <span class="sc">+</span></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="at">data =</span> aov1_emm_dt,</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>                <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>                    <span class="at">y =</span> emmean,</span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymin =</span> lower.CL,</span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ymax =</span> upper.CL),</span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>                <span class="at">color =</span> <span class="st">"black"</span>,</span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>                <span class="at">width =</span> .<span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_pubr</span>() <span class="sc">+</span></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"ER Calcium"</span>) <span class="sc">+</span></span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.x =</span> <span class="fu">element_blank</span>()) <span class="sc">+</span></span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>  <span class="cn">NULL</span></span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>  <span class="co"># add p-values</span></span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>aov1_pairs_dt <span class="ot">&lt;-</span> aov1_pairs <span class="sc">|&gt;</span></span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>()</span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>aov1_pairs_dt[, <span class="fu">c</span>(<span class="st">"group1"</span>, <span class="st">"group2"</span>) <span class="sc">:</span><span class="er">=</span> <span class="fu">tstrsplit</span>(contrast, <span class="st">" - "</span>)]</span>
+<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>aov1_pairs_dt[, p <span class="sc">:</span><span class="er">=</span> <span class="fu">paste0</span>(<span class="st">"p="</span>, <span class="fu">round</span>(p.value, <span class="dv">3</span>))]</span>
+<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>maxy <span class="ot">&lt;-</span> fig2b[, <span class="fu">max</span>(er_calcium)]</span>
+<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>miny <span class="ot">&lt;-</span> fig2b[, <span class="fu">min</span>(er_calcium)]</span>
+<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a><span class="co"># show only rows 1 &amp; 5, per the paper</span></span>
+<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a>aov1_pairs_1_5 <span class="ot">&lt;-</span> aov1_pairs_dt[<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">5</span>),]</span>
+<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a>aov1_pairs_1_5[, y.position <span class="sc">:</span><span class="er">=</span> maxy <span class="sc">+</span> .I<span class="sc">*</span><span class="fl">0.05</span><span class="sc">*</span>(maxy <span class="sc">-</span> miny)]</span>
+<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a>gg <span class="ot">&lt;-</span> gg <span class="sc">+</span></span>
+<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_pvalue_manual</span>(</span>
+<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> aov1_pairs_1_5,</span>
+<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="st">"p"</span>,</span>
+<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a>    <span class="at">tip.length =</span> <span class="fl">0.01</span>)</span>
+<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a>gg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ER-calcium-depletion-as-a-key-driver-for-impaired-ER-to-mitochondria-calcium-transfer-and-mitochondrial-dysfunction-in-Wolfram-syndrome_files/figure-html/fib2b-plot-the-model-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>save_it <span class="ot">&lt;-</span> <span class="cn">TRUE</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(save_it){</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  out_fig <span class="ot">&lt;-</span> <span class="st">"fig2b_ggplot.png"</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  out_path <span class="ot">&lt;-</span> <span class="fu">here</span>(<span class="st">"figs"</span>, data_from, out_fig)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggsave</span>(out_path)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="a-simulation-to-explore-false-discovery-when-the-data-look-pretty-independent" class="level3">
+<h3 class="anchored" data-anchor-id="a-simulation-to-explore-false-discovery-when-the-data-look-pretty-independent">A simulation to explore false discovery when the data look pretty independent</h3>
+<p>The principal question that this simulation addresses is, how much does pseudoreplication increase type I error when ICC is low? Here I create fake data with three levels of error variance, as in Fig 2b</p>
+<ol type="1">
+<li>among cells within a dish</li>
+<li>among replicate dishes within a treatment:experiment combination</li>
+<li>among experimental replicates</li>
+</ol>
+<p>I simulate all combinations of:</p>
+<p>ICC = 0.05, 0.1, 0.15</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>do_it <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>type_1_matrix <span class="ot">&lt;-</span> <span class="fu">data.table</span>(<span class="cn">NULL</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span>(do_it <span class="sc">==</span> <span class="cn">TRUE</span>){</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  n_iter <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  n_cell <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  n_dish <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  n_exper <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  n_treat <span class="ot">&lt;-</span> <span class="dv">4</span> <span class="co"># number of treatments</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  t_batch <span class="ot">&lt;-</span> n_treat <span class="sc">*</span> n_exper</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  t_dish <span class="ot">&lt;-</span> n_dish <span class="sc">*</span> t_batch</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  t_cell <span class="ot">&lt;-</span> t_dish <span class="sc">*</span> n_cell</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  beta_1 <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_treat)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  b_treat_col <span class="ot">&lt;-</span> <span class="fu">rep</span>(beta_1, <span class="at">each =</span> n_cell <span class="sc">*</span> n_dish <span class="sc">*</span> n_exper) <span class="co"># the fixed effects</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  var_table_2 <span class="ot">&lt;-</span> <span class="fu">data.table</span>(var_table_2)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  var_table_2[, frac_of_whole <span class="sc">:</span><span class="er">=</span> vcov<span class="sc">/</span><span class="fu">sum</span>(var_table_2[, vcov])]</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  var_table_2[, frac_of_modeled <span class="sc">:</span><span class="er">=</span> vcov<span class="sc">/</span><span class="fu">sum</span>(var_table_2[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, vcov])]</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># unmodeled random variance is 88.8 %</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># dish has 72% of modeled random variance</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># batch has 0 % of modeled random variance</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># experiment has 28% of modeled random variance</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  sigma <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># this is the root variance lm(y ~ treatment)</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  residual_frac_list <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">0.95</span>, <span class="fl">0.85</span>) <span class="co"># fraction of random variance that is unmodeled noise</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  dish_frac <span class="ot">&lt;-</span> .<span class="dv">72</span> <span class="sc">-</span> <span class="fl">0.05</span><span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  batch_frac <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>  exp_frac <span class="ot">&lt;-</span> .<span class="dv">28</span> <span class="sc">-</span> <span class="fl">0.05</span><span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ICC</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  residual_var <span class="ot">&lt;-</span> residual_frac_list <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="co"># residual variance or variance among cells in a dish</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>  random_var <span class="ot">&lt;-</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> residual_var <span class="co"># total random variance</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  exper_var <span class="ot">&lt;-</span> exp_frac <span class="sc">*</span> random_var <span class="co"># variance among experiments</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>  batch_var <span class="ot">&lt;-</span> batch_frac <span class="sc">*</span> random_var <span class="co"># variance among batch of three dishes means</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>  dish_var <span class="ot">&lt;-</span> dish_frac <span class="sc">*</span> random_var <span class="co"># variance among dish means</span></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>  icc <span class="ot">&lt;-</span> (exper_var <span class="sc">+</span> batch_var <span class="sc">+</span> dish_var)<span class="sc">/</span>sigma<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>  <span class="co"># dish_frac + batch_frac + exp_frac # check!</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>  param_mat <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">residual_frac =</span> residual_frac_list) <span class="sc">|&gt;</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">data.table</span>()</span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>  p1_m1 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>  p2_m1 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>  p1_m2 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>  p2_m2 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>  p1_lmm1 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>  p2_lmm1 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>  p1_aov1 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>  p2_aov1 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(param_set <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(param_mat)){</span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>    residual_frac_i <span class="ot">&lt;-</span> param_mat[param_set, residual_frac] <span class="co"># fraction of random variance that is unmodeled noise</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>    <span class="co"># total variance is 1</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>    residual_var <span class="ot">&lt;-</span> residual_frac_i <span class="sc">*</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="co"># residual variance or variance among cells in a dish</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>    random_var <span class="ot">&lt;-</span> sigma<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> residual_var <span class="co"># total random variance</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a>    exper_var <span class="ot">&lt;-</span> exp_frac <span class="sc">*</span> random_var <span class="co"># variance among experiments</span></span>
+<span id="cb14-58"><a href="#cb14-58" aria-hidden="true" tabindex="-1"></a>    batch_var <span class="ot">&lt;-</span> batch_frac <span class="sc">*</span> random_var <span class="co"># variance among batch of three dishes means</span></span>
+<span id="cb14-59"><a href="#cb14-59" aria-hidden="true" tabindex="-1"></a>    dish_var <span class="ot">&lt;-</span> dish_frac <span class="sc">*</span> random_var <span class="co"># variance among dish means</span></span>
+<span id="cb14-60"><a href="#cb14-60" aria-hidden="true" tabindex="-1"></a>    sigma_cell <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(residual_var) <span class="co"># among cells within a dish - this is residual</span></span>
+<span id="cb14-61"><a href="#cb14-61" aria-hidden="true" tabindex="-1"></a>    sigma_exper <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(exper_var) <span class="co"># among experiments</span></span>
+<span id="cb14-62"><a href="#cb14-62" aria-hidden="true" tabindex="-1"></a>    sigma_batch <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(batch_var) <span class="co"># among batches within a treatment:experiment</span></span>
+<span id="cb14-63"><a href="#cb14-63" aria-hidden="true" tabindex="-1"></a>    sigma_dish <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(dish_var) <span class="co"># among dishes within a treatment:experiment:batch</span></span>
+<span id="cb14-64"><a href="#cb14-64" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-65"><a href="#cb14-65" aria-hidden="true" tabindex="-1"></a>    fd <span class="ot">&lt;-</span> <span class="fu">data.table</span>(</span>
+<span id="cb14-66"><a href="#cb14-66" aria-hidden="true" tabindex="-1"></a>      <span class="at">treatment =</span> <span class="fu">rep</span>(<span class="fu">paste0</span>(<span class="st">"Trt"</span>, <span class="dv">1</span><span class="sc">:</span>n_treat), <span class="at">each =</span> n_exper <span class="sc">*</span> n_dish <span class="sc">*</span> n_cell),</span>
+<span id="cb14-67"><a href="#cb14-67" aria-hidden="true" tabindex="-1"></a>      <span class="at">experiment =</span> <span class="fu">rep</span>(<span class="fu">rep</span>(<span class="fu">paste0</span>(<span class="st">"exper_"</span>, <span class="dv">1</span><span class="sc">:</span>n_exper), <span class="at">each =</span> n_dish <span class="sc">*</span> n_cell), <span class="dv">2</span>),</span>
+<span id="cb14-68"><a href="#cb14-68" aria-hidden="true" tabindex="-1"></a>      <span class="at">batch =</span> <span class="fu">rep</span>(<span class="fu">paste0</span>(<span class="st">"batch_"</span>, <span class="dv">1</span><span class="sc">:</span>t_batch), <span class="at">each =</span> n_dish <span class="sc">*</span> n_cell),</span>
+<span id="cb14-69"><a href="#cb14-69" aria-hidden="true" tabindex="-1"></a>      <span class="at">dish =</span> <span class="fu">rep</span>(<span class="fu">paste0</span>(<span class="st">"dish_"</span>, <span class="dv">1</span><span class="sc">:</span>t_dish), <span class="at">each =</span> n_cell),</span>
+<span id="cb14-70"><a href="#cb14-70" aria-hidden="true" tabindex="-1"></a>      <span class="at">cell =</span> <span class="fu">paste0</span>(<span class="st">"cell_"</span>, <span class="dv">1</span><span class="sc">:</span>t_cell),</span>
+<span id="cb14-71"><a href="#cb14-71" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> <span class="fu">rep</span>(<span class="cn">NA</span>, t_cell)</span>
+<span id="cb14-72"><a href="#cb14-72" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-73"><a href="#cb14-73" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-74"><a href="#cb14-74" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(iter <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_iter){</span>
+<span id="cb14-75"><a href="#cb14-75" aria-hidden="true" tabindex="-1"></a>      b_exper <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n_exper, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma_exper)</span>
+<span id="cb14-76"><a href="#cb14-76" aria-hidden="true" tabindex="-1"></a>      b_exper_col <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">rep</span>(b_exper, <span class="at">each =</span> n_dish <span class="sc">*</span> n_cell), n_treat)</span>
+<span id="cb14-77"><a href="#cb14-77" aria-hidden="true" tabindex="-1"></a>      <span class="co"># length(b_exper_col)</span></span>
+<span id="cb14-78"><a href="#cb14-78" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb14-79"><a href="#cb14-79" aria-hidden="true" tabindex="-1"></a>      b_batch <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(t_batch, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma_batch)</span>
+<span id="cb14-80"><a href="#cb14-80" aria-hidden="true" tabindex="-1"></a>      b_batch_col <span class="ot">&lt;-</span> <span class="fu">rep</span>(b_batch, <span class="at">each =</span> n_dish <span class="sc">*</span> n_cell)</span>
+<span id="cb14-81"><a href="#cb14-81" aria-hidden="true" tabindex="-1"></a>      <span class="co"># length(b_batch_col)</span></span>
+<span id="cb14-82"><a href="#cb14-82" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb14-83"><a href="#cb14-83" aria-hidden="true" tabindex="-1"></a>      b_dish <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(t_dish, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma_dish)</span>
+<span id="cb14-84"><a href="#cb14-84" aria-hidden="true" tabindex="-1"></a>      b_dish_col <span class="ot">&lt;-</span> <span class="fu">rep</span>(b_dish, <span class="at">each =</span> n_cell)</span>
+<span id="cb14-85"><a href="#cb14-85" aria-hidden="true" tabindex="-1"></a>      <span class="co"># length(b_dish_col)</span></span>
+<span id="cb14-86"><a href="#cb14-86" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb14-87"><a href="#cb14-87" aria-hidden="true" tabindex="-1"></a>      b_cell_col <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(t_cell, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> sigma_cell)</span>
+<span id="cb14-88"><a href="#cb14-88" aria-hidden="true" tabindex="-1"></a>      <span class="co"># length(b_cell_col)</span></span>
+<span id="cb14-89"><a href="#cb14-89" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb14-90"><a href="#cb14-90" aria-hidden="true" tabindex="-1"></a>      <span class="co"># put it all together</span></span>
+<span id="cb14-91"><a href="#cb14-91" aria-hidden="true" tabindex="-1"></a>      fd[, y <span class="sc">:</span><span class="er">=</span> b_treat_col <span class="sc">+</span> b_exper_col <span class="sc">+</span> b_batch_col <span class="sc">+</span> b_dish_col <span class="sc">+</span> b_cell_col]</span>
+<span id="cb14-92"><a href="#cb14-92" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb14-93"><a href="#cb14-93" aria-hidden="true" tabindex="-1"></a>      <span class="co"># lm of raw data</span></span>
+<span id="cb14-94"><a href="#cb14-94" aria-hidden="true" tabindex="-1"></a>      m1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y <span class="sc">~</span> treatment, <span class="at">data =</span> fd)</span>
+<span id="cb14-95"><a href="#cb14-95" aria-hidden="true" tabindex="-1"></a>      m1_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m1, <span class="at">specs =</span> <span class="st">"treatment"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-96"><a href="#cb14-96" aria-hidden="true" tabindex="-1"></a>        <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-97"><a href="#cb14-97" aria-hidden="true" tabindex="-1"></a>        <span class="fu">summary</span>()</span>
+<span id="cb14-98"><a href="#cb14-98" aria-hidden="true" tabindex="-1"></a>      p1_m1[iter] <span class="ot">&lt;-</span> m1_pairs[<span class="dv">1</span>, <span class="st">"p.value"</span>]</span>
+<span id="cb14-99"><a href="#cb14-99" aria-hidden="true" tabindex="-1"></a>      p2_m1[iter] <span class="ot">&lt;-</span> m1_pairs[<span class="dv">5</span>, <span class="st">"p.value"</span>]</span>
+<span id="cb14-100"><a href="#cb14-100" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb14-101"><a href="#cb14-101" aria-hidden="true" tabindex="-1"></a>      <span class="co"># lm of control centered data</span></span>
+<span id="cb14-102"><a href="#cb14-102" aria-hidden="true" tabindex="-1"></a>      exper_means <span class="ot">&lt;-</span> fd[, .(<span class="at">y_bar =</span> <span class="fu">mean</span>(y)), by <span class="ot">=</span> .(treatment, experiment)]</span>
+<span id="cb14-103"><a href="#cb14-103" aria-hidden="true" tabindex="-1"></a>      y_bar_vec <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">rep</span>(exper_means[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, y_bar], <span class="at">each =</span> n_cell <span class="sc">*</span> n_dish), <span class="dv">4</span>)</span>
+<span id="cb14-104"><a href="#cb14-104" aria-hidden="true" tabindex="-1"></a>      fd[, y_c <span class="sc">:</span><span class="er">=</span> y<span class="sc">/</span>y_bar_vec]</span>
+<span id="cb14-105"><a href="#cb14-105" aria-hidden="true" tabindex="-1"></a>      <span class="co"># fd[, .(mean = mean(y_c),</span></span>
+<span id="cb14-106"><a href="#cb14-106" aria-hidden="true" tabindex="-1"></a>      <span class="co">#        sd = sd(y_c)), by = .(treatment, experiment)]</span></span>
+<span id="cb14-107"><a href="#cb14-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-108"><a href="#cb14-108" aria-hidden="true" tabindex="-1"></a>      m2 <span class="ot">&lt;-</span> <span class="fu">lm</span>(y_c <span class="sc">~</span> treatment, <span class="at">data =</span> fd)</span>
+<span id="cb14-109"><a href="#cb14-109" aria-hidden="true" tabindex="-1"></a>      m2_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(m2, <span class="at">specs =</span> <span class="st">"treatment"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-110"><a href="#cb14-110" aria-hidden="true" tabindex="-1"></a>        <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-111"><a href="#cb14-111" aria-hidden="true" tabindex="-1"></a>        <span class="fu">summary</span>()</span>
+<span id="cb14-112"><a href="#cb14-112" aria-hidden="true" tabindex="-1"></a>      p1_m2[iter] <span class="ot">&lt;-</span> m2_pairs[<span class="dv">1</span>, <span class="st">"p.value"</span>]</span>
+<span id="cb14-113"><a href="#cb14-113" aria-hidden="true" tabindex="-1"></a>      p2_m2[iter] <span class="ot">&lt;-</span> m2_pairs[<span class="dv">5</span>, <span class="st">"p.value"</span>]</span>
+<span id="cb14-114"><a href="#cb14-114" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb14-115"><a href="#cb14-115" aria-hidden="true" tabindex="-1"></a>      <span class="co"># lmm models</span></span>
+<span id="cb14-116"><a href="#cb14-116" aria-hidden="true" tabindex="-1"></a>      lmm1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(y <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> experiment) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> batch) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> dish), <span class="at">data =</span> fd)</span>
+<span id="cb14-117"><a href="#cb14-117" aria-hidden="true" tabindex="-1"></a>      lmm1_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lmm1, <span class="at">specs =</span> <span class="st">"treatment"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-118"><a href="#cb14-118" aria-hidden="true" tabindex="-1"></a>        <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-119"><a href="#cb14-119" aria-hidden="true" tabindex="-1"></a>        <span class="fu">summary</span>()</span>
+<span id="cb14-120"><a href="#cb14-120" aria-hidden="true" tabindex="-1"></a>      p1_lmm1[iter] <span class="ot">&lt;-</span> lmm1_pairs[<span class="dv">1</span>, <span class="st">"p.value"</span>]</span>
+<span id="cb14-121"><a href="#cb14-121" aria-hidden="true" tabindex="-1"></a>      p2_lmm1[iter] <span class="ot">&lt;-</span> lmm1_pairs[<span class="dv">5</span>, <span class="st">"p.value"</span>]</span>
+<span id="cb14-122"><a href="#cb14-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-123"><a href="#cb14-123" aria-hidden="true" tabindex="-1"></a>      <span class="co"># RM-ANOVA models</span></span>
+<span id="cb14-124"><a href="#cb14-124" aria-hidden="true" tabindex="-1"></a>      aov1 <span class="ot">&lt;-</span> <span class="fu">aov_4</span>(y <span class="sc">~</span> treatment <span class="sc">+</span> (treatment <span class="sc">|</span> experiment), <span class="at">data =</span> fd, <span class="at">fun_aggregate =</span> mean)</span>
+<span id="cb14-125"><a href="#cb14-125" aria-hidden="true" tabindex="-1"></a>      aov1_pairs <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(aov1, <span class="at">specs =</span> <span class="st">"treatment"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-126"><a href="#cb14-126" aria-hidden="true" tabindex="-1"></a>        <span class="fu">contrast</span>(<span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span>
+<span id="cb14-127"><a href="#cb14-127" aria-hidden="true" tabindex="-1"></a>      p1_aov1[iter] <span class="ot">&lt;-</span> aov1_pairs[<span class="dv">1</span>, <span class="st">"p.value"</span>]</span>
+<span id="cb14-128"><a href="#cb14-128" aria-hidden="true" tabindex="-1"></a>      p2_aov1[iter] <span class="ot">&lt;-</span> aov1_pairs[<span class="dv">5</span>, <span class="st">"p.value"</span>]</span>
+<span id="cb14-129"><a href="#cb14-129" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-130"><a href="#cb14-130" aria-hidden="true" tabindex="-1"></a>    type_1_matrix <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb14-131"><a href="#cb14-131" aria-hidden="true" tabindex="-1"></a>      type_1_matrix,</span>
+<span id="cb14-132"><a href="#cb14-132" aria-hidden="true" tabindex="-1"></a>      <span class="fu">data.table</span>(</span>
+<span id="cb14-133"><a href="#cb14-133" aria-hidden="true" tabindex="-1"></a>        <span class="at">resid_frac =</span> residual_frac_i,</span>
+<span id="cb14-134"><a href="#cb14-134" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sigma_cell"</span> <span class="ot">=</span> sigma_cell, <span class="co"># among cells within a dish - this is residual</span></span>
+<span id="cb14-135"><a href="#cb14-135" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sigma_exper"</span> <span class="ot">=</span> sigma_exper, <span class="co"># among experiments</span></span>
+<span id="cb14-136"><a href="#cb14-136" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sigma_batch"</span> <span class="ot">=</span> sigma_batch, <span class="co"># among batches within a treatment:experiment</span></span>
+<span id="cb14-137"><a href="#cb14-137" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sigma_dish"</span> <span class="ot">=</span> sigma_dish, <span class="co"># among dishes within a treatment:experiment:batch</span></span>
+<span id="cb14-138"><a href="#cb14-138" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p1_m1"</span> <span class="ot">=</span> p1_m1,</span>
+<span id="cb14-139"><a href="#cb14-139" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p2_m1"</span> <span class="ot">=</span> p2_m1,</span>
+<span id="cb14-140"><a href="#cb14-140" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p1_m2"</span> <span class="ot">=</span> p1_m2,</span>
+<span id="cb14-141"><a href="#cb14-141" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p2_m2"</span> <span class="ot">=</span> p2_m2,</span>
+<span id="cb14-142"><a href="#cb14-142" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p1_lmm1"</span> <span class="ot">=</span> p1_lmm1,</span>
+<span id="cb14-143"><a href="#cb14-143" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p2_lmm1"</span> <span class="ot">=</span> p2_lmm1,</span>
+<span id="cb14-144"><a href="#cb14-144" aria-hidden="true" tabindex="-1"></a>        <span class="co"># "p1_lmm2" = p1_lmm2,</span></span>
+<span id="cb14-145"><a href="#cb14-145" aria-hidden="true" tabindex="-1"></a>        <span class="co"># "p2_lmm2" = p2_lmm2,</span></span>
+<span id="cb14-146"><a href="#cb14-146" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p1_aov1"</span> <span class="ot">=</span> p1_aov1,</span>
+<span id="cb14-147"><a href="#cb14-147" aria-hidden="true" tabindex="-1"></a>        <span class="st">"p2_aov1"</span> <span class="ot">=</span> p2_aov1</span>
+<span id="cb14-148"><a href="#cb14-148" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb14-149"><a href="#cb14-149" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-150"><a href="#cb14-150" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-151"><a href="#cb14-151" aria-hidden="true" tabindex="-1"></a>  <span class="fu">saveRDS</span>(type_1_matrix, <span class="st">"type_1_matrix.Rds"</span>)</span>
+<span id="cb14-152"><a href="#cb14-152" aria-hidden="true" tabindex="-1"></a>}<span class="cf">else</span>{</span>
+<span id="cb14-153"><a href="#cb14-153" aria-hidden="true" tabindex="-1"></a>  type_1_matrix <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"type_1_matrix.Rds"</span>)</span>
+<span id="cb14-154"><a href="#cb14-154" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-155"><a href="#cb14-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-156"><a href="#cb14-156" aria-hidden="true" tabindex="-1"></a>residual_frac_list <span class="ot">&lt;-</span> <span class="fu">unique</span>(type_1_matrix<span class="sc">$</span>resid_frac)</span>
+<span id="cb14-157"><a href="#cb14-157" aria-hidden="true" tabindex="-1"></a>param_mat <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">residual_frac =</span> residual_frac_list)</span>
+<span id="cb14-158"><a href="#cb14-158" aria-hidden="true" tabindex="-1"></a>param_mat<span class="sc">$</span>icc <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb14-159"><a href="#cb14-159" aria-hidden="true" tabindex="-1"></a>param_mat<span class="sc">$</span>lm1_p1 <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb14-160"><a href="#cb14-160" aria-hidden="true" tabindex="-1"></a>param_mat<span class="sc">$</span>lm1_p2 <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb14-161"><a href="#cb14-161" aria-hidden="true" tabindex="-1"></a>param_mat<span class="sc">$</span>lm2_p1 <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb14-162"><a href="#cb14-162" aria-hidden="true" tabindex="-1"></a>param_mat<span class="sc">$</span>lm2_p2 <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb14-163"><a href="#cb14-163" aria-hidden="true" tabindex="-1"></a>param_mat<span class="sc">$</span>lmm1_p1 <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb14-164"><a href="#cb14-164" aria-hidden="true" tabindex="-1"></a>param_mat<span class="sc">$</span>lmm1_p2 <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb14-165"><a href="#cb14-165" aria-hidden="true" tabindex="-1"></a>param_mat<span class="sc">$</span>rmaov_p1 <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb14-166"><a href="#cb14-166" aria-hidden="true" tabindex="-1"></a>param_mat<span class="sc">$</span>rmaov_p2 <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb14-167"><a href="#cb14-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-168"><a href="#cb14-168" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(param_set <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(param_mat)){</span>
+<span id="cb14-169"><a href="#cb14-169" aria-hidden="true" tabindex="-1"></a>    residual_frac_i <span class="ot">&lt;-</span> param_mat[param_set, <span class="st">"residual_frac"</span>] <span class="co"># fraction of random variance that is unmodeled noise</span></span>
+<span id="cb14-170"><a href="#cb14-170" aria-hidden="true" tabindex="-1"></a>    random_var <span class="ot">&lt;-</span> </span>
+<span id="cb14-171"><a href="#cb14-171" aria-hidden="true" tabindex="-1"></a>      type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, sigma_exper][<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span></span>
+<span id="cb14-172"><a href="#cb14-172" aria-hidden="true" tabindex="-1"></a>      type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, sigma_batch][<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span></span>
+<span id="cb14-173"><a href="#cb14-173" aria-hidden="true" tabindex="-1"></a>      type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, sigma_dish][<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb14-174"><a href="#cb14-174" aria-hidden="true" tabindex="-1"></a>    total_var <span class="ot">&lt;-</span> random_var <span class="sc">+</span> </span>
+<span id="cb14-175"><a href="#cb14-175" aria-hidden="true" tabindex="-1"></a>      type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, sigma_cell][<span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb14-176"><a href="#cb14-176" aria-hidden="true" tabindex="-1"></a>    param_mat[param_set, <span class="st">"icc"</span>] <span class="ot">&lt;-</span> random_var<span class="sc">/</span>total_var</span>
+<span id="cb14-177"><a href="#cb14-177" aria-hidden="true" tabindex="-1"></a>    p1_m1 <span class="ot">&lt;-</span> type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, p1_m1]</span>
+<span id="cb14-178"><a href="#cb14-178" aria-hidden="true" tabindex="-1"></a>    p2_m1 <span class="ot">&lt;-</span> type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, p2_m1]</span>
+<span id="cb14-179"><a href="#cb14-179" aria-hidden="true" tabindex="-1"></a>    p1_m2 <span class="ot">&lt;-</span> type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, p1_m2]</span>
+<span id="cb14-180"><a href="#cb14-180" aria-hidden="true" tabindex="-1"></a>    p2_m2 <span class="ot">&lt;-</span> type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, p2_m2]</span>
+<span id="cb14-181"><a href="#cb14-181" aria-hidden="true" tabindex="-1"></a>    p1_lmm1 <span class="ot">&lt;-</span> type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, p1_lmm1]</span>
+<span id="cb14-182"><a href="#cb14-182" aria-hidden="true" tabindex="-1"></a>    p2_lmm1 <span class="ot">&lt;-</span> type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, p2_lmm1]</span>
+<span id="cb14-183"><a href="#cb14-183" aria-hidden="true" tabindex="-1"></a>    p1_aov1 <span class="ot">&lt;-</span> type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, p1_aov1]</span>
+<span id="cb14-184"><a href="#cb14-184" aria-hidden="true" tabindex="-1"></a>    p2_aov1 <span class="ot">&lt;-</span> type_1_matrix[resid_frac <span class="sc">==</span> residual_frac_i, p2_aov1]</span>
+<span id="cb14-185"><a href="#cb14-185" aria-hidden="true" tabindex="-1"></a>    n_iter <span class="ot">&lt;-</span> <span class="fu">length</span>(p1_m1)</span>
+<span id="cb14-186"><a href="#cb14-186" aria-hidden="true" tabindex="-1"></a>    param_mat[param_set, <span class="st">"lm1_p1"</span>] <span class="ot">&lt;-</span> <span class="fu">sum</span>(p1_m1 <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span>n_iter</span>
+<span id="cb14-187"><a href="#cb14-187" aria-hidden="true" tabindex="-1"></a>    param_mat[param_set, <span class="st">"lm1_p2"</span>] <span class="ot">&lt;-</span> <span class="fu">sum</span>(p2_m1 <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span>n_iter</span>
+<span id="cb14-188"><a href="#cb14-188" aria-hidden="true" tabindex="-1"></a>    param_mat[param_set, <span class="st">"lmm1_p1"</span>] <span class="ot">&lt;-</span> <span class="fu">sum</span>(p1_lmm1 <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span>n_iter</span>
+<span id="cb14-189"><a href="#cb14-189" aria-hidden="true" tabindex="-1"></a>    param_mat[param_set, <span class="st">"lmm1_p2"</span>] <span class="ot">&lt;-</span> <span class="fu">sum</span>(p2_lmm1 <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span>n_iter</span>
+<span id="cb14-190"><a href="#cb14-190" aria-hidden="true" tabindex="-1"></a>    param_mat[param_set, <span class="st">"lm2_p1"</span>] <span class="ot">&lt;-</span> <span class="fu">sum</span>(p1_m2 <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span>n_iter</span>
+<span id="cb14-191"><a href="#cb14-191" aria-hidden="true" tabindex="-1"></a>    param_mat[param_set, <span class="st">"lm2_p2"</span>] <span class="ot">&lt;-</span> <span class="fu">sum</span>(p2_m2 <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span>n_iter</span>
+<span id="cb14-192"><a href="#cb14-192" aria-hidden="true" tabindex="-1"></a>    param_mat[param_set, <span class="st">"rmaov_p1"</span>] <span class="ot">&lt;-</span> <span class="fu">sum</span>(p1_aov1 <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span>n_iter</span>
+<span id="cb14-193"><a href="#cb14-193" aria-hidden="true" tabindex="-1"></a>    param_mat[param_set, <span class="st">"rmaov_p2"</span>] <span class="ot">&lt;-</span> <span class="fu">sum</span>(p2_aov1 <span class="sc">&lt;</span> <span class="fl">0.05</span>)<span class="sc">/</span>n_iter</span>
+<span id="cb14-194"><a href="#cb14-194" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-195"><a href="#cb14-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-196"><a href="#cb14-196" aria-hidden="true" tabindex="-1"></a>param_mat <span class="sc">|&gt;</span></span>
+<span id="cb14-197"><a href="#cb14-197" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb14-198"><a href="#cb14-198" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">residual_frac</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">icc</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">lm1_p1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">lm1_p2</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">lm2_p1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">lm2_p2</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">lmm1_p1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">lmm1_p2</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">rmaov_p1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">rmaov_p2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.90</td>
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">0.144</td>
+<td style="text-align: right;">0.134</td>
+<td style="text-align: right;">0.149</td>
+<td style="text-align: right;">0.144</td>
+<td style="text-align: right;">0.027</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.053</td>
+<td style="text-align: right;">0.048</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.95</td>
+<td style="text-align: right;">0.05</td>
+<td style="text-align: right;">0.093</td>
+<td style="text-align: right;">0.093</td>
+<td style="text-align: right;">0.098</td>
+<td style="text-align: right;">0.093</td>
+<td style="text-align: right;">0.024</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: right;">0.052</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.179</td>
+<td style="text-align: right;">0.184</td>
+<td style="text-align: right;">0.185</td>
+<td style="text-align: right;">0.026</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.049</td>
+<td style="text-align: right;">0.050</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>out_table <span class="ot">&lt;-</span> <span class="fu">melt</span>(<span class="fu">data.table</span>(param_mat),</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">id.vars =</span> <span class="fu">c</span>(<span class="st">"residual_frac"</span>, <span class="st">"icc"</span>),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">variable.name =</span> <span class="st">"test"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                  <span class="at">value.name =</span> <span class="st">"type_1"</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># out_table[, contrast := ifelse(str_detect(test, "p1"), "p1", "p2")]</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>out_table[, <span class="fu">c</span>(<span class="st">"model"</span>, <span class="st">"contrast"</span>) <span class="sc">:</span><span class="er">=</span> <span class="fu">tstrsplit</span>(test, <span class="st">"_"</span>)]</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> out_table,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> icc,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> type_1,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> model,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>           <span class="at">linetype =</span> contrast)) <span class="sc">+</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Type I error rate"</span>) <span class="sc">+</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_pubr</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ER-calcium-depletion-as-a-key-driver-for-impaired-ER-to-mitochondria-calcium-transfer-and-mitochondrial-dysfunction-in-Wolfram-syndrome_files/figure-html/fib2b-plot-simulation-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Even though the dependence due to shared variance seems small given the figure of this variance above, the Type I error rate is 14.4% - 14.9%, or almost 3X the expected rate of 5%. This is an unacceptable inflation of type I error that will lead to frequent false discovery. By contrast, the RM-ANOVA model has exceptional control of Type I error rate. And, the naive LMM is overly conservative.</p>
+<p>Key:</p>
+<p>lm1: Linear/ANOVA model of all data, ignoring nesting. The data are not normalized by the mean of the control.</p>
+<p>lm2: Linear/ANOVA model of the control-normalized data, ignoring nesting. This is what the researchers did</p>
+<p>lmm1: Linear mixed model with intercepts for experiment, batch (= treatment:experiment), and dish. A naive model that simply accepts results regardless of boundary errors.</p>
+<p>aov1: multivariate Repeated Measures ANOVA</p>
+</section>
+</section>
+<section id="exploring-other-figure-panels" class="level2">
+<h2 class="anchored" data-anchor-id="exploring-other-figure-panels">Exploring other figure panels</h2>
+<section id="fig-1c" class="level3">
+<h3 class="anchored" data-anchor-id="fig-1c">Fig 1c</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data_from <span class="ot">&lt;-</span> <span class="st">"ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>file_name <span class="ot">&lt;-</span> <span class="st">"Source data for Figures and Table.xlsx"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, file_name)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>fig1c <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(file_path,</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sheet =</span> <span class="st">"Fig 1C"</span>,</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">range =</span> <span class="st">"A1:D56"</span>,</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">col_names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">melt</span>(<span class="at">id.vars =</span> <span class="fu">c</span>(<span class="st">"dish"</span>),</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">variable.name =</span> <span class="st">"treatment"</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">value.name =</span> <span class="st">"er_calcium"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>fig1c[, dish_id <span class="sc">:</span><span class="er">=</span> <span class="fu">as.character</span>(dish)]</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>fig1c[, dish <span class="sc">:</span><span class="er">=</span> <span class="fu">paste</span>(treatment, dish)]</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="co"># output as clean excel file</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>fileout_name <span class="ot">&lt;-</span> <span class="st">"fig1c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>fileout_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, fileout_name)</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(fig1c, fileout_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> fig1c,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> er_calcium,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> dish_id)) <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ER-calcium-depletion-as-a-key-driver-for-impaired-ER-to-mitochondria-calcium-transfer-and-mitochondrial-dysfunction-in-Wolfram-syndrome_files/figure-html/fig1c-plot-each-prep-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>lmm1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> dish), <span class="at">data =</span> fig1c)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>var_table <span class="ot">&lt;-</span> <span class="fu">VarCorr</span>(lmm1) <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>icc <span class="ot">=</span> var_table[<span class="dv">1</span>, <span class="st">"vcov"</span>]<span class="sc">/</span>(var_table[<span class="dv">1</span>, <span class="st">"vcov"</span>] <span class="sc">+</span> var_table[<span class="dv">2</span>, <span class="st">"vcov"</span>])</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>icc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1802483</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>lmm1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> dish), <span class="at">data =</span> fig1c)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>lmm1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lmm1, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>lmm1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lmm1_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>lmm1_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast                 estimate     SE df lower.CL  upper.CL t.ratio p.value
+ Wfs1 shRNA - scr shRNA    -0.0682 0.0302 10  -0.1354 -0.000929  -2.259  0.0475
+ Cisd2 shRNA - scr shRNA   -0.0555 0.0302 10  -0.1227  0.011705  -1.840  0.0956
+ Cisd2 shRNA - Wfs1 shRNA   0.0126 0.0318 10  -0.0582  0.083496   0.397  0.6995
+
+Degrees-of-freedom method: kenward-roger 
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+</section>
+<section id="fig-1e-left" class="level3">
+<h3 class="anchored" data-anchor-id="fig-1e-left">Fig 1e left</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>data_from <span class="ot">&lt;-</span> <span class="st">"ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>file_name <span class="ot">&lt;-</span> <span class="st">"Source data for Figures and Table.xlsx"</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, file_name)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>fig1e_left <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(file_path,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sheet =</span> <span class="st">"Fig 1E"</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">range =</span> <span class="st">"A1:F67"</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">col_names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">melt</span>(<span class="at">id.vars =</span> <span class="fu">c</span>(<span class="st">"experiment"</span>, <span class="st">"dish"</span>),</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">variable.name =</span> <span class="st">"treatment"</span>,</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">value.name =</span> <span class="st">"er_calcium"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>fig1e_left[, dish_id <span class="sc">:</span><span class="er">=</span> <span class="fu">as.character</span>(dish)] <span class="co"># for plot only</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>fig1e_left[, dish <span class="sc">:</span><span class="er">=</span> <span class="fu">paste</span>(treatment, dish)] <span class="co"># dish 1 differs in each treatment</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a><span class="co"># output as clean excel file</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a><span class="co"># fileout_name &lt;- "fig1c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="co"># fileout_path &lt;- here(data_folder, data_from, fileout_name)</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a><span class="co"># write_xlsx(fig1c, fileout_path)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> fig1e_left,</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> er_calcium,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> dish_id)) <span class="sc">+</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ER-calcium-depletion-as-a-key-driver-for-impaired-ER-to-mitochondria-calcium-transfer-and-mitochondrial-dysfunction-in-Wolfram-syndrome_files/figure-html/fig1e_left-plot-each-prep-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>lmm1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> experiment), <span class="at">data =</span> fig1e_left)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>var_table <span class="ot">&lt;-</span> <span class="fu">VarCorr</span>(lmm1) <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>icc <span class="ot">=</span> var_table[<span class="dv">1</span>, <span class="st">"vcov"</span>]<span class="sc">/</span>(var_table[<span class="dv">1</span>, <span class="st">"vcov"</span>] <span class="sc">+</span> var_table[<span class="dv">2</span>, <span class="st">"vcov"</span>])</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>icc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.009580095</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>lmm1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (treatment <span class="sc">|</span> experiment), <span class="at">data =</span> fig1e_left)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>var_table <span class="ot">&lt;-</span> <span class="fu">VarCorr</span>(lmm1) <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>icc <span class="ot">=</span> var_table[<span class="dv">1</span>, <span class="st">"vcov"</span>]<span class="sc">/</span>(var_table[<span class="dv">1</span>, <span class="st">"vcov"</span>] <span class="sc">+</span> var_table[<span class="dv">2</span>, <span class="st">"vcov"</span>])</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>icc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>lmm1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (treatment <span class="sc">|</span> experiment), <span class="at">data =</span> fig1e_left)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>lmm1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lmm1, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>lmm1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lmm1_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>lmm1_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast                            estimate     SE df lower.CL upper.CL
+ Wfs1 shRNA - scr shRNA               -0.1290 0.0606  1   -0.899    0.641
+ SERCA2b - scr shRNA                   0.0395 0.0321  1   -0.368    0.447
+ SERCA2b - Wfs1 shRNA                  0.1685 0.0780  1   -0.823    1.160
+ (Wfs1 shRNA + SERCA2b) - scr shRNA   -0.0360 0.0310  1   -0.429    0.358
+ (Wfs1 shRNA + SERCA2b) - Wfs1 shRNA   0.0930 0.0460  1   -0.492    0.678
+ (Wfs1 shRNA + SERCA2b) - SERCA2b     -0.0755 0.0441  1   -0.636    0.485
+ t.ratio p.value
+  -2.128  0.2797
+   1.231  0.4344
+   2.160  0.2761
+  -1.161  0.4526
+   2.021  0.2925
+  -1.712  0.3366
+
+Degrees-of-freedom method: kenward-roger 
+Confidence level used: 0.95 </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>fig1e_left_agg <span class="ot">&lt;-</span> fig1e_left[, .(<span class="at">er_calcium =</span> <span class="fu">mean</span>(er_calcium)),</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                   by <span class="ot">=</span> .(treatment, experiment, dish)]</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>lmm2 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> experiment), <span class="at">data =</span> fig1e_left_agg)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>lmm2_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lmm2, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>lmm2_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lmm2_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>lmm2_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast                            estimate    SE df lower.CL upper.CL
+ Wfs1 shRNA - scr shRNA               -0.1290 0.042 19  -0.2169  -0.0411
+ SERCA2b - scr shRNA                   0.0395 0.042 19  -0.0484   0.1274
+ SERCA2b - Wfs1 shRNA                  0.1685 0.042 19   0.0806   0.2564
+ (Wfs1 shRNA + SERCA2b) - scr shRNA   -0.0360 0.042 19  -0.1239   0.0520
+ (Wfs1 shRNA + SERCA2b) - Wfs1 shRNA   0.0930 0.042 19   0.0051   0.1810
+ (Wfs1 shRNA + SERCA2b) - SERCA2b     -0.0755 0.042 19  -0.1634   0.0125
+ t.ratio p.value
+  -3.070  0.0063
+   0.940  0.3590
+   4.010  0.0007
+  -0.856  0.4028
+   2.214  0.0392
+  -1.796  0.0885
+
+Degrees-of-freedom method: kenward-roger 
+Confidence level used: 0.95 </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>lm1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(er_calcium <span class="sc">~</span> treatment, <span class="at">data =</span> fig1e_left_agg)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>lm1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lm1, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>lm1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lm1_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>lm1_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast                            estimate    SE df lower.CL upper.CL
+ Wfs1 shRNA - scr shRNA               -0.1290 0.042 20  -0.2166  -0.0414
+ SERCA2b - scr shRNA                   0.0395 0.042 20  -0.0481   0.1271
+ SERCA2b - Wfs1 shRNA                  0.1685 0.042 20   0.0809   0.2561
+ (Wfs1 shRNA + SERCA2b) - scr shRNA   -0.0360 0.042 20  -0.1236   0.0517
+ (Wfs1 shRNA + SERCA2b) - Wfs1 shRNA   0.0930 0.042 20   0.0054   0.1807
+ (Wfs1 shRNA + SERCA2b) - SERCA2b     -0.0755 0.042 20  -0.1631   0.0122
+ t.ratio p.value
+  -3.070  0.0060
+   0.940  0.3584
+   4.010  0.0007
+  -0.856  0.4023
+   2.214  0.0386
+  -1.796  0.0877
+
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>aov1 <span class="ot">&lt;-</span> <span class="fu">aov_4</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (treatment <span class="sc">|</span> experiment), <span class="at">data =</span> fig1e_left, <span class="at">fun_aggregate =</span> mean)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>aov1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(aov1, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>aov1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(aov1_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>aov1_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast                          estimate     SE df lower.CL upper.CL t.ratio
+ Wfs1.shRNA - scr.shRNA             -0.1290 0.0573  1   -0.857    0.599  -2.253
+ SERCA2b - scr.shRNA                 0.0395 0.0196  1   -0.210    0.289   2.010
+ SERCA2b - Wfs1.shRNA                0.1685 0.0769  1   -0.809    1.146   2.191
+ Wfs1.shRNA...SERCA2b - scr.shRNA   -0.0360 0.0176  1   -0.259    0.187  -2.048
+ Wfs1.shRNA...SERCA2b - Wfs1.shRNA   0.0930 0.0397  1   -0.411    0.597   2.344
+ Wfs1.shRNA...SERCA2b - SERCA2b     -0.0755 0.0372  1   -0.548    0.397  -2.028
+ p.value
+  0.2659
+  0.2939
+  0.2726
+  0.2892
+  0.2567
+  0.2917
+
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+</section>
+<section id="fig-1e-right" class="level3">
+<h3 class="anchored" data-anchor-id="fig-1e-right">Fig 1e right</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>data_from <span class="ot">&lt;-</span> <span class="st">"ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>file_name <span class="ot">&lt;-</span> <span class="st">"Source data for Figures and Table.xlsx"</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, file_name)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>fig1e_right <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(file_path,</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sheet =</span> <span class="st">"Fig 1E"</span>,</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">range =</span> <span class="st">"F1:J34"</span>,</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">col_names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">melt</span>(<span class="at">id.vars =</span> <span class="fu">c</span>(<span class="st">"dish"</span>),</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">variable.name =</span> <span class="st">"treatment"</span>,</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">value.name =</span> <span class="st">"er_calcium"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>fig1e_right[, dish_id <span class="sc">:</span><span class="er">=</span> <span class="fu">as.character</span>(dish)] <span class="co"># for plot only</span></span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>fig1e_right[, dish <span class="sc">:</span><span class="er">=</span> <span class="fu">paste</span>(treatment, dish)] <span class="co"># dish 1 differs in each treatment</span></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a><span class="co"># output as clean excel file</span></span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a><span class="co"># fileout_name &lt;- "fig1c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"</span></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a><span class="co"># fileout_path &lt;- here(data_folder, data_from, fileout_name)</span></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a><span class="co"># write_xlsx(fig1c, fileout_path)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> fig1e_right,</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> er_calcium,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">color =</span> dish_id)) <span class="sc">+</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ER-calcium-depletion-as-a-key-driver-for-impaired-ER-to-mitochondria-calcium-transfer-and-mitochondrial-dysfunction-in-Wolfram-syndrome_files/figure-html/fig1e_right-plot-each-prep-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>lmm1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> dish), <span class="at">data =</span> fig1e_right)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>var_table <span class="ot">&lt;-</span> <span class="fu">VarCorr</span>(lmm1) <span class="sc">|&gt;</span> <span class="fu">as.data.frame</span>()</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>icc <span class="ot">=</span> var_table[<span class="dv">1</span>, <span class="st">"vcov"</span>]<span class="sc">/</span>(var_table[<span class="dv">1</span>, <span class="st">"vcov"</span>] <span class="sc">+</span> var_table[<span class="dv">2</span>, <span class="st">"vcov"</span>])</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>icc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.09172787</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>lmm1 <span class="ot">&lt;-</span> <span class="fu">lmer</span>(er_calcium <span class="sc">~</span> treatment <span class="sc">+</span> (treatment <span class="sc">|</span> dish), <span class="at">data =</span> fig1e_right)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>lmm1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lmm1, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>lmm1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lmm1_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>lmm1_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast                             estimate     SE   df lower.CL upper.CL
+ scr shRNA - (Wfs1 shRNA + SERCA2b)     0.0184 0.0644 2.52   -0.211   0.2473
+ Cisd2 shRNA - (Wfs1 shRNA + SERCA2b)  -0.1362 0.0644 2.52   -0.365   0.0928
+ Cisd2 shRNA - scr shRNA               -0.1546 0.0311 4.00   -0.241  -0.0682
+ SERCA2b - (Wfs1 shRNA + SERCA2b)       0.0547 0.0644 2.52   -0.174   0.2836
+ SERCA2b - scr shRNA                    0.0363 0.0311 4.00   -0.050   0.1227
+ SERCA2b - Cisd2 shRNA                  0.1909 0.0311 4.00    0.105   0.2772
+ t.ratio p.value
+   0.286  0.7969
+  -2.115  0.1419
+  -4.969  0.0077
+   0.850  0.4686
+   1.168  0.3078
+   6.137  0.0036
+
+Degrees-of-freedom method: kenward-roger 
+Confidence level used: 0.95 </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>fig1e_right_agg <span class="ot">&lt;-</span> fig1e_right[, .(<span class="at">er_calcium =</span> <span class="fu">mean</span>(er_calcium)),</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>                   by <span class="ot">=</span> .(treatment, dish)]</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>lm1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(er_calcium <span class="sc">~</span> treatment, <span class="at">data =</span> fig1e_right_agg)</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>lm1_emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(lmm2, <span class="at">specs =</span> <span class="st">"treatment"</span>)</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>lm1_pairs <span class="ot">&lt;-</span> <span class="fu">contrast</span>(lmm2_emm, <span class="at">method =</span> <span class="st">"revpairwise"</span>, <span class="at">adjust =</span> <span class="st">"none"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>(<span class="at">infer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>lm1_pairs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> contrast                            estimate    SE df lower.CL upper.CL
+ Wfs1 shRNA - scr shRNA               -0.1290 0.042 19  -0.2169  -0.0411
+ SERCA2b - scr shRNA                   0.0395 0.042 19  -0.0484   0.1274
+ SERCA2b - Wfs1 shRNA                  0.1685 0.042 19   0.0806   0.2564
+ (Wfs1 shRNA + SERCA2b) - scr shRNA   -0.0360 0.042 19  -0.1239   0.0520
+ (Wfs1 shRNA + SERCA2b) - Wfs1 shRNA   0.0930 0.042 19   0.0051   0.1810
+ (Wfs1 shRNA + SERCA2b) - SERCA2b     -0.0755 0.042 19  -0.1634   0.0125
+ t.ratio p.value
+  -3.070  0.0063
+   0.940  0.3590
+   4.010  0.0007
+  -0.856  0.4028
+   2.214  0.0392
+  -1.796  0.0885
+
+Degrees-of-freedom method: kenward-roger 
+Confidence level used: 0.95 </code></pre>
+</div>
+</div>
+</section>
+<section id="c-three-experiments" class="level3">
+<h3 class="anchored" data-anchor-id="c-three-experiments">8c three experiments</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>data_from <span class="ot">&lt;-</span> <span class="st">"ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome"</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>file_name <span class="ot">&lt;-</span> <span class="st">"Source data for Figures and Table.xlsx"</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, file_name)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>fig8c_wide <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(file_path,</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sheet =</span> <span class="st">"Fig 8C"</span>,</span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">range =</span> <span class="st">"G1:L164"</span>,</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">col_names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.table</span>() <span class="sc">|&gt;</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>()</span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>fig8c <span class="ot">&lt;-</span> <span class="fu">melt</span>(fig8c_wide,</span>
+<span id="cb44-13"><a href="#cb44-13" aria-hidden="true" tabindex="-1"></a>              <span class="at">id.vars =</span> <span class="fu">c</span>(<span class="st">"experiment"</span>, <span class="st">"dish"</span>),</span>
+<span id="cb44-14"><a href="#cb44-14" aria-hidden="true" tabindex="-1"></a>              <span class="at">variable.name =</span> <span class="st">"treatment"</span>,</span>
+<span id="cb44-15"><a href="#cb44-15" aria-hidden="true" tabindex="-1"></a>              <span class="at">value.name =</span> <span class="st">"number_with_mitochondria"</span>)</span>
+<span id="cb44-16"><a href="#cb44-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>fig8c[, dish_id <span class="sc">:</span><span class="er">=</span> <span class="fu">ifelse</span>(dish <span class="sc">&lt;</span> <span class="dv">10</span>, <span class="fu">paste0</span>(<span class="st">"0"</span>, dish), <span class="fu">as.character</span>(dish))] <span class="co"># for plot only</span></span>
+<span id="cb44-18"><a href="#cb44-18" aria-hidden="true" tabindex="-1"></a>fig8c[, dish <span class="sc">:</span><span class="er">=</span> <span class="fu">paste</span>(treatment, dish)] <span class="co"># dish 1 differs in each treatment</span></span>
+<span id="cb44-19"><a href="#cb44-19" aria-hidden="true" tabindex="-1"></a>fig8c[, experiment <span class="sc">:</span><span class="er">=</span> <span class="fu">as.character</span>(experiment)] <span class="co"># for plot only</span></span>
+<span id="cb44-20"><a href="#cb44-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-21"><a href="#cb44-21" aria-hidden="true" tabindex="-1"></a><span class="co"># output as clean excel file</span></span>
+<span id="cb44-22"><a href="#cb44-22" aria-hidden="true" tabindex="-1"></a>fileout_name <span class="ot">&lt;-</span> <span class="st">"fig8c-ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome.xlsx"</span></span>
+<span id="cb44-23"><a href="#cb44-23" aria-hidden="true" tabindex="-1"></a>fileout_path <span class="ot">&lt;-</span> <span class="fu">here</span>(data_folder, data_from, fileout_name)</span>
+<span id="cb44-24"><a href="#cb44-24" aria-hidden="true" tabindex="-1"></a><span class="fu">write_xlsx</span>(fig8c, fileout_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> fig8c,</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> treatment,</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> number_with_mitochondria)) <span class="sc">+</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">group =</span> dish_id, <span class="at">color =</span> experiment),</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">position =</span> <span class="fu">position_jitterdodge</span>(<span class="at">jitter.width =</span> <span class="dv">0</span>)</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>             )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ER-calcium-depletion-as-a-key-driver-for-impaired-ER-to-mitochondria-calcium-transfer-and-mitochondrial-dysfunction-in-Wolfram-syndrome_files/figure-html/fig8c-plot-each-prep-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

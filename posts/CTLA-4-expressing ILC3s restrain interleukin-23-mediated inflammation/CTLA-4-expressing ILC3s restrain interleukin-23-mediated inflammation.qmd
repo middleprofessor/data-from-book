@@ -78,6 +78,7 @@ library(ggforce) # better jitter
 library(cowplot) # combine plots
 library(knitr) # kable tables
 library(kableExtra) # kable_styling tables
+library(ragg) # agg_png for png output
 
 # packages specific to this code
 library(SimMultiCorrData) # correlated random negbin variables

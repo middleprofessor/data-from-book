@@ -1,0 +1,568 @@
+---
+title: "Hot takes: No need to use a Mann-Whitney U"
+subtitle: "Data From Fig 1b -- Release of mitochondrial dsRNA into the cytosol is a key driver of the inflammatory phenotype of senescent cells"
+author: "Jeff Walker"
+date: '2 Sep 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["counts", "xxx"]
+description: "xxx"
+draft: false
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  freeze: false
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+---
+
+![xxx](../../figs/Release of mitochondrial dsRNA into the cytosol is a key driver of the inflammatory phenotype of senescent cells/xxx.png){width=4in fig-align="left"}
+
+## Vital info
+
+Data From: [López-Polo, V., Maus, M., Zacharioudakis, E. et al. Release of mitochondrial dsRNA into the cytosol is a key driver of the inflammatory phenotype of senescent cells. Nat Commun 15, 7378 (2024). https://doi.org/10.1038/s41467-024-51363-0](https://www.nature.com/articles/s41467-024-51363-0){target="_blank"}
+
+Fig: 1b [download data](../../data from/Release of mitochondrial dsRNA into the cytosol is a key driver of the inflammatory phenotype of senescent cells/41467_2024_51363_MOESM4_ESM.xlsx){target="_blank"}
+
+key words: 
+
+Published methods: xxx
+
+Design: Completely Randomized Design with subsampling (CRDS)
+
+Response: DNA foci (counts)
+
+Key learning concepts: right-skewed and heterogenous data with counts
+
+More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
+
+## TL;DR
+
+Many research biologists use traditional non-parametric tests such as the Mann-Whitney U test in place of parametric tests such at a *t*-test. Traditional non-parametric tests were invented in the pre-desktop computer era when statisticians had to compute test statistics with a pencil (or punch cards). Ever since desktop computers, there really hasn't been a need for traditional non-parametric tests. More modern alternative are
+
+1. Randomization tests. These are excellent but can be tricky with complex experimental designs. They also are typically implemented in software like GraphPad Prism.
+2. Generalized linear models. These are a more modern statistical tool for data 
+
+* the design is actually 2 x 2 factorial but I'll treat it as if its 4 x 0.
+
+## The experiment
+
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+library(ragg) # agg_png for png output
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+source_path <- here("R", "ggptm.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+## Fig 1b
+
+```{r fig1h-import, message=FALSE, warning=FALSE}
+data_from <- "Release of mitochondrial dsRNA into the cytosol is a key driver of the inflammatory phenotype of senescent cells"
+file_name <- "41467_2024_51363_MOESM4_ESM.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+read_fig1b <- function(
+    range_in = "B5:C25",
+    label_in = "IMR-90"
+){
+  read_excel(file_path,
+             sheet = "1b",
+             range = range_in,
+             col_names = TRUE) |>
+    data.table() |>
+    melt(variable.name = "treatment",
+         value.name = "foci") |>
+    na.omit()
+}
+fig1b <- data.table(NULL)
+fig1b <- rbind(
+  fig1b,
+  data.table(
+    cell_type = "IMR-90",
+    read_fig1b(range_in = "B5:C25")
+  )
+)
+fig1b <- rbind(
+  fig1b,
+  data.table(
+    cell_type = "SK-MEL-103",
+    read_fig1b(range_in = "E5:F55")
+  )
+)
+fig1b <- rbind(
+  fig1b,
+  data.table(
+    cell_type = "A549",
+    read_fig1b(range_in = "H5:I22")
+  )
+)
+
+
+# output as clean excel file
+fileout_name <- "fig1b-2x0 counts-Release of mitochondrial dsRNA into the cytosol is a key driver of the inflammatory phenotype of senescent cells.xlsx"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig1b, fileout_path)
+```
+
+## Replicate the results -- linear model equivalents of t-tests
+
+```{r}
+# lm1 <- lm(foci ~ treatment, cell_type == "IMR-90", data = fig1b)
+# huh, I mindlessly used this spec of cell_type and only realized after that it actually worked. This is really nice!
+
+lm1 <- lm(foci ~ treatment, data = fig1b[cell_type == "IMR-90", ])
+coef(summary(lm1))
+
+lm2 <- lm(foci ~ treatment, cell_type == "SK-MEL-103", data = fig1b)
+coef(summary(lm2))
+
+lm3 <- lm(foci ~ treatment, cell_type == "A549", data = fig1b)
+coef(summary(lm3))
+
+```
+
+A Student's (equal variance) t-test replicates the p-values.
+
+Let's check the models
+
+```{r fig1b-check-the-model, warning=FALSE, message=FALSE}
+ggcheck_the_model(lm1) # compare to above
+
+ggcheck_the_model(lm2)
+
+ggcheck_the_model(lm3)
+```
+
+The all have QQ plots showing right skew expected of count data and lm1 and lm2 are quite severe. All have spread plots showing variance increasing with mean, expected of count data. Certainly a count glm model is best model to fit.
+
+## Better than reproducibility of fig1b
+
+```{r plot-models}
+fs_chunk <- 9
+# IMR-90 cell type
+glm1 <- glm(foci ~ treatment,
+            family = quasipoisson(link = "log"),
+            data = fig1b[cell_type == "IMR-90", ])
+glm1_emm <- emmeans(glm1, specs = "treatment", type = "response")
+glm1_pairs <- contrast(glm1_emm,
+                       method = "revpairwise") |>
+  summary(infer = TRUE)
+gg1 <- plot_response(glm1, glm1_emm, glm1_pairs,
+              jitter_type = "density",
+              y_label = "dsRNA foci per cell",
+              font_size = 10) +
+  ggtitle("IMR-90")
+
+# SK-MEL-103 cell type
+glm2 <- glm(foci ~ treatment,
+            family = quasipoisson(link = "log"),
+            data = fig1b[cell_type == "SK-MEL-103", ])
+glm2_emm <- emmeans(glm2, specs = "treatment", type = "response")
+glm2_pairs <- contrast(glm2_emm,
+                       method = "revpairwise") |>
+  summary(infer = TRUE)
+gg2 <- plot_response(glm2, glm2_emm, glm2_pairs,
+              jitter_type = "density",
+              y_label = "dsRNA foci per cell",
+              font_size = 10) +
+  ggtitle("SK-MEL-103")
+
+# A549 cell type
+glm3 <- glm(foci ~ treatment,
+            family = quasipoisson(link = "log"),
+            data = fig1b[cell_type == "A549", ])
+glm3_emm <- emmeans(glm3, specs = "treatment", type = "response")
+glm3_pairs <- contrast(glm3_emm,
+                       method = "revpairwise") |>
+  summary(infer = TRUE)
+gg3 <- plot_response(glm3, glm3_emm, glm3_pairs,
+              jitter_type = "density",
+              y_label = "dsRNA foci per cell",
+              font_size = 10) +
+  ggtitle("A549")
+
+gg <- plot_grid(gg1, gg2, gg3, ncol = 3)
+pngfile <- fs::path(knitr::fig_path(), "gg.png")
+agg_png(pngfile, width = 30, height = 12, units = "cm", res = 96, scaling = 1)
+plot(gg)
+invisible(dev.off())
+knitr::include_graphics(pngfile)
+```
+
+## A simulation
+
+This is a simple simulation to look at Type I error (false discovery) and power (true discovery) with data that look those in fig1b for the SK-MEL-103 cell type (middle panel). First, let's use a negative binomial fit to get the observed shape parameter theta, which is 2.25. I then use the mean of the control and treatment groups and the observed theta to create a large (n = 1000) fake dataset. The distribution of the fake foci counts for the control looks like the left panel and a plot of the data for both groups looks like the right panel in the figure below.
+
+```{r fig1b-shape-parameter, warning=FALSE}
+# parameters of observed data
+glm2.nb <- glm.nb(foci ~ treatment,
+            data = fig1b[cell_type == "SK-MEL-103", ])
+theta_obs <- glm2.nb$theta
+theta_obs
+b0 <- coef(summary(glm2.nb))["(Intercept)", "Estimate"]
+b1 <- coef(summary(glm2.nb))["treatmentPalbociclib", "Estimate"]
+mu1_obs <- exp(b0)
+mu2_obs <- exp(b0 + b1)
+
+# what this looks like with a big sample
+set.seed(1)
+gg1 <- gghistogram(rnegbin(1000, mu = mu1_obs, theta = theta_obs))
+
+fd <- data.table(
+  treatment = rep(c("Untreated", "Palbociclib"), each = 1000),
+  foci = c(rnegbin(1000, mu = mu1_obs, theta = theta_obs),
+           rnegbin(1000, mu = mu2_obs, theta = theta_obs))
+)
+fd[, treatment := factor(treatment, levels = c("Untreated", "Palbociclib"))]
+gg2 <- ggplot(data = fd,
+              aes(x = treatment,
+                  y = foci)) +
+  geom_sina(scale = "width", maxwidth = 0.5) +
+  theme_pubr()
+
+gg <- plot_grid(gg1, gg2, ncol = 2)
+pngfile <- fs::path(knitr::fig_path(), "gg.png")
+agg_png(pngfile, width = 30, height = 12, units = "cm", res = 96, scaling = 1)
+plot(gg)
+invisible(dev.off())
+knitr::include_graphics(pngfile)
+```
+
+Next, let's create two versions of the simulation.
+
+* In the first, I very the shape parameter theta to have values 0.5, 1, 2, 4. At a constant mean (the parameter mu), the smaller the shape parameter, the more skew. Or the larger the shape parameter, the more closely the fake data would approximate a normal distribution. I use a sample size of n = 30.
+* In the second, I use a constant shape parameter of 1 and vary the the sample size with values 5, 10, 15, 20, 25, 30.
+
+This is what the fake data look like for theta = 0.5.
+
+```{r fig1b-fake-foci-theta-.5}
+# what this looks like with a big sample
+# what this looks like with a big sample
+set.seed(1)
+gg1 <- gghistogram(rnegbin(1000, mu = mu1_obs, theta = 0.5))
+
+fd <- data.table(
+  treatment = rep(c("Untreated", "Palbociclib"), each = 1000),
+  foci = c(rnegbin(1000, mu = mu1_obs, theta = 0.5),
+           rnegbin(1000, mu = mu2_obs, theta = 0.5))
+)
+fd[, treatment := factor(treatment, levels = c("Untreated", "Palbociclib"))]
+gg2 <- ggplot(data = fd,
+              aes(x = treatment,
+                  y = foci)) +
+  geom_sina(scale = "width", maxwidth = 0.5) +
+  theme_pubr()
+
+gg <- plot_grid(gg1, gg2, ncol = 2)
+pngfile <- fs::path(knitr::fig_path(), "gg.png")
+agg_png(pngfile, width = 30, height = 12, units = "cm", res = 96, scaling = 1)
+plot(gg)
+invisible(dev.off())
+knitr::include_graphics(pngfile)
+```
+
+Here is the simulation
+
+```{r fig1b-simulation}
+
+p_less <- function(x, alpha = 0.05){
+  sum(x < alpha)/length(x)
+}
+
+simulate_it <- FALSE
+if(simulate_it == TRUE){
+  # have to run this twice to do either effect of theta or effect of n on type 1/power
+  # because I didn't want all combos of each set
+  n_iter <- 10000
+  theta_or_n <- "theta"
+  if(theta_or_n == "theta"){
+    theta_set <- c(0.5, 1, 2, 4)
+    n_set <- 30
+  }else{ # n
+    theta_set <- 1
+    n_set <- c(5, 10, 15, 20, 25, 30)
+  }
+  mu_sim <- mu_obs
+  
+  test_set <- c("LM", "LogLM", "MW", "NB", "QP")
+  p_mat <- matrix(NA, nrow = n_iter, ncol = length(test_set))
+  colnames(p_mat) <- test_set
+  type1_table <- data.table(NULL)
+  power_table <- data.table(NULL)
+  
+  # type 1
+  for(n in n_set){
+    fd <- data.table(
+      treatment = rep(c("Cn", "Tr"), each = n),
+      foci = NA
+    )
+    for(theta_sim in theta_set){
+      fake_y <- rnegbin(n * 2 * n_iter, mu = mu_sim, theta = theta_sim)
+      y_mat <- matrix(fake_y, nrow = n * 2, ncol = n_iter)
+      for(iter in 1:n_iter){
+        fd[, foci := y_mat[, iter]]
+        
+        lm1 <- lm(foci ~ treatment, data = fd)
+        p_mat[iter, "LM"] <- coef(summary(lm1))[2, "Pr(>|t|)"]
+        
+        loglm1 <- lm(log(foci+1) ~ treatment, data = fd)
+        p_mat[iter, "LogLM"] <- coef(summary(loglm1))[2, "Pr(>|t|)"]
+        
+        mw <- wilcox.test(foci ~ treatment, data = fd, exact = FALSE)
+        p_mat[iter, "MW"] <- mw$p.value
+        
+        glm1.nb <- glm.nb(foci ~ treatment, data = fd)
+        # glm1.nb <- glmmTMB(foci ~ treatment,
+        #                    family = nbinom2(link = "log"), # variance increases quadratically
+        #                    data = fd)
+        glm1.pairs <- emmeans(glm1.nb, specs = "treatment") |>
+          contrast(method = "revpairwise") |>
+          summary()
+        p_mat[iter, "NB"] <- glm1.pairs[1, "p.value"]
+        
+        glm2.qp <- glm(foci ~ treatment,
+                       family = quasipoisson(link = "log"),
+                       data = fd)
+        # glm2.qp <- glmmTMB(foci ~ treatment,
+        #                    family = nbinom1(link = "log"), # variance increases linearly
+        #                    data = fd)
+        glm2.pairs <- emmeans(glm2.qp, specs = "treatment") |>
+          contrast(method = "revpairwise") |>
+          summary()
+        p_mat[iter, "QP"] <- glm2.pairs[1, "p.value"]
+      }
+      type1_table = rbind(type1_table, t(c(theta = theta_sim, N = n, apply(p_mat, 2, p_less))))
+    }
+  }
+  
+  # power
+  p_mat <- matrix(NA, nrow = n_iter, ncol = length(test_set))
+  colnames(p_mat) <- test_set
+  power_table <- data.table(NULL)
+  delta <- 2
+  for(n in n_set){
+    fd <- data.table(
+      treatment = rep(c("Cn", "Tr"), each = n),
+      foci = NA
+    )
+    for(theta_sim in theta_set){
+      # cn
+      fake_cn <- rnegbin(n * n_iter, mu = mu_sim, theta = theta_sim)
+      fake_tr <- rnegbin(n * n_iter, mu = mu_sim * delta, theta = theta_sim)
+      y_mat <- rbind(matrix(fake_cn, nrow = n, ncol = n_iter),
+                     matrix(fake_tr, nrow = n, ncol = n_iter))
+      for(iter in 1:n_iter){
+        fd[, foci := y_mat[, iter]]
+        
+        lm1 <- lm(foci ~ treatment, data = fd)
+        p_mat[iter, "LM"] <- coef(summary(lm1))[2, "Pr(>|t|)"]
+        
+        loglm1 <- lm(log(foci+1) ~ treatment, data = fd)
+        p_mat[iter, "LogLM"] <- coef(summary(loglm1))[2, "Pr(>|t|)"]
+        
+        mw <- wilcox.test(foci ~ treatment, data = fd, exact = FALSE)
+        p_mat[iter, "MW"] <- mw$p.value
+        
+        glm1.nb <- glm.nb(foci ~ treatment, data = fd)
+        # glm1.nb <- glmmTMB(foci ~ treatment,
+        #                    family = nbinom2(link = "log"), # variance increases quadratically
+        #                    data = fd)
+        glm1.pairs <- emmeans(glm1.nb, specs = "treatment") |>
+          contrast(method = "revpairwise") |>
+          summary()
+        p_mat[iter, "NB"] <- glm1.pairs[1, "p.value"]
+        
+        glm2.qp <- glm(foci ~ treatment,
+                       family = quasipoisson(link = "log"),
+                       data = fd)
+        # glm2.qp <- glmmTMB(foci ~ treatment,
+        #                    family = nbinom1(link = "log"), # variance increases linearly
+        #                    data = fd)
+        glm2.pairs <- emmeans(glm2.qp, specs = "treatment") |>
+          contrast(method = "revpairwise") |>
+          summary()
+        p_mat[iter, "QP"] <- glm2.pairs[1, "p.value"]
+      }
+      
+      power_table = rbind(power_table, t(c(theta = theta_sim, N = n, apply(p_mat, 2, p_less))))
+    }
+  }
+  
+  type1_table |>
+    kable(digits = 3) |>
+    kable_styling()
+  
+  power_table |>
+    kable(digits = 3) |>
+    kable_styling()
+  
+save_it <- FALSE
+if(save_it == TRUE & theta_or_n == "theta"){
+  saveRDS(type1_table, "type1_table-theta_varies-10k_iter.Rds")
+  saveRDS(power_table, "power_table-theta_varies-10k_iter.Rds")
+}
+if(save_it == TRUE & theta_or_n == "n"){
+  saveRDS(type1_table, "type1_table-n_varies-10k_iter.Rds")
+  saveRDS(power_table, "power_table-n_varies-10k_iter.Rds")
+}
+}
+
+
+
+```
+
+```{r fig1b-read-saved-simulation-values}
+type1_table_theta <- readRDS("type1_table-theta_varies-10k_iter.Rds")
+power_table_theta <- readRDS("power_table-theta_varies-10k_iter.Rds")
+type1_table_n <- readRDS("type1_table-n_varies-10k_iter.Rds")
+power_table_n <- readRDS("power_table-n_varies-10k_iter.Rds")
+
+```
+
+```{r fig1b-plot-sim-theta}
+type1_table_long <- melt(type1_table_theta,
+                         id.vars = c("theta", "N"),
+                         variable.name = "test",
+                         value.name = "Type_I")
+gg1 <- ggplot(data = type1_table_long,
+              aes(x = theta,
+                  y = Type_I,
+                  color = test)) +
+  geom_hline(yintercept = 0.05, color = "gray") +
+  geom_point() +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 0.1)) +
+  theme_pubr()
+
+power_table_long <- melt(power_table_theta,
+                         id.vars = c("theta", "N"),
+                         variable.name = "test",
+                         value.name = "Power")
+gg2 <- ggplot(data = power_table_long,
+              aes(x = theta,
+                  y = Power,
+                  color = test)) +
+  geom_point() +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 1)) +
+  theme_pubr()
+
+gg <- plot_grid(gg1, gg2, ncol = 2)
+pngfile <- fs::path(knitr::fig_path(), "gg.png")
+agg_png(pngfile, width = 30, height = 12, units = "cm", res = 96, scaling = 1)
+plot(gg)
+invisible(dev.off())
+knitr::include_graphics(pngfile)
+
+```
+
+Notes
+
+1. The linear model with untransformed counts performs well -- the Type I error is right on except a bit conservative at a small theta (0.5). And it has higher power than the a linear model of log transformed counts and the Mann Whitney.
+2. Type I error for the Negative binomial and Quasipoisson GLM models are slightly inflated and have slightly higher power than the linear model at small theta.
+
+```{r fig1b-plot-sim-n}
+type1_table_long <- melt(type1_table_n,
+                         id.vars = c("theta", "N"),
+                         variable.name = "test",
+                         value.name = "Type_I")
+gg1 <- ggplot(data = type1_table_long,
+              aes(x = N,
+                  y = Type_I,
+                  color = test)) +
+  geom_hline(yintercept = 0.05, color = "gray") +
+  geom_point() +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 0.2)) +
+  theme_pubr()
+
+power_table_long <- melt(power_table_n,
+                         id.vars = c("theta", "N"),
+                         variable.name = "test",
+                         value.name = "Power")
+gg2 <- ggplot(data = power_table_long,
+              aes(x = N,
+                  y = Power,
+                  color = test)) +
+  geom_point() +
+  geom_line() +
+  coord_cartesian(ylim = c(0, 1)) +
+  theme_pubr()
+
+gg <- plot_grid(gg1, gg2, ncol = 2)
+pngfile <- fs::path(knitr::fig_path(), "gg.png")
+agg_png(pngfile, width = 30, height = 12, units = "cm", res = 96, scaling = 1)
+plot(gg)
+invisible(dev.off())
+knitr::include_graphics(pngfile)
+
+```
+
+Notes
+
+1. The linear model with untransformed counts performs well -- the Type I error is right on except a bit conservative at a small theta (0.5). And it has higher power than the a linear model of log transformed counts and the Mann Whitney at higher sample sizes.
+2. Type I error for the Negative binomial and Quasipoisson GLM models are slightly inflated at large sample size but moderately to severely inflated at small samples -- which are the typical sample sizes of bench biology data. The GLM models have higher power than the LM, but the higher power at small n comes at the cost of inflated Type I error.
+
+Some cautious recommendations
+
+1. Graphpad Prism doesn't do GLM, so if I were using that package, I'd probably just use the linear model on untransformed data, but I'd probably also be more familiar with the published literature on where the linear model fails. Also recognize that sample SEs don't reflect a model fit.
+2. I'm fine with the slightly inflated Type I error of the glm and especially the Quasipoisson model at larger n. Maybe quasipoisson is acceptable even at smaller n. Again, p-values are very rough tools for making decisions because of the many violations of the assumptions for their computation in any real dataset. One thing that I like about the quasipoisson is that I can get confidence intervals of the mean that reflect the model.

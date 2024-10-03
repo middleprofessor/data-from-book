@@ -1,0 +1,395 @@
+---
+title: "xxx"
+subtitle: "Data From Fig 1h, i -- Paracrine signalling by pancreatic δ cells determines the glycaemic set point in mice"
+author: "Jeff Walker"
+date: '20 Aug 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["nested subsampling", "linear mixed model", "ggplot", "simulation"]
+description: "xxx"
+draft: true
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  freeze: true
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+---
+
+![ggplot better-than-replication of Fig 2b from the article. It's better because the plot shows the nested subsampling design...and the p-values account for this design](../../figs/ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome/fig2b_ggplot.png){width=4in fig-align="left"}
+
+## Vital info
+
+Data From: [Liiv, M., Vaarmann, A., Safiulina, D., Choubey, V., Gupta, R., Kuum, M., ... & Kaasik, A. (2024). ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome. Nature Communications, 15(1), 6143.](https://www.nature.com/articles/s41467-024-50502-x){target="_blank"}
+
+Fig: 2b [download data](../../data from/ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome/Source data for Figures and Table.xlsx){target="_blank"}
+
+key words: 
+
+Published methods: ANOVA model with Sidak adjustment for the *p*-values
+
+Design: Randomized Complete Block Design with nested subsampling (RCBDSS)
+
+Response: ER Ca++ levels
+
+Key learning concepts: analyzing replicated experiments with RM-ANOVA or LMMs
+
+More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
+
+## TL;DR
+
+Fig 2b contains four replicates of an experiment, each with four treatment levels. The data were analyzed with an ANOVA model. There is nothing unusual about this. This is too bad because replicated experiments are examples of Randomized Complete Block Designs, where each experiment is a block. Analyzing blocked designs using best-practice models increases power, so the usual ANOVA model is a lost opportunity. What is *highly* unusual about this publication is the researchers identified the experiments in the archived data, which means I can reanalyze the data with a best practice model, either a linear mixed model or an equivalent repeated measures (RM) ANOVA.
+
+The data in Fig 2b is actually more complex than that for a simple RCBD. In the experiment, there are four replicates of an experiment, where each experiment contains three replicate dishes for each treatment and ten measures from each dish. The researchers analyzed the data as if the sample size (n) is 10 x 3 x 4 = 120, which assumes all measurements within a treatment are independent. In fact, measures within a dish share variance, dishes within a treatment:experiment combination share variance, and dishes across treatments within an experiment share variance. The researchers' analysis is pseudoreplicated. A simulation of the data shows that the Type I error rate, which leads to false discovery, is about three times the expected rate.
+
+* the design is actually 2 x 2 factorial but I'll treat it as if its 4 x 0.
+
+## The experiment
+
+Within one experimental replicate, there were three culture dishes per treatment and the researchers measured Ca++ levels in ten neurons per culture dish. The experiment was replicated four times.
+
+From an e-mail from A. Vaarmann: "A single block corresponds to measurements from 10 neurons from one cell culture dish. Each cell culture preparation contributes at least 3 dishes to one treatment group, so 3 times 10 neurons equals 30 neurons per group. This also answers your second question. All measurements within three blocks (three blocks of 10 rows with a blank row in between blocks) correspond to one cell culture preparation i.e. n=30 per group as shown in the right panel of Fig. 1e (n = 30, 30, 30, or 29 neurons). In cases where n=60 (or more, e.g., n=90) as shown in the left panel of Fig.1e, the data from two replicate experiments are combined, with the only difference being that they are from different cell culture preparations. All other conditions are kept as similar as possible, i.e., the time between transfections and imaging, and the imaging settings.
+
+All experiments have been repeated at least three times, i.e., with three cell culture preparations, but data from multiple cultures are combined only if the microscopy settings and the conditions between transfection and imaging are the same. That's why the neuron n varies in different panels of the figures."
+
+The researchers analyzed the data as if the sample size, n, is 10 x 3 x 4 = 120, which assumes all measurements within a treatment are independent. In fact, measures within a dish share variance, dishes within a treatment:experiment combination share variance, and dishes across treatments within an experiment share variance. The researchers' analysis is pseudoreplicated.
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+source_path <- here("R", "ggptm.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+## Fig 1h,i: time effect
+
+```{r fig1h-import, message=FALSE, warning=FALSE}
+data_from <- "Paracrine signalling by pancreatic δ cells determines the glycaemic set point in mice"
+file_name <- "42255_2023_944_MOESM3_ESM.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig1h_in <- read_excel(file_path,
+                    sheet = "Fig. 1H",
+                    range = "A2:L3",
+                    col_names = FALSE) |>
+  data.table() |>
+  transpose(make.names = 1)
+N <- nrow(fig1h_in)
+fig1h_wide <- data.table(
+  mouse = paste0("mouse_", 1:N),
+  genotype = rep(c("WT", "CKO"), c(7,4)),
+  fig1h_in
+) |>
+  clean_names()
+fig1h_wide[, genotype := factor(genotype, levels = c("WT", "CKO"))]
+fig1h <- melt(fig1h_wide,
+              id.vars = c("mouse", "genotype"),
+              variable.name = "time",
+              value.name = "insulin")
+fig1h[, time := factor(time, levels = c("x0_min", "x15_min"))]
+
+
+# output as clean excel file
+fileout_name <- "fig1h-prepost-Paracrine signalling by pancreatic δ cells determines the glycaemic set point in mice.xlsx"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig1h, fileout_path)
+```
+
+## Ancova
+
+expected no difference at baseline. not true because cKO may have effect on baseline insulin -- these aren't drawn from same hat, even if the two hats have similar mean.
+
+```{r}
+lm1 <- lm(x15_min ~ genotype + x0_min, data = fig1h_wide)
+coef(summary(lm1))
+
+```
+
+## time series model
+
+allows for difference at baseline
+
+```{r}
+lmm1 <- lmer(insulin ~ time * genotype + (1 | mouse), data = fig1h)
+coef(summary(lmm1))
+
+```
+
+```{r}
+lmm1_emm <- emmeans(lmm1, specs = c("time", "genotype"))
+lmm1_pairs <- contrast(lmm1_emm,
+                       method = "revpairwise") |>
+  summary(infer = TRUE)
+plot_response(lmm1, lmm1_emm, lmm1_pairs)
+```
+
+```{r}
+ggcheck_the_model(lmm1)
+```
+
+## fold change model
+
+using glm offset
+
+```{r}
+glm1 <- glm(x15_min ~ genotype + offset(log(x0_min)),
+            family = Gamma(link = "log"),
+            data = fig1h_wide)
+glm1_emm <- emmeans(glm1, specs = "genotype", type = "response")
+coef(summary(glm1))
+exp(coef(summary(glm1))[,1])
+```
+
+using ratio
+
+```{r}
+fig1h_wide[, fold_change := x15_min/x0_min]
+lm2 <- lm(fold_change ~ genotype,
+            data = fig1h_wide)
+coef(summary(lm2))
+
+lm2_emm <- emmeans(lm2, specs = "genotype")
+lm2_pairs <- contrast(lm2_emm,
+                      method = "revpairwise") |>
+  summary(infer = TRUE)
+plot_response(lm2, lm2_emm, lm2_pairs)
+```
+
+1. Notes on the fold change model
+
+Treats x0_min as if its a sampling effort, so assumes x15_min is proportional to this effort with constant of 1 (in log space). What this means is that we expect that if x0_min differs by dx from the mean we expect x15_min to differ by dx from the mean. This would occur if x15 is entirely a function of the individual and not the time. We don't expect this at all.
+
+we expect individuals with more insulin at x0 to have more at x15 but should the slope be 1. What determines this slope?
+
+1. Things that grow at the same rate. If the femur is 1/4 of my height then if I grow twice as tall, the femur should still be 1/4 of my height. On a log-log plot of femur length and height, the slope of the points should be one.
+2. Sampling effort. If the proportion of x is 1/4 then if I sample twice as much the proportion should still be 1/4. On a log-log plot of cell-count vs volume sampled, the slope of the line should be one (this leads to the offset model)
+
+We get the measured slope with the glm model but use x0_min as a covariate and not an offset. The measured slope is 0.28 and 1.0 is well above 95% CI.
+
+some other examples of the response being the fold change from baseline
+
+1. https://aacrjournals.org/clincancerres/article/18/13/3677/287295/Prospective-Study-of-Changes-in-the-Metabolomic
+
+```{r, message=FALSE}
+glm2 <- glm(x15_min ~ genotype + log(x0_min),
+            family = Gamma(link = "log"),
+            data = fig1h_wide)
+out_table <- cbind(
+  coef(summary(glm2)),
+  confint(glm2)
+)
+out_table|>
+  kable(digits = 3)
+
+
+```
+
+We can kinda get what this looks like with by plotting the regression lines for the offset and covariate models on the log-transformed data.
+
+```{r}
+fig1h_wide[, y_hat_offset := predict(glm1, fig1h_wide)]
+fig1h_wide[, y_hat_cov := predict(glm2, fig1h_wide)]
+ggplot(data = fig1h_wide,
+       aes(x = log(x0_min),
+           y = log(x15_min),
+           color = genotype)) +
+  geom_point() +
+  geom_line(aes(y = y_hat_offset)) +
+  geom_line(aes(y = y_hat_cov),
+            linetype = "dashed") +
+  NULL
+```
+
+glm model
+
+```{r}
+glm3 <- glmmTMB(insulin ~ time * genotype + (1 | mouse),
+            family = Gamma(link = "log"),
+            data = fig1h)
+coef(summary(glm3))$cond
+glm3_emm <- emmeans(glm3, specs = c("time", "genotype"), type = "response")
+glm3_pairs <- contrast(glm3_emm,
+                       method = "revpairwise",
+                       simple = "each",
+                       combine = TRUE) |>
+  summary(infer = TRUE)
+glm3_pairs|>
+  kable(digits = 4) |>
+  kable_styling()
+
+```
+```{r}
+fig1h_wide[, .(fc = mean(x15_min)/mean(x0_min),
+               logfc = (log(mean(x15_min)) - log(mean(x0_min)))), by = .(genotype)]
+exp(0.8833132 - 0.6721047)
+exp(0.2146562)
+2.418901/1.958355
+```
+
+## Fig 1l: dose effect
+
+```{r fig1l-import, message=FALSE, warning=FALSE}
+data_from <- "Paracrine signalling by pancreatic δ cells determines the glycaemic set point in mice"
+file_name <- "42255_2023_944_MOESM3_ESM.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig1l_in <- read_excel(file_path,
+                    sheet = "Fig. 1L",
+                    range = "A2:m3",
+                    col_names = FALSE) |>
+  data.table() |>
+  transpose(make.names = 1)
+N <- nrow(fig1l_in)
+fig1l_wide <- data.table(
+  mouse = paste0("mouse_", 1:N),
+  genotype = rep(c("WT", "CKO"), c(6,6)),
+  fig1l_in
+) |>
+  clean_names()
+fig1l_wide[, genotype := factor(genotype, levels = c("WT", "CKO"))]
+fig1l_wide[x3_m_m > 0.6, x3_m_m := NA]
+fig1l_wide[x11_m_m > 0.6, x11_m_m := NA]
+setnames(fig1l_wide, old = c("x3_m_m", "x11_m_m"), new = c("3mM", "11mM"))
+
+fig1l <- melt(fig1l_wide,
+              id.vars = c("mouse", "genotype"),
+              variable.name = "dose",
+              value.name = "insulin")
+fig1l[, time := factor(dose, levels = c("3mM", "11mM"))]
+
+
+# output as clean excel file
+fileout_name <- "fig1l-prepost-Paracrine signalling by pancreatic δ cells determines the glycaemic set point in mice.xlsx"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig1l, fileout_path)
+```
+
+## 2-factor model
+
+```{r}
+lm1 <- lm(insulin ~ genotype * dose, data = fig1l)
+coef(summary(lm1))
+
+```
+
+## exploration
+
+```{r}
+frac <- 1/4
+n <- 10^3
+cells_0 <- rnorm(n, mean = 1000, sd = 100)
+marked_0 <- frac*cells_0 + rnorm(n, mean = 0, sd = 10)
+cells_1 <- cells_0 + rnorm(n, mean = 0, sd = 10)
+marked_1 <- marked_0/cells_0*cells_1 + rnorm(n, mean = 0, sd = 10)
+cor(cells_0, marked_0)
+cor(cells_1, marked_1)
+cor(marked_0, marked_1)
+
+fd <- data.table(
+  "cells_0" = cells_0,
+  "marked_0" = marked_0,
+  "cells_1" = cells_1,
+  "marked_1" = marked_1
+)
+
+lm1 <- lm(marked_0 ~ cells_0, data = fd)
+coef(summary(lm1))
+lm2 <- lm(log(marked_0) ~ log(cells_0), data = fd)
+coef(summary(lm2))
+lm3 <- lm(log(marked_1) ~ log(cells_1), data = fd)
+coef(summary(lm3))
+lm4 <- lm(log(marked_1) ~ log(marked_0), data = fd)
+coef(summary(lm4))
+```
+
+```{r eval=FALSE}
+n = 10^3
+size_0 <- exp(rnorm(n, mean = log(10), sd = log(1.2)))
+# mean(size_0)
+# sd(size_0)
+alpha <- 0.9
+logsize_0 <- rnorm(n, mean = 0, sd = 1) # centered scaled in log space
+logheight_0 <- alpha * logsize_0 + sqrt(1 - alpha^2)*rnorm(n, mean = 0, sd = 1)
+loglength_0 <- alpha * logsize_0 + sqrt(1 - alpha^2)*rnorm(n, mean = 0, sd = 1)
+cor(logheight_0, loglength_0)
+logsize_1 <- 2 * logsize_0
+logheight_1 <- alpha * 2*logsize_0 + sqrt(1 - alpha^2)*rnorm(n, mean = 0, sd = 1)
+loglength_1 <- alpha * 2*logsize_0 + sqrt(1 - alpha^2)*rnorm(n, mean = 0, sd = 1)
+cor(logheight_1, loglength_1)
+
+# mean(height_0)
+# sd(height_0)
+# sd(height_0)^2
+length_0 <- 1/4*height_0 + rnorm(n, mean = 0, sd = sd(height_0)/10)
+# mean(length_0)
+# sd(length_0)
+cor(height_0, length_0)
+height_2 <- 2 * height_0 + rnorm(n, mean = 0, sd = sd(height_0) * sqrt(2))
+# mean(height_2)
+# sd(height_2)
+# sd(height_2)^2
+length_2 <- 1/4*height_0 + rnorm(n, mean = 0, sd = sd(height_0)/10)
+
+ggplot(data = fd,
+       x = log(height_0),
+       y = log(length_0)) +
+  geom_point()
+```
+
