@@ -1,0 +1,354 @@
+---
+title: "GLM counts"
+subtitle: "Data From Fig 2d -- SOX21 modulates SOX2-initiated differentiation of epithelial cells in the extrapulmonary airways"
+author: "Jeff Walker"
+date: '20 Aug 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["generalized linear model", "counts"]
+description: "xxx"
+draft: true
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  freeze: true
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+# ![ggplot better-than-replication of Fig 2b from the article. It's better because the plot shows the nested subsampling design...and the p-values account for this design](../../figs/ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome/fig2b_ggplot.png){width=4in fig-align="left"}
+```
+
+
+## Vital info
+
+Data From: [Evelien Eenjes Marjon Buscop-van Kempen Anne Boerema-de Munck Gabriela G Edel Floor Benthem Lisette de Kreij-de Bruin Marco Schnater Dick Tibboel Jennifer Collins Robbert J Rottier (2021) SOX21 modulates SOX2-initiated differentiation of epithelial cells in the extrapulmonary airways eLife 10:e57325.](https://elifesciences.org/articles/57325){target="_blank"}
+
+key words: 
+
+Published methods: glm neg binomial
+
+Design:  3 x 1
+
+Response: 
+
+Key learning concepts: 
+
+More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
+
+## TL;DR
+
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+source_path <- here("R", "ggptm.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+# Fig 5d top left
+
+```{r import5d}
+data_from <- "SOX21 modulates SOX2-initiated differentiation of epithelial cells in the extrapulmonary airways"
+file_name <- "elife-57325-fig5-data1-v2.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+  fig5d <- read_excel(file_path,
+                          sheet = "D20 Napthalen",
+                          range = "B166:Y169",
+                          col_names = TRUE) |>
+    data.table() |>
+    transpose(make = 1, keep = "id") |>
+    clean_names()
+genotype_levels <- c("WT", "Sox2KO", "Sox21KO")
+fig5d[, genotype := rep(c("Sox2KO", "WT", "Sox21KO"), c(9,8,6)) |>
+        factor(genotype_levels)]
+fig5d <- fig5d[-c(8,9,17)]
+fig5d[, foxj1_prop := foxj1/dapi]
+fig5d[, non_foxj1 := dapi - foxj1]
+
+```
+
+```{r}
+lm1 <- lm(foxj1_prop ~ genotype, data = fig5d)
+lm1_pairs <- emmeans(lm1, specs = "genotype") |>
+  contrast(method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+
+glm.qbw <- glm(foxj1_prop ~ genotype,
+          family = quasibinomial,
+          weights = dapi,
+          data = fig5d)
+
+lm1_pairs <- emmeans(lm1, specs = "genotype") |>
+  contrast(method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+
+glm.qbw_pairs <- emmeans(glm.qbw, specs = "genotype", type = "response") |>
+  contrast(method = "revpairwise", adjust = "none") |>
+  summary(infer = TRUE)
+
+lm1_pairs
+glm.qbw_pairs
+```
+
+## explore fig5d data
+
+means
+
+```{r}
+mean(fig5d$dapi)
+emmeans(lm1, specs = "genotype")
+```
+
+correlations between foxj1 and other
+
+```{r}
+r1 <- cor(fig5d[genotype == "WT", foxj1], fig5d[genotype == "WT", non_foxj1])
+r2 <- cor(fig5d[genotype == "Sox2KO", foxj1], fig5d[genotype == "Sox2KO", non_foxj1])
+r3 <- cor(fig5d[genotype == "Sox21KO", foxj1], fig5d[genotype == "Sox21KO", non_foxj1])
+c(r1,r2,r3)
+mean(c(r1,r2,r3))
+```
+
+dispersion
+
+```{r}
+
+qp1 <- glm(foxj1 ~ genotype,
+          family = quasipoisson(link = "log"),
+          data = fig5d)
+qp1_alpha <- summary(qp1)$dispersion
+
+nb1 <- glmmTMB(foxj1 ~ genotype,
+          family = nbinom1(link = "log"),
+          data = fig5d)
+nb1_alpha <- sigma(nb1)
+
+nb2 <- glmmTMB(foxj1 ~ genotype,
+          family = nbinom2(link = "log"),
+          data = fig5d)
+nb2_theta <- sigma(nb2)
+
+qp1_alpha
+nb1_alpha
+nb2_theta
+
+qp1 <- glm(non_foxj1 ~ genotype,
+          family = quasipoisson(link = "log"),
+          data = fig5d)
+qp1_alpha <- summary(qp1)$dispersion
+
+nb1 <- glmmTMB(non_foxj1 ~ genotype,
+          family = nbinom1(link = "log"),
+          data = fig5d)
+nb1_alpha <- sigma(nb1)
+
+nb2 <- glmmTMB(non_foxj1 ~ genotype,
+          family = nbinom2(link = "log"),
+          data = fig5d)
+nb2_theta <- sigma(nb2)
+
+qp1_alpha
+nb1_alpha
+nb2_theta
+
+```
+
+# Fig 7d
+
+```{r fig7d-import, message=FALSE, warning=FALSE}
+data_from <- "SOX21 modulates SOX2-initiated differentiation of epithelial cells in the extrapulmonary airways"
+file_name <- "elife-57325-fig7-data1-v2.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig7d_import <- function(donor = NULL,
+                         range = NULL,
+                         col_names = FALSE){
+  fig7d_bit <- read_excel(file_path,
+                          sheet = "Fig 7D Counting FOXJ1",
+                          range = range,
+                          col_names = col_names) |>
+    data.table()  
+  colnames(fig7d_bit) <- c("sox", "replicate", "cherry+", "cherry+foxj1+", "foxj1")
+  fig7d_bit[, sox := fill_down(sox)]
+  fig7d_bit[, donor := donor]
+  return(fig7d_bit)
+}
+
+
+donor_j <- "donor_2"
+fig7d <- fig7d_import(donor = donor_j, range = "b3:f5")
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b8:f10"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b13:f15"))
+
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "h3:l5"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "h10:l12"))
+
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o3:s5"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o8:s10"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o13:s15"))
+
+donor_j <- "donor_4"
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b21:f23"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b26:f28"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b31:f33"))
+
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "h21:l23"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "h27:l29"))
+
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o21:s23"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o26:s28"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o31:s33"))
+
+donor_j <- "donor_3"
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b38:f40"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b43:f45"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b48:f50"))
+
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "h38:l40"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "h44:l46"))
+
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o38:s40"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o43:s45"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o48:s50"))
+
+donor_j <- "donor_1"
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b56:f58"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b61:f63"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "b66:f68"))
+
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "h56:l58"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "h62:l64"))
+
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o56:s58"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o61:s63"))
+fig7d <- rbind(fig7d, fig7d_import(donor = donor_j, range = "o66:s68"))
+
+fig7d[, replicate_id := .I]
+
+outfile <- "SOX21 Fig 7d.xlsx"
+file_path <- here(data_folder, data_from, outfile)
+#write_xlsx(fig7d, file_path)
+```
+
+## Replication
+
+Using t-tests of tech rep means
+```{r}
+fig7d_means <- fig7d[, .(foxj1 = mean(foxj1)), by = .(sox, donor)]
+
+# in order Left to right as in fig
+t.test(fig7d_means[sox == "Scr", foxj1],
+       fig7d_means[sox == "shSox2-A", foxj1],
+       paired = TRUE)$p.value
+
+t.test(fig7d_means[sox == "Scr", foxj1],
+       fig7d_means[sox == "shSox2-C", foxj1],
+       paired = TRUE)$p.value
+
+t.test(fig7d_means[sox == "Scr", foxj1],
+       fig7d_means[sox == "shSox21-B", foxj1],
+       paired = TRUE)$p.value
+
+t.test(fig7d_means[sox == "Scr", foxj1],
+       fig7d_means[sox == "shSox21-C", foxj1],
+       paired = TRUE)$p.value
+
+```
+## GLMM
+```{r}
+glmm.nb1 <- glmmTMB(foxj1 ~ sox + (sox | donor),
+                   family = nbinom1(link = "log"),
+                   data = fig7d[sox %in% c("shSox2-A", "Scr", "shSox2-C")])
+
+glmm.nb1.m2 <- glmmTMB(foxj1 ~ sox + (1 | donor),
+                   family = nbinom1(link = "log"),
+                   data = fig7d[sox %in% c("shSox2-A", "Scr", "shSox2-C")])
+glmm.nb1.m2_emm <- emmeans(glmm.nb1.m2, specs = "sox", type = "response")
+glmm.nb1.m2_pairs <- contrast(glmm.nb1.m2_emm,
+                              method = "revpairwise",
+                              adjust = "none")
+
+fig7d_means[, foxj1_int := round(foxj1, 0)]
+glmm.nb1.m1 <- glmmTMB(foxj1_int ~ sox + (1 | donor),
+                   family = nbinom1(link = "log"),
+                   data = fig7d_means[sox %in% c("shSox2-A", "Scr", "shSox2-C")])
+glmm.nb1.m1_emm <- emmeans(glmm.nb1.m1, specs = "sox", type = "response")
+glmm.nb1.m1_pairs <- contrast(glmm.nb1.m1_emm,
+                              method = "revpairwise",
+                              adjust = "none")
+glmm.nb1.m2_pairs
+glmm.nb1.m1_pairs
+```
+## RMANOVA
+
+```{r}
+rmaov1 <- aov_4(foxj1 ~ sox + (sox | donor),
+                fun_aggregate = mean,
+                data = fig7d[sox %in% c("shSox2-A", "Scr", "shSox2-C")])
+rmaov1_emm <- emmeans(rmaov1, specs = "sox", type = "response")
+rmaov1_pairs <- contrast(rmaov1_emm,
+                         method = "revpairwise",
+                         adjust = "none")
+rmaov1_pairs
+```
+

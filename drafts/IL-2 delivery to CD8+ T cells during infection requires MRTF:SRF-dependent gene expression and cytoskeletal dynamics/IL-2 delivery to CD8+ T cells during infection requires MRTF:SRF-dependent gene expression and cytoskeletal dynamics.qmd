@@ -1,0 +1,176 @@
+---
+title: "GLM counts"
+subtitle: "Data From Fig 2e -- IL-2 delivery to CD8+ T cells during infection requires MRTF/SRF-dependent gene expression and cytoskeletal dynamics"
+author: "Jeff Walker"
+date: '20 Aug 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["generalized linear model", "counts"]
+description: "xxx"
+draft: true
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  freeze: true
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+## Vital info
+
+Data From: [Stojanović, O., Altirriba, J., Rigo, D. et al. Dietary excess regulates absorption and surface of gut epithelium through intestinal PPARα. Nat Commun 12, 7031 (2021). https://doi.org/10.1038/s41467-021-27133-7](https://www.nature.com/articles/s41467-021-27133-7){target="_blank"}
+
+key words: 
+
+Published methods: glm neg binomial
+
+Design:  3 x 1
+
+Response: 
+
+Key learning concepts: 
+
+More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
+
+## TL;DR
+
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+source_path <- here("R", "ggptm.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+# Fig 3
+
+```{r fig1h-import, message=FALSE, warning=FALSE}
+data_from <- "IL-2 delivery to CD8+ T cells during infection requires MRTF-SRF-dependent gene expression and cytoskeletal dynamics"
+file_name <- "Source Data File 1.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig_importer <- function(sheet = NULL,
+                         percent_range = NULL,
+                         count_range = NULL,
+                         n = NULL){ # n should be a 2 element vector
+  percent_data <- read_excel(file_path,
+                             sheet = sheet,
+                             range = percent_range,
+                             col_names = FALSE) |>
+    data.table() |>
+    transpose(make.names = 1)
+  colnames(percent_data) <- c("slec_percent", "mpec_percent")
+  
+  count_data <- read_excel(file_path,
+                           sheet = sheet,
+                           range = count_range,
+                           col_names = FALSE) |>
+    data.table() |>
+    transpose(make.names = 1)
+  colnames(count_data) <- c("slec_count", "mpec_count")
+  
+  figdata <- data.table(
+    genotype = rep(c("WT", "KO"), n),
+    count_data,
+    percent_data
+  )
+  # perc = part/whole so whole = part/per
+  figdata[, total_slec := slec_count/(slec_percent/100)]
+  figdata[, total_mpec := mpec_count/(mpec_percent/100)]
+  figdata[, other_slec := total_slec - slec_count]
+  figdata[, other_mpec := total_mpec - mpec_count]
+  return(figdata)
+}
+
+cor_data <- function(figdata){
+  r1 <- cor(figdata[genotype == "WT", slec_count], figdata[genotype == "WT", other_slec])
+  r2 <- cor(figdata[genotype == "WT", mpec_count], figdata[genotype == "WT", other_mpec])
+  r3 <- cor(figdata[genotype == "KO", slec_count], figdata[genotype == "KO", other_slec])
+  r4 <- cor(figdata[genotype == "KO", mpec_count], figdata[genotype == "KO", other_mpec])
+  return(c(r1,r2,r3,r4))
+}
+
+# the count is 8, 8 in the figure but 6, 8 in the Excel file
+fig1d <- fig_importer(sheet = "Figure 1",
+                      percent_range = "B11:P12",
+                      count_range = "B16:P17",
+                      n = c(6,8))
+cor_data(fig1d)
+
+# one cell is missing in otam-cre in both slec and mpec.
+fig2 <- xxx
+    
+# fourth correlation is suspect
+fig3c <- fig_importer(sheet = "Figure 3 ",
+                      percent_range = "C11:K12",
+                      count_range = "C16:K17",
+                      n = c(4,4))
+cor_data(fig3c)
+
+# count data are same as percent data
+fig3g <- xxx
+
+```
+
+```{r}
+
+```
+

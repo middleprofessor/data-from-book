@@ -195,5 +195,8 @@ for(set_i in 1:n_cardiolipins){
                sum(p_table[, fdr] < 0.05))
   )
 
+   p_table |>
+    kable() |>
+    kable_styling()
 ```
 

@@ -1,0 +1,189 @@
+---
+title: "GLM counts"
+subtitle: "Data From Fig 2e -- Dietary excess regulates absorption and surface of gut epithelium through intestinal PPARα"
+author: "Jeff Walker"
+date: '20 Aug 2024'
+date-modified: "`r Sys.Date()`"
+categories: ["generalized linear model", "counts"]
+description: "xxx"
+draft: true
+format: 
+  html: 
+    toc: true 
+    toc-location: right
+execute: 
+  freeze: true
+  message: false
+  warning: false
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r}
+# ![ggplot better-than-replication of Fig 2b from the article. It's better because the plot shows the nested subsampling design...and the p-values account for this design](../../figs/ER calcium depletion as a key driver for impaired ER-to-mitochondria calcium transfer and mitochondrial dysfunction in Wolfram syndrome/fig2b_ggplot.png){width=4in fig-align="left"}
+```
+
+
+## Vital info
+
+Data From: [Stojanović, O., Altirriba, J., Rigo, D. et al. Dietary excess regulates absorption and surface of gut epithelium through intestinal PPARα. Nat Commun 12, 7031 (2021). https://doi.org/10.1038/s41467-021-27133-7](https://www.nature.com/articles/s41467-021-27133-7){target="_blank"}
+
+key words: 
+
+Published methods: glm neg binomial
+
+Design:  3 x 1
+
+Response: 
+
+Key learning concepts: 
+
+More info: [Chapter 16 Models for non-independence -- linear mixed models](https://www.middleprofessor.com/files/applied-biostatistics_bookdown/_book/lmm){target="_blank"}
+
+## TL;DR
+
+
+## Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# wrangling packages
+library(here) # here makes a project transportable
+library(janitor) # clean_names
+library(readxl) # read excel, duh!
+library(writexl) # write excel, duh!
+library(data.table) # magical data frames
+library(magrittr) # pipes
+library(stringr) # string functions
+library(forcats) # factor functions
+
+# analysis packages
+library(emmeans) # the workhorse for inference
+library(nlme) # gls and some lmm
+library(lme4) # linear mixed models
+library(lmerTest) # linear mixed model inference
+library(afex) # ANOVA linear models
+library(glmmTMB) # generalized linear models
+library(MASS) # negative binomial and some other functions
+library(car) # model checking and ANOVA
+library(DHARMa) # model checking
+library(mvtnorm)
+library(MHTdiscrete) # sidak
+
+# graphing packages
+library(ggsci) # color palettes
+library(ggpubr) # publication quality plots
+library(ggforce) # better jitter
+library(cowplot) # combine plots
+library(knitr) # kable tables
+library(kableExtra) # kable_styling tables
+
+# ggplot_the_model.R packages not loaded above
+library(insight)
+library(lazyWeave)
+
+# use here from the here package
+here <- here::here
+# use clean_names from the janitor package
+clean_names <- janitor::clean_names
+# use transpose from data.table
+transpose <- data.table::transpose
+
+# load functions used by this text written by me
+# ggplot_the_model.R needs to be in the folder "R"
+# if you didn't download this and add to your R folder in your
+# project, then this line will cause an error
+source_path <- here("R", "ggplot_the_model.R")
+source(source_path)
+source_path <- here("R", "ggptm.R")
+source(source_path)
+
+data_folder <- "data from"
+image_folder <- "images"
+output_folder <- "output"
+```
+
+# Fig 2b
+
+```{r fig1h-import, message=FALSE, warning=FALSE}
+data_from <- "Dietary excess regulates absorption and surface of gut epithelium through intestinal PPARα"
+file_name <- "41467_2021_27133_MOESM5_ESM.xlsx"
+file_path <- here(data_folder, data_from, file_name)
+
+fig2 <- read_excel(file_path,
+                         sheet = "Fig2",
+                         range = "A13:M35",
+                         col_names = TRUE) |>
+  data.table() |>
+  transpose(make.names = 1, keep.names = "treatment_excel")
+
+gene_list <- colnames(fig2)[-1]
+gene_matrix <- round(fig2[, .SD, .SDcols = c(gene_list)] * 100000, 0)
+
+treatment_levels <- c("RT", "WT", "Cold", "OB/OB")
+pooled_levels <- c("WT RT", "Cold", "OB/OB")
+fig2b <- data.table(
+  treatment = rep(treatment_levels, each = 3) |> factor(levels = treatment_levels),
+  pooled = rep(pooled_levels, c(6,3,3)) |> factor(levels = pooled_levels),
+  gene_matrix
+)
+
+# output as clean excel file
+fileout_name <- "Dietary excess fig2b.xlsx"
+fileout_path <- here(data_folder, data_from, fileout_name)
+write_xlsx(fig2b, fileout_path)
+
+fig2b <- read_excel(fileout_path) |>
+  data.table()
+fig2b[, treatment := factor(treatment, levels = treatment_levels)]
+
+```
+
+
+```{r}
+gene_id <- "Cpt1a"
+formula_in <- paste(gene_id, "~ treatment") |>
+  as.formula()
+# all groups, subsetting two pairs
+glm.nb <- glm.nb(formula_in, data = fig2b)
+glm.nb_emm <- emmeans(glm.nb, specs = "treatment", type = "response")
+glm.nb_pairs <- contrast(glm.nb_emm, method = "revpairwise", adjust = "none")
+glm.nb_pairs[c(2,5)] |>
+  kable(digits = c(1,2,3,1,1,3,8)) |>
+  kable_styling()
+
+# independent tests
+glm.nb <- glm.nb(formula_in, data = fig2b[treatment %in% c("RT", "Cold")])
+glm.nb_emm <- emmeans(glm.nb, specs = "treatment", type = "response")
+glm.nb_pairs <- contrast(glm.nb_emm, method = "revpairwise", adjust = "none")
+glm.nb_pairs |>
+  kable(digits = c(1,2,3,1,1,3,8)) |>
+  kable_styling()
+glm.nb <- glm.nb(formula_in, data = fig2b[treatment %in% c("WT", "OB/OB")])
+glm.nb_emm <- emmeans(glm.nb, specs = "treatment", type = "response")
+glm.nb_pairs <- contrast(glm.nb_emm, method = "revpairwise", adjust = "none")
+glm.nb_pairs |>
+  kable(digits = c(1,2,3,1,1,3,8)) |>
+  kable_styling()
+
+# independent tests
+# glm.nb1 <- glmmTMB(Hk2 ~ treatment, 
+#                   family = nbinom1(link = "log"),
+#                   data = fig2b[treatment %in% c("RT", "Cold")])
+# glm.nb1_emm <- emmeans(glm.nb1, specs = "treatment", type = "response")
+# glm.nb1_pairs <- contrast(glm.nb1_emm, method = "revpairwise", adjust = "none")
+# glm.nb1_pairs |>
+#   kable(digits = c(1,2,3,1,1,3,8)) |>
+#   kable_styling()
+# glm.nb1 <- glmmTMB(Hk2 ~ treatment, 
+#                  family = nbinom1(link = "log"),
+#                  data = fig2b[treatment %in% c("WT", "OB/OB")])
+# glm.nb1_emm <- emmeans(glm.nb1, specs = "treatment", type = "response")
+# glm.nb1_pairs <- contrast(glm.nb1_emm, method = "revpairwise", adjust = "none")
+# glm.nb1_pairs |>
+#   kable(digits = c(1,2,3,1,1,3,8)) |>
+#   kable_styling()
+
+```
+

@@ -196,7 +196,7 @@ m1 <- lm(Fbxo32 ~ treatment, data = fig7d)
 
 ## The reported p-values are conservative (a bit on the "multiple testing" problem), or not!
 
-The researchers reported Tukey-adjusted p-values. The Tukey method adjusts for the number of tests in a "family" of tests, where a family is the set of tests that answer one question. The researchers follow the norm in bench bio and choose the whole set of six contrasts as the family. This would answer a question such as: "if we were to create these combinations, would we find any difference between at least on pair?", which isn't a very interesting question.
+The researchers reported Tukey-adjusted p-values. The Tukey method adjusts for the number of tests in a "family" of tests, where a family is the set of tests that answer one question. The researchers follow the norm in bench bio and choose the whole set of six contrasts as the family. This would answer a question such as: "if we were to create these combinations, would we find any difference between at least one pair?", which isn't a very interesting question.
 
 The researchers are focused on a much more specific question and at least two more questions, both related to controls:
 
